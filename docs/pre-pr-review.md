@@ -1,6 +1,6 @@
 # Revisión previa a PR — issue #1
 
-Fecha: 18 de octubre de 2026. **Revisión independiente renovada completada; aprobación explícita del usuario pendiente.** No se ha creado una PR ni se ha publicado la web.
+Fecha: 18 de octubre de 2026. **Revisión independiente renovada completada y resultado aprobado explícitamente por el usuario para abrir la PR.** La aprobación corresponde al commit `be3570f`; el usuario confirmó «vale por ahora está genial, vamos. con esa PR». La integración y publicación siguen pendientes de autorización.
 
 ## Ajuste actual solicitado
 
@@ -81,6 +81,6 @@ Pendiente antes de dar por completada toda la aceptación:
 - Medición de 30 FPS y gestos de giro/pellizco en teléfono físico, incluido Safari/iOS.
 - Prueba del fallback en un navegador real sin WebGL 2; el camino está implementado y revisado por código.
 - Inspección visual de las imágenes dentro de GitHub con una sesión autorizada: las URLs duraderas están adjuntadas y su presencia se verifica mediante API, pero el navegador de revisión no tiene sesión en el repositorio privado.
-- Aprobación del usuario antes de crear la PR, integración autorizada, activación de Pages y comprobación pública sin iniciar sesión.
+- Integración autorizada, activación de Pages y comprobación pública sin iniciar sesión. La aprobación pre-PR del usuario se recibió el 18 de octubre de 2026.
 
 La evidencia inicial y las capturas finales se conservan en [la issue #1](https://github.com/0GiS0/tesla-roadster-demo/issues/1). La captura inicial es un directorio vacío servido localmente antes de implementar: no existía una interfaz comparable.
