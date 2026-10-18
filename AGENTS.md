@@ -1,0 +1,83 @@
+## Project context
+
+- This is an independent artistic recreation of a Roadster ramp demonstration, not a physical simulation or an official Tesla product.
+- The app is static, with a Spanish UI, built with Vite, React, TypeScript, Three.js, React Three Fiber and Drei. It requires WebGL 2.
+- Public site: https://0gis0.github.io/tesla-roadster-demo/ . All runtime assets are served locally from the project.
+- The current sequence lasts **28 seconds**: one ascent, a direct turn into flight, then landing.
+- Timing: 0–13s ascent; 13–18s turn; 18–19s level hover; 19–27s descent; 28s finished.
+- Do not restore the original 55-second hold, reverse descent or second ascent unless the user changes the requirement.
+- Keep scope focused. Do not add backend services, external runtime assets, Rapier, audio, free driving, multiplayer or extra scenarios without a request.
+
+## Key entrypoints
+
+- `src/main.tsx`: playback state, Spanish controls, accessibility, loading and error handling.
+- `src/Scene.tsx`: Canvas, vehicle, ramp, vapor, orbital camera and performance diagnostics.
+- `src/scenario.ts`: pure `Scenario` contract, trajectory, contact constants and playback boundaries.
+- `src/scenario.test.ts`: rigid contact, continuity, determinism, single ascent and playback boundary tests.
+- `src/style.css`: desktop, portrait and short landscape layouts, plus keyboard focus treatments.
+- `model/create_roadster.py`: original procedural Blender geometry and optional studio renders.
+- `model/roadster.blend` and `public/models/roadster.glb`: editable model and deployed asset.
+- `model/validate_glb.py`: standalone Python validation of export budgets and wheel contracts.
+- `vite.config.ts`: `/tesla-roadster-demo/` base path.
+- `.github/workflows/ci-pages.yml`: PR validation and deployment restricted to `main`.
+- `README.md`: operation details; `docs/pre-pr-review.md`: review evidence, including explicitly historical results.
+
+## Development and run
+
+Use Node.js **22.12+**, npm and Python 3. Install dependencies first:
+
+```sh
+npm ci
+```
+
+Launch development separately; this command keeps running:
+
+```sh
+npm run dev
+```
+
+Open `http://127.0.0.1:5173/tesla-roadster-demo/`. Run validation in another terminal:
+
+```sh
+npm run typecheck
+npm test
+python3 model/validate_glb.py
+npm run build
+```
+
+To inspect the production build, launch `npm exec vite preview -- --host 127.0.0.1` and open `http://127.0.0.1:4173/tesla-roadster-demo/`.
+
+For model changes, regenerate with Blender 5.2; normal generation saves the `.blend` and GLB without rendering:
+
+```sh
+blender --background --python model/create_roadster.py
+```
+
+On macOS, the available executable may be `/Applications/Blender.app/Contents/MacOS/Blender`; verify it before use. Optional previews use `blender --background --python model/create_roadster.py -- --render-dir DIRECTORY`.
+
+## Guardrails
+
+- Preserve the pure `Scenario` interface: `id`, `title`, `duration`, `evaluate(time)`. Position, quaternion, wheel rotation and vapor must depend on absolute playback time.
+- Pause freezes every effect. Reset, seek and replay must be deterministic and must not accumulate particles or resources.
+- Keep contact geometry aligned with `RADIUS`, `WHEEL_RADIUS = 0.44` and `HALF_WHEELBASE = 1.47`; update the contract and validation together if these change.
+- Exported coordinates are +X forward, +Y up, with wheel axles along Z. Wheel pivots are `Wheel_FL` (1.47, 0, 0.94), `Wheel_FR` (1.47, 0, -0.94), `Wheel_RL` (-1.47, 0, 0.94), `Wheel_RR` (-1.47, 0, -0.94).
+- Only the four animated wheels use the `Wheel_` prefix. Keep `Static_Brake_Caliper_*` separate and stationary relative to the body.
+- Maintain original geometry and keep generator, editable `.blend` and GLB consistent. References are not distributable runtime assets.
+- Keep the low, smooth canopy and flush details; inspect silhouette and wheel openings after geometry edits. Exclude studio cameras/lights and external resources from the GLB.
+- Export budgets are **fewer than 30,000 triangles** and **fewer than 2,000,000 bytes**.
+- Preserve the DPR cap of 1.6, 1024px shadows and fixed 256-particle plume unless a measured change justifies revising them. `?debug=1` logs a five-second playback performance sample.
+- Keep controls accessible in Spanish with mouse, touch and keyboard. Canvas arrows orbit, +/− zoom and Tab exits without intercepting other controls.
+- Camera reset must flush pending OrbitControls damping before placing the home view. Keep loading/error/no-WebGL fallbacks and disable controls until the model loads successfully.
+- Resolve assets through `import.meta.env.BASE_URL`; preserve the Pages prefix and self-contained delivery.
+- Follow GitHub Flow: find/reuse a relevant issue before implementation; use a focused issue branch and Conventional Commits. Inspect existing emoji labels and obtain approval before shared label changes. Do not merge automatically.
+- Check scope before starting another issue or independent deliverable; normal corrections and refinements stay with the active task. Follow the user's current workflow requirements.
+- PR workflows validate only. Deployment runs after a push to `main` or a manual run selecting `main`; do not expose deployment permissions to PR code.
+
+## Definition of done
+
+- For code/model changes, required type checks, meaningful tests, GLB validation and production build pass. Test contact, continuity, determinism and playback boundaries when affected; do not merely mirror implementation.
+- For documentation-only changes, verify paths, commands, accuracy and formatting; application tests are unnecessary.
+- For UI/model changes, inspect the actual rendered app and provide before/after screenshots with durable reviewer-accessible URLs. Label app captures, Blender renders and reference images distinctly.
+- Verify usable framing and controls on desktop, portrait and short landscape. Distinguish viewport emulation from real mobile hardware; report untested phone gestures/performance or real no-WebGL fallback behavior as limitations.
+- Complete an independent review of the actual diff, resolve actionable findings and have fixes verified. Present the concrete result and wait for **explicit user approval before any PR, including a draft**. Material changes require renewed affected review and approval.
+- After an authorized deployment, verify the public page without a session, the Pages prefix, browser console and correct GLB/resource access. A passing build alone does not verify publication.
