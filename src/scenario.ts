@@ -30,4 +30,17 @@ export const rampFlight:Scenario={id:'ramp-flight',title:'Rampa · Vuelo · Ater
  const dt=.01;const before=state(Math.max(0,t-dt)).s,after=state(Math.min(13,t+dt)).s;
  return {position,quaternion:q.toArray() as Pose['quaternion'],wheelAngle:-st.s/WHEEL_RADIUS,vapor:clamp(st.vapor),phase:st.phase,speed:t<13?Math.abs(after-before)/(2*dt):0};
 }};
-export function advance(time:number,delta:number,playing:boolean){const next=playing?Math.min(DURATION,time+Math.max(0,delta)):time;return {time:next,playing:playing&&next<DURATION};}
+const smoothStep=(n:number)=>{const t=clamp(n);return t*t*(3-2*t)};
+export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',duration:12,evaluate(time){
+ const t=clamp(time,0,12);let x=-12,y=WHEEL_RADIUS,phase='Aproximación',wheelAngle=0,vapor=0;
+ if(t<3){x=-12+5*smoothStep(t/3);wheelAngle=-(x+12)/WHEEL_RADIUS;}
+ else if(t<5){x=-7;y=WHEEL_RADIUS+4*smoothStep((t-3)/2);wheelAngle=-5/WHEEL_RADIUS;phase='Despegue';vapor=smoothStep((t-3)/.8);}
+ else if(t<8){const u=(t-5)/3;x=-7+14*smoothStep(u);y=WHEEL_RADIUS+4;wheelAngle=-5/WHEEL_RADIUS;phase='Cruce del bache';vapor=1;}
+ else if(t<10){x=7;y=WHEEL_RADIUS+4*(1-smoothStep((t-8)/2));wheelAngle=-5/WHEEL_RADIUS;phase='Aterrizaje';vapor=1-smoothStep((t-8)/1.2);}
+ else {x=7+5*smoothStep((t-10)/2);wheelAngle=-(5+x-7)/WHEEL_RADIUS;phase=t<12?'Salida':'Maniobra completada';}
+ const q=new Quaternion();
+ const u=t<3?t/3:t<5?(t-3)/2:t<8?(t-5)/3:t<10?(t-8)/2:(t-10)/2;
+ const speed=t<3?10*u*(1-u):t<5||t<10&&t>=8?12*u*(1-u):t<8?28*u*(1-u):15*u*(1-u);
+ return {position:[x,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle,vapor,phase,speed};
+}};
+export function advance(time:number,delta:number,playing:boolean,duration=DURATION){const next=playing?Math.min(duration,time+Math.max(0,delta)):time;return {time:next,playing:playing&&next<duration};}

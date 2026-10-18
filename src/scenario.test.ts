@@ -1,6 +1,8 @@
 import { describe,it,expect } from 'vitest';
 import { Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance } from './scenario';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight } from './scenario';
+import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor } from './sceneCatalog';
+import { copyShareLink } from './share';
 describe('Rigid vehicle follows the ramp',()=>{
  it('keeps axle spacing and every wheel center on the surface through the floor transition',()=>{
   for(let s=-9;s<22;s+=.13){const p=contactPose(s);expect(Math.hypot(p.front[0]-p.rear[0],p.front[1]-p.rear[1])).toBeCloseTo(2*HALF_WHEELBASE,5);
@@ -22,4 +24,56 @@ describe('Rigid vehicle follows the ramp',()=>{
 });
 describe('playback boundaries',()=>{
  it('freezes paused time, clamps the 28-second end and evaluates out-of-range times safely',()=>{expect(DURATION).toBe(28);expect(advance(20,3,false)).toEqual({time:20,playing:false});expect(advance(27,10,true)).toEqual({time:28,playing:false});expect(advance(0,-2,true).time).toBe(0);expect(rampFlight.evaluate(-5)).toEqual(rampFlight.evaluate(0));expect(rampFlight.evaluate(55)).toEqual(rampFlight.evaluate(28));});
+});
+describe('Bache volador meme scene',()=>{
+ it('keeps the car level, clears the hole, and resumes wheel rotation on landing',()=>{
+  const approach=potholeFlight.evaluate(0),takeoff=potholeFlight.evaluate(4),crossing=potholeFlight.evaluate(6),landing=potholeFlight.evaluate(10),exit=potholeFlight.evaluate(11);
+  expect(approach.position[1]).toBeCloseTo(WHEEL_RADIUS);expect(approach.quaternion).toEqual([0,0,0,1]);
+  expect(takeoff.position[1]).toBeGreaterThan(WHEEL_RADIUS+1.9);expect(crossing.phase).toBe('Cruce del bache');expect(crossing.position[1]).toBeGreaterThan(3.8);
+  expect(takeoff.wheelAngle).toBe(crossing.wheelAngle);expect(landing.wheelAngle).toBe(takeoff.wheelAngle);expect(exit.wheelAngle).toBeLessThan(landing.wheelAngle);expect(exit.position[0]).toBeGreaterThan(landing.position[0]);
+ });
+ it('keeps wheel clearance across the hole and returns only on safe asphalt',()=>{
+  for(let time=0;time<=12;time+=.025){
+   const pose=potholeFlight.evaluate(time),centerX=pose.position[0];
+   if(Math.abs(centerX)<5.8)expect(pose.position[1]-WHEEL_RADIUS).toBeGreaterThan(3.8);
+   else if(time>=10)expect(pose.position[1]).toBeCloseTo(WHEEL_RADIUS,2);
+   else expect(pose.position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS);
+  }
+ });
+ it('is deterministic and continuous around all 12-second phase boundaries',()=>{
+  for(const t of [3,5,8,10,12]){const a=potholeFlight.evaluate(t-.001),b=potholeFlight.evaluate(t+.001);expect(Math.hypot(a.position[0]-b.position[0],a.position[1]-b.position[1])).toBeLessThan(.03);expect(potholeFlight.evaluate(t)).toEqual(potholeFlight.evaluate(t));}
+  expect(potholeFlight.evaluate(12).phase).toBe('Maniobra completada');
+ });
+ it('keeps the midair rotation level and clamps non-finite or out-of-range sample times',()=>{
+  const airborne=[3,4,5,6.5,8,9].map(time=>potholeFlight.evaluate(time));
+  expect(airborne.every(pose=>pose.wheelAngle===airborne[0].wheelAngle)).toBe(true);
+  for(const time of [-4,0,3,5,6.5,8,10,12,18]){
+   const pose=potholeFlight.evaluate(time);
+   expect(pose.position.every(Number.isFinite)).toBe(true);
+   expect(pose.quaternion.every(Number.isFinite)).toBe(true);
+   expect(Math.hypot(...pose.quaternion)).toBeCloseTo(1,8);
+  }
+  expect(potholeFlight.evaluate(-4)).toEqual(potholeFlight.evaluate(0));
+  expect(potholeFlight.evaluate(18)).toEqual(potholeFlight.evaluate(12));
+ });
+ it('selects only known canonical hash routes and uses registry metadata for links',()=>{
+  const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
+  expect(sceneCatalog).toHaveLength(2);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
+  expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme,true)).toBe('https://example.test/tesla-roadster-demo/?debug=1#meme/bache-volador');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',original)).toBe('https://example.test/tesla-roadster-demo/');
+  expect(advance(11,.5,true,meme.scenario.duration)).toEqual({time:11.5,playing:true});
+  expect(advance(11,2,true,meme.scenario.duration)).toEqual({time:12,playing:false});
+ });
+});
+describe('share-link clipboard fallback',()=>{
+ it('reports clipboard success, rejection and unavailable clipboard distinctly',async()=>{
+  const successfulClipboard={writeText:async()=>{}};
+  const rejectedClipboard={writeText:async()=>{throw new Error('blocked')}};
+  await expect(copyShareLink('https://example.test/meme',successfulClipboard)).resolves.toBe(true);
+  await expect(copyShareLink('https://example.test/meme',rejectedClipboard)).resolves.toBe(false);
+  await expect(copyShareLink('https://example.test/meme')).resolves.toBe(false);
+ });
 });
