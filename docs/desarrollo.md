@@ -21,7 +21,7 @@ Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina c
 
 **Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo, con su título, resumen y `source.label`.
 
-En el workflow `ci-pages.yml` el tour se genera tras `npm run build` (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). En los PRs se sube como artefacto `tour` para revisarlo, sin permisos de despliegue. En `main` se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
+En el workflow `ci-pages.yml` el tour se genera tras `npm run build` (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). Solo se graba en los push a `main` (no en los pull requests, para que `🧪 validate` no tarde más); para revisarlo antes, ejecútalo en local. Se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
 
 Para generarlo en local (necesitas `ffmpeg`, `img2webp` y Chromium de Playwright):
 
