@@ -108,6 +108,7 @@ if: needs.pre_activation.outputs.deployed == 'true'
 
 permissions:
   contents: read
+  copilot-requests: write
 
 engine: copilot
 

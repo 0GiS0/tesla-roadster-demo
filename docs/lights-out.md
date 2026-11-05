@@ -40,16 +40,17 @@ flowchart LR
 
 Las PR creadas con el `GITHUB_TOKEN` por defecto no disparan workflows de `pull_request`: los checks obligatorios nunca se ejecutarían y el auto-merge no llegaría a completarse. Por eso la PR se crea con `safe-outputs.create-pull-request.github-token`, un token personal. La PR la firma entonces la propietaria del token y sus checks se ejecutan con normalidad.
 
-### Secretos necesarios
+### Secreto necesario
 
-Se crean en *Settings → Secrets and variables → Actions → New repository secret*. No hay ningún secreto versionado.
+Se crea en *Settings → Secrets and variables → Actions → New repository secret*. No hay ningún secreto versionado.
 
 | Secreto | Para qué | Cómo crearlo |
 | --- | --- | --- |
-| `COPILOT_GITHUB_TOKEN` | Autentica el motor de Copilot que ejecuta el agente. | Token *fine-grained* en <https://github.com/settings/personal-access-tokens/new> con *Resource owner* = la cuenta personal (no una organización) y el permiso de cuenta **Copilot Requests: Read**. No necesita acceso a repositorios. |
 | `DOCS_SYNC_PR_TOKEN` | Crea la rama y la PR para que se ejecuten los checks obligatorios. | Token *fine-grained* de la misma cuenta, con *Repository access* limitado a este repositorio y los permisos **Contents: Read and write**, **Pull requests: Read and write** y **Metadata: Read**. No necesita el permiso *Workflows*, porque solo escribe en `docs/` y `README.md`. |
 
-Con la CLI, `gh aw secrets set COPILOT_GITHUB_TOKEN --value "<token>"` y `gh aw secrets set DOCS_SYNC_PR_TOKEN --value "<token>"` los guardan en el repositorio. Conviene poner a los tokens una caducidad y renovarlos antes de que venza.
+Con la CLI, `gh aw secrets set DOCS_SYNC_PR_TOKEN --value "<token>"` lo guarda en el repositorio. Conviene ponerle una caducidad y renovarlo antes de que venza.
+
+La inferencia del agente no necesita ningún secreto: el workflow declara `copilot-requests: write` y el motor de Copilot usa el token de Actions.
 
 ### Cómo se compila
 
