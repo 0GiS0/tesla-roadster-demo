@@ -1,4 +1,4 @@
-name: Attach Knowledge Base artifact
+name: 📎 Attach Knowledge Base artifact
 
 on:
   issues:

@@ -6,7 +6,7 @@
 #
 # To change the schedule, edit the cron expression below.
 
-name: Update Knowledge Base
+name: 📚 Update Knowledge Base
 
 on:
   schedule:
