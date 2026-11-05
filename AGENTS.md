@@ -81,3 +81,22 @@ On macOS, the available executable may be `/Applications/Blender.app/Contents/Ma
 - Verify usable framing and controls on desktop, portrait and short landscape. Distinguish viewport emulation from real mobile hardware; report untested phone gestures/performance or real no-WebGL fallback behavior as limitations.
 - Complete an independent review of the actual diff, resolve actionable findings and have fixes verified. Present the concrete result and wait for **explicit user approval before any PR, including a draft**. Material changes require renewed affected review and approval.
 - After an authorized deployment, verify the public page without a session, the Pages prefix, browser console and correct GLB/resource access. A passing build alone does not verify publication.
+
+
+<!-- github-knowledge-base-start -->
+## Knowledge Base
+
+### Purpose
+
+This repository uses the Knowledge Base at [https://github.com/0GiS0/tesla-roadster-demo](https://github.com/0GiS0/tesla-roadster-demo) on branch `main`.
+
+### Required behavior
+
+1. Before changing code, read `docs/index.md` from that branch.
+2. Use the index to open only the knowledge files relevant to the task.
+3. If the index is unavailable, stop and report that the Knowledge Base could not be loaded.
+
+### Source of truth
+
+Generated knowledge tracks the code. When the knowledge and code disagree, trust the code.
+<!-- github-knowledge-base-end -->
