@@ -5,7 +5,7 @@
 ## Qué cubre
 
 - Únicamente los ficheros bajo `docs/`.
-- `docs/` no tiene propietario en `.github/CODEOWNERS` (entrada `docs/` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
+- `docs/` no tiene propietario en `.github/CODEOWNERS` (entrada `/docs/` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
 - El único requisito es el check obligatorio `validate`: si está en verde, la PR puede mergearse.
 
 ## Quién activa el auto-merge
