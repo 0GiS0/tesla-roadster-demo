@@ -40,6 +40,27 @@ DPR máximo 1,6, sombras de 1024 px y 256 partículas fijas, salvo que una medic
 - Código y comentarios en inglés; la interfaz y la documentación, en español.
 - Hecho significa: lint, tipos, pruebas, validación del GLB y build en verde. Los cambios de interfaz o modelo requieren además capturas antes y después. Tras un despliegue autorizado se verifica la página pública, el prefijo de Pages, la consola y el acceso al GLB.
 
+## Agent Hooks: lint y Markdown antes de la PR
+
+Los checks obligatorios de `main` son `🧪 validate` y `📚 docs`. Una PR que no los pase no se puede fusionar, y en las PR 🌙 lights-out eso significa que se queda abierta. Para que los agentes lo arreglen antes de llegar a la PR, `.github/hooks/pre-pr-checks.json` declara dos [hooks de Copilot](https://docs.github.com/en/copilot/reference/hooks-reference). Los scripts están en `.github/hooks/scripts/` y solo usan Node.js, sin dependencias nuevas (valen en macOS y Linux).
+
+| Hook | Cuándo salta | Qué comprueba | Cómo se entera el agente |
+|---|---|---|---|
+| `postToolUse` (`post-edit-check.mjs`) | Tras cada `edit`, `create` o `apply_patch` | Solo el fichero tocado: `.ts`, `.tsx`, `.js`, `.mjs`, `.cjs` → `eslint`; `README.md` y `docs/**/*.md` → `markdownlint-cli2@0.24.0` | Devuelve el error como `additionalContext`, que el agente lee en el mismo turno |
+| `agentStop` (`final-check.mjs`) | Cuando el agente va a terminar | Todo lo cambiado en la rama respecto a `origin/main` (confirmado, preparado, sin preparar y nuevo): código → `npm run lint` y `npm run typecheck`; Markdown → `markdownlint-cli2` y `node scripts/check-markdown-links.mjs` | Si algo falla, bloquea el final (`decision: "block"`) y el error pasa a ser el siguiente prompt |
+
+- Se usa `agentStop` y no `sessionEnd` porque este último no puede bloquear ni devolver nada al agente.
+- Los dos hooks no hacen nada si el cambio no toca ficheros de esos tipos. La comprobación de enlaces solo se ejecuta al final, porque a mitad de trabajo puede apuntar a páginas que aún no existen.
+- Tras 8 bloqueos seguidos Copilot CLI ignora el hook y termina, para evitar bucles.
+- Copilot CLI carga `.github/hooks/*.json` del repositorio (hay que confiar en la carpeta) y, según su documentación, también el agente en la nube (allí `npx` depende de lo que permita su firewall). Los hooks de código necesitan `npm ci` previo; sin `node_modules` se omiten.
+
+### Y en `📚 Docs sync` (gh-aw)
+
+La documentación de gh-aw no menciona `.github/hooks`, y su firewall solo deja pasar los dominios declarados en `network:`: por defecto no incluye el registro de npm, así que `npx markdownlint-cli2` no funcionaría. Por eso los hooks salen enseguida cuando existe `GITHUB_AW` (variable que gh-aw pone al agente) y `docs-sync.md` tiene su propia defensa:
+
+- `network.allowed` incluye `node`, y el prompt pide al agente ejecutar `npx --yes markdownlint-cli2@0.24.0` y `node scripts/check-markdown-links.mjs` antes de abrir la PR.
+- Un `post-steps` en el runner repite esas dos comprobaciones tras el agente. Si fallan, el job `agent` falla y el job `🔀 Enable auto-merge` no se ejecuta (ahora exige `agent` en verde), de modo que la PR no se fusiona sola.
+
 ## Quién revisa qué
 
 El ruleset de `main` exige la revisión de un code owner. `.github/CODEOWNERS` decide quién cuenta como tal; en CODEOWNERS gana la última regla que coincide con cada fichero.
