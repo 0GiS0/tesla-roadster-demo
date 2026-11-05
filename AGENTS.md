@@ -22,7 +22,7 @@
 - `.github/workflows/ci-pages.yml`: PR validation, tour recording (PR artifact; published with Pages on `main`) and deployment restricted to `main`.
 - `scripts/record-tour.mjs`: deterministic frame-by-frame tour capture (Playwright + ffmpeg) producing `tour.mp4`, `tour.webp`, `tour-poster.png`; `npm run tour`. It needs Playwright Chromium (`npx playwright install chromium`).
 - `scripts/generate-qr.mjs`: local QR generator for `docs/assets/qr-web.svg`; `npm run qr`.
-- `README.md`: operation details; `docs/pre-pr-review.md`: review evidence, including explicitly historical results.
+- `README.md`: Spanish showcase (tour, QR, author); `docs/desarrollo.md`: technical and operation details; `docs/pre-pr-review.md`: review evidence, including explicitly historical results.
 
 ## Development and run
 
