@@ -1,0 +1,11 @@
+# Default owner for every file in the repository
+* @0GiS0
+
+# Agent instructions, CI/workflow and repository governance
+AGENTS.md @0GiS0
+.github/ @0GiS0
+.vscode/ @0GiS0
+
+# 3D model sources and the deployed GLB asset
+model/ @0GiS0
+public/models/ @0GiS0
