@@ -58,7 +58,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(2);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(3);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
