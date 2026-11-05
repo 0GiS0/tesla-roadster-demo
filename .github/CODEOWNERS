@@ -9,3 +9,6 @@ AGENTS.md @0GiS0
 # 3D model sources and the deployed GLB asset
 model/ @0GiS0
 public/models/ @0GiS0
+
+# Documentation has no code owner so lights-out PRs can auto-merge (see docs/lights-out.md)
+/docs/
