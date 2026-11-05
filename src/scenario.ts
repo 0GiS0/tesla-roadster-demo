@@ -45,6 +45,7 @@ export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',du
 }};
 /** Parking-lot layout shared by the scenario, the environment and the tests. Bays run along Z, the aisle along X. */
 export const PARKING = {
+ groundY: 0,
  slotX: 0,
  slotZ: -2.8,
  bayWidth: 3,
@@ -94,7 +95,7 @@ export function createParkingSpaceTheft(dropHeight:number):Scenario{
   const vapor=t<ROADSTER_DROP_START?0:t<ROADSTER_LAND?smooth((t-ROADSTER_DROP_START)/1):1-smooth((t-ROADSTER_LAND)/1.6);
   const phase=t<ROADSTER_DROP_START?'Buscando sitio':t<ROADSTER_LAND?'Descenso':t<7.2?'Plaza ocupada':t<SPACE_DURATION?'Sigue buscando':'Maniobra completada';
   const q=new Quaternion().setFromEuler(new Euler(0,Math.PI/2,0));
-  return {position:[PARKING.slotX,WHEEL_RADIUS+dropHeight*drop,PARKING.slotZ],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:clamp(vapor),phase,speed:0};
+  return {position:[PARKING.slotX,PARKING.groundY+WHEEL_RADIUS+dropHeight*drop,PARKING.slotZ],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:clamp(vapor),phase,speed:0};
  }};
 }
 export const parkingSpaceTheft=createParkingSpaceTheft(PARKING_DEFAULT_DROP_HEIGHT);

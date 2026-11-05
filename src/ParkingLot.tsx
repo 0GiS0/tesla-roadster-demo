@@ -114,19 +114,17 @@ export function ParkingLot({ time }: { time: number }) {
  }, [bayWidth]);
  const rowZ = -bayDepth / 2;
  const oppositeZ = aisleWidth + bayDepth / 2;
+ const ground = PARKING.groundY;
  return <group>
-  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -.065, 0]} receiveShadow>
+  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, ground, 0]} receiveShadow>
    <planeGeometry args={[90, 60]} /><meshStandardMaterial color="#ffffff" map={asphalt} roughness={.96} />
   </mesh>
-  {lineX.map(x => <mesh key={`line-${x}`} position={[x, -.03, rowZ]} rotation={[-Math.PI / 2, 0, 0]}>
+  {lineX.map(x => <mesh key={`line-${x}`} position={[x, ground + .012, rowZ]} rotation={[-Math.PI / 2, 0, 0]}>
    <planeGeometry args={[.13, bayDepth]} /><meshStandardMaterial color="#ece8dc" roughness={.8} />
   </mesh>)}
-  {lineX.map(x => <mesh key={`opposite-${x}`} position={[x, -.03, oppositeZ]} rotation={[-Math.PI / 2, 0, 0]}>
-   <planeGeometry args={[.13, bayDepth]} /><meshStandardMaterial color="#ece8dc" roughness={.8} />
-  </mesh>)}
-  <mesh position={[0, -.03, -bayDepth]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[22, .13]} /><meshStandardMaterial color="#ece8dc" roughness={.8} /></mesh>
-  {[-6, -2, 2, 6].map(x => <mesh key={`dash-${x}`} position={[x * 1.6, -.03, PARKING.aisleZ]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[2, .1]} /><meshStandardMaterial color="#c9c4b4" roughness={.9} /></mesh>)}
-  <mesh position={[slotX, -.025, rowZ]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[bayWidth - .2, bayDepth - .2]} /><meshStandardMaterial color="#56585c" roughness={1} transparent opacity={.5} /></mesh>
+  <mesh position={[0, ground + .012, -bayDepth]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[22, .13]} /><meshStandardMaterial color="#ece8dc" roughness={.8} /></mesh>
+  {[-6, -2, 2, 6].map(x => <mesh key={`dash-${x}`} position={[x * 1.6, ground + .012, PARKING.aisleZ]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[2, .1]} /><meshStandardMaterial color="#c9c4b4" roughness={.9} /></mesh>)}
+  <mesh position={[slotX, ground + .008, rowZ]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[bayWidth - .2, bayDepth - .2]} /><meshStandardMaterial color="#56585c" roughness={1} transparent opacity={.5} /></mesh>
   <mesh position={[0, .55, WALL_Z - .4]} castShadow receiveShadow><boxGeometry args={[60, 1.1, .6]} /><meshStandardMaterial color="#b5ad9c" roughness={.95} /></mesh>
   <mesh position={[0, 2.2, WALL_Z - 1.6]} receiveShadow><boxGeometry args={[60, 4.4, .6]} /><meshStandardMaterial color="#cbbfa8" roughness={.95} /></mesh>
   {[-15, -6, 3, 12, 21].map(x => <Hedge key={x} x={x} />)}

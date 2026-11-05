@@ -36,7 +36,7 @@ describe('Robo de plaza meme scene', () => {
   for (const t of times) expect(parkingSpaceTheft.evaluate(t).position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS - 1e-9);
   for (const t of [5.4, 6, 8, 10]) {
    const pose = parkingSpaceTheft.evaluate(t);
-   expect(pose.position[1]).toBeCloseTo(WHEEL_RADIUS, 8);
+   expect(pose.position[1]).toBeCloseTo(PARKING.groundY + WHEEL_RADIUS, 8);
    expect(pose.position[0]).toBe(PARKING.slotX);
    expect(pose.position[2]).toBe(PARKING.slotZ);
    expect(pose.wheelAngle).toBe(0);
@@ -80,6 +80,12 @@ describe('Robo de plaza meme scene', () => {
    expect(overlaps(greyRect(t), roadsterRect(t))).toBe(false);
    for (const car of parked) expect(overlaps(greyRect(t), car)).toBe(false);
   }
+ });
+ it('leaves exactly one marked bay free before the Roadster lands', () => {
+  const marked: number[] = [];
+  for (let x = -9; x <= 9; x += PARKING.bayWidth) marked.push(x);
+  const free = marked.filter(x => !(PARKING.parkedBayX as readonly number[]).includes(x));
+  expect(free).toEqual([PARKING.slotX]);
  });
  it('starts the descent above the top edge of every supported framing and keeps a bounded pace', () => {
   const framing = sceneFromHash('#meme/robo-de-plaza').camera.fit!;
