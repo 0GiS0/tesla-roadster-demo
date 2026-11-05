@@ -2,6 +2,15 @@
 
 Seguridad: sin secretos ni permisos nuevos; al servicio de imágenes solo van el prompt y la captura pública de la web.
 
+## Publicación
+
+Siempre que se cree el Issue de la propuesta, la imagen se adjunta. Nota obligatoria en el cuerpo: «Imagen orientativa generada con IA, no es el meme original.»
+
+- Issue nuevo: pon la nota y `![Concepto de la escena <nombre>](./concepto-<slug>.png)` en el cuerpo y usa `gh issue create -R 0GiS0/tesla-roadster-demo --title … --body-file cuerpo.md --attach './concepto-<slug>.png#Concepto de la escena <nombre>'`.
+- Issue existente: `gh issue view <n> --json body -q .body > cuerpo.md`, añade al final la nota y la imagen, y ejecuta `gh issue edit <n> --body-file cuerpo.md --attach './concepto-<slug>.png#Concepto de la escena <nombre>'`. Nunca sustituyas el cuerpo original.
+
+Comprueba después que la imagen se ve en el Issue.
+
 ## Plantilla de prompt
 
 ```text
