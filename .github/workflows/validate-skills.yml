@@ -1,0 +1,101 @@
+name: Validate skills
+
+on:
+  pull_request:
+    paths:
+      - ".github/skills/**"
+      - ".github/workflows/validate-skills.yml"
+  push:
+    branches: [main]
+    paths:
+      - ".github/skills/**"
+      - ".github/workflows/validate-skills.yml"
+
+permissions:
+  contents: read
+
+env:
+  WAZA_NO_UPDATE_CHECK: "1"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect skills
+        id: skills
+        shell: bash
+        run: |
+          shopt -s nullglob
+          skills=(.github/skills/*/)
+          if [ "${#skills[@]}" -eq 0 ]; then
+            echo "No skills found; skipping validation."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install checksum-verified waza
+        if: steps.skills.outputs.found == 'true'
+        shell: bash
+        env:
+          WAZA_VERSION: v0.40.0
+          WAZA_SHA256: d09117a3c631f44a00a6c362462c951aed83c87751e8c25f39916a77d1013802
+        run: |
+          mkdir -p "$RUNNER_TEMP/waza-bin"
+          cd "$RUNNER_TEMP/waza-bin"
+          curl --fail --silent --show-error --location \
+            "https://github.com/microsoft/waza/releases/download/${WAZA_VERSION}/waza-linux-amd64" \
+            --output waza
+          echo "${WAZA_SHA256}  waza" | sha256sum --check
+          chmod +x waza
+          echo "$RUNNER_TEMP/waza-bin" >> "$GITHUB_PATH"
+          ./waza --version
+
+      - name: Check skill readiness and count tokens
+        if: steps.skills.outputs.found == 'true'
+        shell: bash
+        run: |
+          shopt -s nullglob
+          for skill in .github/skills/*/; do
+            echo "Checking $skill"
+            if ! waza check "./$skill" --format json > "$RUNNER_TEMP/skill-check.json"; then
+              echo "::error::waza check failed for $skill"
+              exit 1
+            fi
+            cat "$RUNNER_TEMP/skill-check.json"
+            if ! jq -e '(.skills | length > 0) and all(.skills[]; .ready == true)' \
+              "$RUNNER_TEMP/skill-check.json" > /dev/null; then
+              echo "::error::Skill $skill is not ready; see the waza report above."
+              exit 1
+            fi
+            waza tokens count "./$skill"
+          done
+
+      - name: Preflight optional evaluation files without running models
+        if: steps.skills.outputs.found == 'true'
+        shell: bash
+        run: |
+          while IFS= read -r -d '' evaluation; do
+            waza preflight "$evaluation"
+          done < <(find .github/skills -type f -name eval.yaml -print0)
+
+      - name: Compare skill tokens with main baseline
+        if: steps.skills.outputs.found == 'true'
+        shell: bash
+        env:
+          # A push compares against main before the push, not the new main HEAD.
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ "$BASE_REF" =~ ^0+$ ]]; then
+            echo "::notice::Initial push has no main baseline; readiness checks enforce token budgets."
+            exit 0
+          fi
+          git rev-parse --verify "${BASE_REF}^{commit}"
+          waza tokens compare "$BASE_REF" HEAD --skills --threshold 10 --strict
