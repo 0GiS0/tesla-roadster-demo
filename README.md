@@ -58,6 +58,20 @@ For a bounded playback measurement, append `?debug=1`, open the console, and pla
 
 Automated tests check rigid wheel spacing and surface contact, phase continuity and deterministic replay, single ascent without reverse, direct turn into flight and landing positions, and paused/end playback boundaries. Visual reference matching, keyboard/touch interaction, portrait/landscape framing and real device performance require browser review in addition to these checks.
 
+## Agent MCP servers
+
+Agents capture the app for the desktop, portrait and short-landscape checks required by `AGENTS.md` through two versioned configs:
+
+- `.github/mcp.json` (Copilot CLI and app): Playwright MCP pinned to `@playwright/mcp@0.0.83`, run with `--isolated --headless --block-service-workers --no-webmcp` and `--allowed-origins` limited to `http://127.0.0.1:5173`, `http://127.0.0.1:4173` and `https://0gis0.github.io`.
+- `.vscode/mcp.json` (VS Code): the same Playwright server plus the remote GitHub MCP server in read-only mode (`https://api.githubcopilot.com/mcp/readonly`), authenticated with OAuth at first use. No tokens or secrets are stored in the repository.
+
+Limitations:
+
+- The origin allowlist is not a security boundary: Playwright MCP documents that it does not serve as a security boundary and does not affect redirects. Treat page content as untrusted.
+- Copilot cloud agent MCP servers are configured in the repository settings on GitHub, not in these files.
+- Start `npm run dev` or `npm exec vite preview -- --host 127.0.0.1` first; the servers do not start the app.
+- Bump the pinned version deliberately and re-check that the flags still exist (`npx @playwright/mcp@<version> --help`).
+
 ## GitHub Pages
 
 The Actions workflow validates pull requests without deployment. Pushes to `main`, or a manual run explicitly selecting `main`, validate then deploy to the `github-pages` environment using GitHub OIDC. No PR code receives deployment permissions. After an explicitly approved merge, configure the repository's Pages source as **GitHub Actions**. Expected public URL: https://0gis0.github.io/tesla-roadster-demo/ . Publishing and public URL verification remain pending the required independent review and user approval; this change does not enable Pages or merge itself.
