@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, Group, InstancedMesh, Object3D, Path, Quaternion, RepeatWrapping, Spherical, Shape, ShapeGeometry, SRGBColorSpace, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
-import { rampFlight, RADIUS } from './scenario';
+import { RADIUS } from './scenario';
 import type { SceneDefinition } from './sceneCatalog';
 
 function Vehicle({time,onReady,definition}:{time:number;onReady:()=>void;definition:SceneDefinition}) {
@@ -84,7 +84,7 @@ function Camera({reset,definition}:{reset:number;definition:SceneDefinition}){
  },[camera,reset,size.width,size.height,definition]);
  useEffect(()=>{
   const canvas=gl.domElement;
-  canvas.tabIndex=0;
+  canvas.setAttribute('tabindex','0');
   canvas.setAttribute('aria-label','Vista 3D interactiva del Roadster');
   canvas.setAttribute('aria-describedby','camera-keyboard-help');
   const onKeyDown=(event:KeyboardEvent)=>{
@@ -165,7 +165,9 @@ function Pothole(){
  },[asphaltTexture]);
  const [road,setRoad]=useState<PotholeGeometry|null>(null);
  useEffect(()=>{
-  const geometry=createPotholeGeometry();setRoad(geometry);
+  const geometry=createPotholeGeometry();
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- geometry owns GPU resources disposed in cleanup
+  setRoad(geometry);
   return()=>{geometry.asphalt.dispose();geometry.rim.dispose();geometry.chippedEdge.dispose()};
  },[]);
  if(!road)return null;
@@ -212,6 +214,7 @@ function Building({position,color,side}:{position:[number,number,number];color:s
    -4.4,4.65,-3.1,4.4,4.65,-3.1,4.4,5.45,0,-4.4,5.45,0,
    -4.4,4.65,3.1,4.4,4.65,3.1,4.4,5.45,0,-4.4,5.45,0,
   ],3));geometry.setIndex([0,1,2,0,2,3,4,6,5,4,7,6]);geometry.computeVertexNormals();
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- geometry owns GPU resources disposed in cleanup
   setRoof(geometry);
   return()=>geometry.dispose();
  },[]);
