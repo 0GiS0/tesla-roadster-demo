@@ -49,8 +49,8 @@ jobs:
   # Runs outside the agent, after the pull request exists, and only touches that pull request.
   auto-merge:
     name: 🔀 Enable auto-merge
-    needs: [safe_outputs]
-    if: ${{ always() && needs.safe_outputs.outputs.created_pr_number != '' }}
+    needs: [agent, safe_outputs]
+    if: ${{ always() && needs.agent.result == 'success' && needs.safe_outputs.outputs.created_pr_number != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -112,10 +112,30 @@ permissions:
 
 engine: copilot
 
+# The agent runs behind a firewall: the npm registry is allowed so it can run markdownlint
+# itself, but the .github/hooks checks are skipped there (they exit when GITHUB_AW is set).
+network:
+  allowed:
+    - defaults
+    - node
+
+# Safety net on the runner, after the agent: if the documentation does not pass the checks of
+# the required "📚 docs" check, the agent job fails and auto-merge is not enabled.
+post-steps:
+  - name: 🟢 Set up Node.js
+    uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+    with:
+      node-version: 22
+  - name: 📝 Lint Markdown before the pull request
+    shell: bash
+    run: npx --yes markdownlint-cli2@0.24.0
+  - name: 🔗 Check relative links before the pull request
+    run: node scripts/check-markdown-links.mjs
+
 timeout-minutes: 20
 
 tools:
-  bash: ["cat", "ls", "grep", "find", "head", "tail", "wc", "diff", "git log", "git diff", "git show", "git status"]
+  bash: ["cat", "ls", "grep", "find", "head", "tail", "wc", "diff", "npx --yes markdownlint-cli2@0.24.0", "node scripts/check-markdown-links.mjs", "git log", "git diff", "git show", "git status"]
   edit:
 
 safe-outputs:
@@ -155,7 +175,7 @@ You keep the documentation of this repository in sync with its code. The reposit
 1. Read `docs/index.md`, then every page it lists. Each page starts with a note describing its purpose and what must be kept up to date; follow it.
 2. Compare each statement with the code as it is now: `src/`, `model/`, `public/`, `package.json`, `.github/workflows/`, `.github/skills/` and `AGENTS.md`. When documentation and code disagree, the code is right.
 3. Check in particular: the scene catalog and the Scenario contract, commands and versions, the deployment flow, workflows and checks named in the docs, skills and MCP configuration, and that every page of `docs/` appears in the index.
-4. Relative links and images must keep working, and Markdown must pass `markdownlint` (`.markdownlint-cli2.jsonc`).
+4. Relative links and images must keep working, and Markdown must pass `markdownlint` (`.markdownlint-cli2.jsonc`). Before opening the pull request, run `npx --yes markdownlint-cli2@0.24.0` and `node scripts/check-markdown-links.mjs` and fix every problem they report: these are the same checks as the required `📚 docs` check, and a pull request that fails them cannot be merged.
 5. If you find nothing that needs updating, do not create a pull request: call `noop` with a short reason.
 
 ## Pull request
