@@ -1,6 +1,6 @@
 ---
 name: record-scene
-description: "Graba una escena de la web (original o MEME) de principio a fin como MP4 H.264 listo para adjuntar al cuerpo de una PR. USE FOR: vídeo de un meme para la PR, grabar la reproducción de una escena. DO NOT USE FOR: añadir vídeos a la web o a public/, el tour del README (#37)."
+description: "Graba una escena de la web (original o MEME) de principio a fin como MP4 H.264 listo para adjuntar al cuerpo de una PR. USE FOR: vídeo de un meme para la PR, grabar la reproducción de una escena. DO NOT USE FOR: añadir vídeos a la web o a public/, el tour del README (usa record-tour)."
 ---
 
 # Grabar una escena

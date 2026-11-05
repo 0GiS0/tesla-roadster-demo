@@ -18,6 +18,8 @@ export interface SceneDefinition {
  };
  copy: { label: string; title: string; summary: string };
  source?: SceneSource;
+ // Key moment shown in the tour video: an instant or a range of the time slider, in seconds.
+ tourMoment?: number | { from: number; to: number };
 }
 
 export function sourceLabel(source: SceneSource): string {
@@ -29,6 +31,7 @@ export const sceneCatalog: SceneDefinition[] = [
   key: 'ramp-flight',
   hash: '',
   mode: 'original',
+  tourMoment: { from: 12.5, to: 17 },
   scenario: rampFlight,
   environment: 'ramp',
   camera: {
@@ -67,6 +70,7 @@ export const sceneCatalog: SceneDefinition[] = [
   key: 'robo-de-plaza',
   hash: '#meme/robo-de-plaza',
   mode: 'meme',
+  tourMoment: { from: 2.5, to: 6 },
   scenario: parkingSpaceTheft,
   environment: 'parking',
   camera: {

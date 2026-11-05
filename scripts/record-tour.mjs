@@ -1,12 +1,13 @@
-// Builds the README tour film from a production build:
-//   1. Playwright records one deterministic clip per scene in src/sceneCatalog.ts
-//      (the time slider is driven frame by frame, never by wall-clock time).
-//   2. scripts/tour/film.mjs writes a HyperFrames project (intro, original scene,
-//      Modo MEME bridge, one segment per meme, outro).
+// Builds the short tour film (10-15 s) from a production build:
+//   1. Playwright records, for every scene in src/sceneCatalog.ts, only its key
+//      moment (`tourMoment`, see scripts/tour/moments.mjs). The time slider is
+//      driven frame by frame, never by wall-clock time, so it works without a GPU.
+//   2. scripts/tour/film.mjs writes a HyperFrames project: the original scene first,
+//      then one segment per meme.
 //   3. HyperFrames checks and renders tour.mp4; tour.webp and tour-poster.png
 //      are derived from it.
-// Usage: node scripts/record-tour.mjs [--dist dist] [--out docs/assets] [--clips-dir DIR] [--project-dir DIR]
-// With --clips-dir, existing clips are reused so the film can be re-rendered quickly.
+// Usage: node scripts/record-tour.mjs [--build] [--dist dist] [--out docs/assets] [--clips-dir DIR] [--project-dir DIR]
+// --build runs `npm run build` first. With --clips-dir, existing clips are reused.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -14,6 +15,7 @@ import { join, resolve } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
 import { loadCatalog } from './tour/catalog.mjs';
+import { planMoments } from './tour/moments.mjs';
 import { writeFilmProject } from './tour/film.mjs';
 
 const CAPTURE_FPS = 24;
@@ -21,13 +23,15 @@ const WIDTH = 1280;
 const HEIGHT = 860;
 const WEBP_FPS = 10;
 const WEBP_WIDTH = 640;
-const MAX_MP4_BYTES = 10 * 1024 * 1024;
+const MAX_MP4_BYTES = 5 * 1024 * 1024;
 const MAX_WEBP_BYTES = 2 * 1024 * 1024;
 
 function arg(name, fallback) {
   const index = process.argv.indexOf(`--${name}`);
   return index > -1 ? process.argv[index + 1] : fallback;
 }
+
+const hasFlag = (name) => process.argv.includes(`--${name}`);
 
 function fail(message) {
   console.error(`record-tour: ${message}`);
@@ -44,6 +48,8 @@ const ffmpeg = (args) => run('ffmpeg', ['-y', '-loglevel', 'error', ...args]);
 if (spawnSync('ffmpeg', ['-version']).status !== 0) fail('ffmpeg was not found on PATH');
 if (spawnSync('img2webp', ['-version']).status !== 0) fail('img2webp (WebP tools) was not found on PATH');
 
+if (hasFlag('build')) run('npm', ['run', 'build']);
+
 const distDir = resolve(arg('dist', 'dist'));
 const outDir = resolve(arg('out', 'docs/assets'));
 const workDir = mkdtempSync(join(tmpdir(), 'roadster-tour-'));
@@ -52,8 +58,8 @@ const projectDir = resolve(arg('project-dir', join(workDir, 'film')));
 mkdirSync(outDir, { recursive: true });
 mkdirSync(clipsDir, { recursive: true });
 
-const catalog = await loadCatalog();
-console.log(`record-tour: ${catalog.length} scenes: ${catalog.map((scene) => scene.key).join(', ')}`);
+const catalog = planMoments(await loadCatalog());
+console.log(`record-tour: ${catalog.length} scenes: ${catalog.map((scene) => `${scene.key} [${scene.moment.from.toFixed(1)}s +${scene.moment.length.toFixed(1)}s]`).join(', ')}`);
 
 async function recordClip(browser, baseUrl, entry) {
   const clip = join(clipsDir, `${entry.key}.mp4`);
@@ -91,9 +97,9 @@ async function recordClip(browser, baseUrl, entry) {
         return new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
       }, time);
 
-    const total = Math.round(entry.duration * CAPTURE_FPS);
+    const total = Math.round(entry.moment.length * CAPTURE_FPS);
     for (let i = 0; i < total; i += 1) {
-      await setTime(Math.min(entry.duration, i / CAPTURE_FPS));
+      await setTime(Math.min(entry.duration, entry.moment.from + i / CAPTURE_FPS));
       await stage.screenshot({ path: join(framesDir, `frame-${String(i).padStart(4, '0')}.jpg`), type: 'jpeg', quality: 92 });
       if (i % 96 === 0) console.log(`record-tour: ${entry.key} frame ${i + 1}/${total}`);
     }
@@ -114,9 +120,9 @@ const server = await preview({
 });
 const url = server.resolvedUrls?.local?.[0];
 if (!url) fail('vite preview did not report a local URL');
-const browser = await chromium.launch({
-  args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--hide-scrollbars'],
-});
+const browser = await chromium
+  .launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--hide-scrollbars'] })
+  .catch((error) => fail(`Chromium could not start (run "npx playwright install --with-deps chromium"): ${error.message}`));
 try {
   for (const entry of catalog) await recordClip(browser, url, entry);
 } finally {
@@ -128,7 +134,6 @@ const film = writeFilmProject({
   catalog,
   projectDir,
   clipsDir,
-  qrPath: resolve('docs/assets/qr-web.svg'),
   gsapPath: resolve('node_modules/gsap/dist/gsap.min.js'),
 });
 console.log(`record-tour: film ${film.total}s, segments: ${film.segments.map((s) => s.id).join(' > ')}`);
@@ -140,31 +145,21 @@ const mp4 = join(outDir, 'tour.mp4');
 run(hyperframes, ['render', projectDir, '--output', mp4, '--fps', String(CAPTURE_FPS), '--quality', 'looks',
   '--video-frame-format', 'png', '--strict', '--no-best-effort', '--quiet'], { env: hfEnv });
 
-// README animation: short highlights taken from the rendered film.
+// README animation: the whole film is already short, so it is just downscaled.
 const webp = join(outDir, 'tour.webp');
 const poster = join(outDir, 'tour-poster.png');
-const highlights = [];
-for (const segment of film.segments) {
-  if (segment.id === 'intro') highlights.push([segment.start + 0.9, 2.6]);
-  else if (segment.id.startsWith('scene-')) highlights.push([segment.start + 10, 5]);
-  else if (segment.id.startsWith('meme-')) highlights.push([segment.start + 1.8, Math.min(4, segment.duration - 2)]);
-  else if (segment.id === 'outro') highlights.push([segment.start + 2, 2.5]);
-}
 const scaledDir = join(workDir, 'webp');
 mkdirSync(scaledDir);
-highlights.forEach(([start, length], index) => {
-  ffmpeg(['-ss', String(start), '-t', String(length), '-i', mp4, '-vf', `fps=${WEBP_FPS},scale=${WEBP_WIDTH}:-1:flags=lanczos`,
-    join(scaledDir, `h${index}-%03d.png`)]);
-});
+ffmpeg(['-i', mp4, '-vf', `fps=${WEBP_FPS},scale=${WEBP_WIDTH}:-1:flags=lanczos`, join(scaledDir, 'f-%03d.png')]);
 const frames = readdirSync(scaledDir).sort().map((name) => join(scaledDir, name));
 run('img2webp', ['-loop', '0', '-lossy', '-q', '60', '-d', String(Math.round(1000 / WEBP_FPS)), ...frames, '-o', webp]);
 
-const announcement = film.segments.find((s) => s.id.startsWith('scene-'));
-ffmpeg(['-ss', String(announcement.start + 12), '-i', mp4, '-frames:v', '1', poster]);
+const original = film.segments.find((s) => s.id.startsWith('scene-'));
+ffmpeg(['-ss', String(original.start + original.duration * 0.7), '-i', mp4, '-frames:v', '1', poster]);
 if (!arg('project-dir')) rmSync(workDir, { recursive: true, force: true });
 
 for (const [file, limit] of [[mp4, MAX_MP4_BYTES], [webp, MAX_WEBP_BYTES]]) {
   const size = statSync(file).size;
-  console.log(`record-tour: ${file} ${(size / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`record-tour: ${film.total}s ${file} ${(size / 1024 / 1024).toFixed(2)} MB`);
   if (size >= limit) fail(`${file} exceeds the ${limit / 1024 / 1024} MB budget`);
 }

@@ -20,7 +20,8 @@ export async function loadCatalog() {
       label: scene.copy.label,
       title: scene.copy.title,
       summary: scene.copy.summary,
-      source: scene.source ?? null,
+      source: scene.source ? { ...scene.source, label: module.sourceLabel(scene.source) } : null,
+      tourMoment: scene.tourMoment,
     }));
   } finally {
     await server.close();
