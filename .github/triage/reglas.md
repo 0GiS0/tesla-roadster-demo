@@ -19,7 +19,8 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   o no se sabe qué falla ni dónde.
 - 💡 lights-on: cambia lo que ve el público en la web.
 - 🌙 lights-out: solo cambia la documentación o el inventario (pie de foto,
-  texto alternativo, la lista de memes).
+  texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
+  la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
 
 ### Según el tipo de issue
 
@@ -28,8 +29,9 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   si no, 💬 needs-info.
 - ✨ enhancement: 📐 needs-spec salvo que sea un cambio pequeño, en una sola parte
   de la web y con criterios de aceptación que se puedan comprobar.
-- 🏭 software-factory: nunca 🌙 lights-out. Cambia cómo trabaja la fábrica
-  (plantillas, skills, MCP, workflows, CODEOWNERS), así que siempre lo revisa una persona.
+- 🏭 software-factory: nunca 🌙 lights-out, y siempre lleva 💡 lights-on, aunque no
+  cambie la web. Cambia cómo trabaja la fábrica (plantillas, skills, MCP, workflows,
+  CODEOWNERS), así que siempre lo revisa una persona.
 
 ## Ejemplos
 
