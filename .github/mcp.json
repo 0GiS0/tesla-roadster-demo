@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "local",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@0.0.83",
+        "--isolated",
+        "--headless",
+        "--block-service-workers",
+        "--no-webmcp",
+        "--allowed-origins",
+        "http://127.0.0.1:5173;http://127.0.0.1:4173;https://0gis0.github.io"
+      ],
+      "tools": ["*"]
+    }
+  }
+}

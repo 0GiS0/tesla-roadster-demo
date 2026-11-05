@@ -1,0 +1,88 @@
+# Field IDs are stable and used by the triage skill `triage-enhancement`:
+#   problem              -> "Problema u objetivo" (required)
+#   proposal             -> "Propuesta" (required)
+#   area                 -> "Área" (dropdown, optional)
+#   acceptance-criteria  -> "Criterios de aceptación" (required)
+#   alternatives         -> "Alternativas consideradas" (optional)
+#   references           -> "Referencias o capturas" (optional)
+#   checklist            -> "Comprobaciones" (two required checkboxes)
+name: "✨ Mejora de la web"
+description: "Propón una mejora de la página web. El título debe empezar por un emoji; puedes cambiar ✨ por otro más concreto. Para memes, usa la plantilla de memes."
+title: "✨ "
+labels: ["✨ enhancement", "🔍 needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponer una mejora de la web. Antes de enviar:
+
+        - **Título:** empieza por un emoji que describa el tipo de mejora. Está precargado `✨`, pero puedes cambiarlo por otro más concreto.
+        - **Alcance:** describe una mejora de la página web, no un meme.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema u objetivo
+      description: ¿Qué problema existe o qué quieres conseguir?
+      placeholder: Describe el problema o el objetivo y a quién afecta.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: ¿Qué cambio propones?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      description: Elige el área principal de la mejora.
+      options:
+        - Interfaz
+        - Accesibilidad
+        - Controles
+        - Rendimiento
+        - Otra
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Criterios de aceptación
+      description: Condiciones verificables que demuestran que la mejora está terminada.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Otras opciones que valoraste y por qué no las propones.
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referencias o capturas
+      description: Enlaces, capturas de pantalla o ejemplos de otras webs.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Comprobaciones
+      options:
+        - label: No es un meme
+          required: true
+        - label: No añade recursos externos en tiempo de ejecución
+          required: true

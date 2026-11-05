@@ -1,0 +1,71 @@
+name: "🏭 Cambio en la software factory"
+description: "Propón un cambio en CODEOWNERS, workflows de Actions, plantillas de Issue, MCP, skills, instrucciones, etiquetas, Automations o rulesets. Son cambios de más riesgo: nunca irán en 🌙 lights-out y siempre requieren revisión humana. El título debe empezar por un emoji; puedes cambiarlo por otro más concreto."
+title: "🏭 "
+labels: ["🏭 software-factory", "🔍 needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Este formulario es para cambios en la software factory. Son cambios de más riesgo: no se automatizan con 🌙 lights-out y siempre tendrán revisión humana antes de fusionarse.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente
+      description: Elige uno o varios componentes que cambia la propuesta.
+      multiple: true
+      options:
+        - "CODEOWNERS"
+        - "Workflows de Actions"
+        - "Plantillas de Issue"
+        - "MCP"
+        - "Skills"
+        - "Instrucciones / AGENTS.md"
+        - "Etiquetas / Automations"
+        - "Rulesets"
+    validations:
+      required: true
+  - type: textarea
+    id: problem_goal
+    attributes:
+      label: Problema u objetivo
+      description: Qué problema resuelve el cambio o qué objetivo persigue.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Propuesta
+      description: Describe el cambio concreto, con los archivos o configuraciones afectadas.
+    validations:
+      required: true
+  - type: textarea
+    id: security_impact
+    attributes:
+      label: Impacto en seguridad y permisos
+      description: Qué permisos, secretos, tokens o superficies de ataque cambian y por qué es seguro.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Criterios de aceptación
+      description: Condiciones verificables que dan por terminado el cambio.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: Plan de marcha atrás
+      description: Cómo deshacer el cambio si causa problemas.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety_checks
+    attributes:
+      label: Comprobaciones de seguridad
+      options:
+        - label: "No expone secretos ni tokens."
+          required: true
+        - label: "Respeta los permisos mínimos."
+          required: true
