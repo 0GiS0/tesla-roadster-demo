@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import type { RefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { CanvasTexture, Group, MeshStandardMaterial, RepeatWrapping, SRGBColorSpace } from 'three';
 import { GREY_CAR_FOOTPRINT, PARKING, greyCarPose } from './scenario';
@@ -32,15 +33,17 @@ function createAsphaltTexture() {
 }
 
 /** Generic box-shaped car: no brands, no plates. Lights are plain emissive materials. */
-function BoxCar({ color, length = 4.2, width = 1.8, lights }: { color: string; length?: number; width?: number; lights?: LightMaterials }) {
- const body = Math.max(.9, length * .22);
+function BoxCar({ color, length = 4.2, width = 1.8, lights }: { color: string; length?: number; width?: number; lights?: LightRegistry }) {
  const wheelOffsets = [[-1, -1], [-1, 1], [1, -1], [1, 1]] as const;
- const lamp = (x: number, z: number, material: MeshStandardMaterial | undefined, fallback: string, key: string) => (
-  <mesh key={key} position={[x, .62, z]}>
-   <boxGeometry args={[.12, .22, .38]} />
-   {material ? <primitive object={material} attach="material" /> : <meshStandardMaterial color={fallback} />}
+ const lightMaterial = (kind: LightKind, size: [number, number, number], position: [number, number, number], key: string, fallback?: string) => (
+  <mesh key={key} position={position}>
+   <boxGeometry args={size} />
+   {lights
+    ? <meshStandardMaterial ref={registerLight(lights, kind)} color={LIGHT_STYLES[kind].color} emissive={LIGHT_STYLES[kind].emissive} emissiveIntensity={0} roughness={.4} />
+    : <meshStandardMaterial color={fallback} />}
   </mesh>
  );
+ const lamp = (x: number, z: number, kind: LightKind, fallback: string, key: string) => lightMaterial(kind, [.12, .22, .38], [x, .62, z], key, fallback);
  return <group>
   <mesh position={[0, .62, 0]} castShadow receiveShadow><boxGeometry args={[length, .7, width]} /><meshStandardMaterial color={color} roughness={.62} metalness={.1} /></mesh>
   <mesh position={[-.1, 1.18, 0]} castShadow><boxGeometry args={[length * .55, .5, width * .86]} /><meshStandardMaterial color={color} roughness={.6} metalness={.1} /></mesh>
@@ -48,41 +51,52 @@ function BoxCar({ color, length = 4.2, width = 1.8, lights }: { color: string; l
   {wheelOffsets.map(([sx, sz]) => <mesh key={`${sx}${sz}`} position={[sx * length * .31, .33, sz * (width / 2 - .08)]} rotation={[Math.PI / 2, 0, 0]}>
    <cylinderGeometry args={[.33, .33, .26, 12]} /><meshStandardMaterial color="#1b1d20" roughness={.9} />
   </mesh>)}
-  {lamp(length / 2, -width * .34, lights?.headlight, '#e8e2cc', 'hl')}
-  {lamp(length / 2, width * .34, lights?.headlight, '#e8e2cc', 'hr')}
-  {lamp(-length / 2, -width * .34, lights?.tail, '#6e2a2a', 'tl')}
-  {lamp(-length / 2, width * .34, lights?.tail, '#6e2a2a', 'tr')}
+  {lamp(length / 2, -width * .34, 'headlight', '#e8e2cc', 'hl')}
+  {lamp(length / 2, width * .34, 'headlight', '#e8e2cc', 'hr')}
+  {lamp(-length / 2, -width * .34, 'tail', '#6e2a2a', 'tl')}
+  {lamp(-length / 2, width * .34, 'tail', '#6e2a2a', 'tr')}
   {lights && <>
-   <mesh position={[length / 2, .62, -width * .5 + .05]}><boxGeometry args={[.14, .14, .12]} /><primitive object={lights.indicator} attach="material" /></mesh>
-   <mesh position={[-length / 2, .78, -width * .5 + .05]}><boxGeometry args={[.14, .14, .12]} /><primitive object={lights.indicator} attach="material" /></mesh>
-   <mesh position={[-length / 2, .5, width * .3]}><boxGeometry args={[.12, .12, .24]} /><primitive object={lights.reverse} attach="material" /></mesh>
+   {lightMaterial('indicator', [.14, .14, .12], [length / 2, .62, -width * .5 + .05], 'il')}
+   {lightMaterial('indicator', [.14, .14, .12], [-length / 2, .78, -width * .5 + .05], 'ir')}
+   {lightMaterial('reverse', [.12, .12, .24], [-length / 2, .5, width * .3], 'rv')}
   </>}
  </group>;
 }
 
-type LightMaterials = { headlight: MeshStandardMaterial; tail: MeshStandardMaterial; indicator: MeshStandardMaterial; reverse: MeshStandardMaterial };
+type LightKind = 'headlight' | 'tail' | 'indicator' | 'reverse';
+type LightRegistry = RefObject<Record<LightKind, Set<MeshStandardMaterial>>>;
 
-const lampMaterial = (color: string, emissive: string) => new MeshStandardMaterial({ color, emissive, emissiveIntensity: 0, roughness: .4 });
+const LIGHT_STYLES: Record<LightKind, { color: string; emissive: string }> = {
+ headlight: { color: '#e8e2cc', emissive: '#fff4c8' },
+ tail: { color: '#6e2a2a', emissive: '#ff2a1a' },
+ indicator: { color: '#8a5a1c', emissive: '#ff9a1a' },
+ reverse: { color: '#cfcfcf', emissive: '#ffffff' },
+};
+
+/** Ref callback that tracks the mounted materials of one light kind so useFrame can drive their emissive intensity. */
+const registerLight = (registry: LightRegistry, kind: LightKind) => (material: MeshStandardMaterial | null) => {
+ if (!material) return undefined;
+ registry.current[kind].add(material);
+ return () => { registry.current[kind].delete(material); };
+};
+
+function setIntensity(materials: Set<MeshStandardMaterial>, intensity: number) {
+ materials.forEach(material => { material.emissiveIntensity = intensity; });
+}
 
 function GreyCar({ time }: { time: number }) {
  const group = useRef<Group>(null);
- const lights = useMemo<LightMaterials>(() => ({
-  headlight: lampMaterial('#e8e2cc', '#fff4c8'),
-  tail: lampMaterial('#6e2a2a', '#ff2a1a'),
-  indicator: lampMaterial('#8a5a1c', '#ff9a1a'),
-  reverse: lampMaterial('#cfcfcf', '#ffffff'),
- }), []);
- useEffect(() => () => { Object.values(lights).forEach(material => material.dispose()); }, [lights]);
+ const lights = useRef<Record<LightKind, Set<MeshStandardMaterial>>>({ headlight: new Set(), tail: new Set(), indicator: new Set(), reverse: new Set() });
  useFrame(() => {
   const state = greyCarPose(time);
   if (group.current) {
    group.current.position.set(...state.position);
    group.current.rotation.set(0, state.yaw, 0);
   }
-  lights.tail.emissiveIntensity = state.brake ? 2.4 : 0;
-  lights.indicator.emissiveIntensity = state.indicator ? 3 : 0;
-  lights.reverse.emissiveIntensity = state.reverse ? 2 : 0;
-  lights.headlight.emissiveIntensity = state.headlightFlash ? 3.2 : 0;
+  setIntensity(lights.current.tail, state.brake ? 2.4 : 0);
+  setIntensity(lights.current.indicator, state.indicator ? 3 : 0);
+  setIntensity(lights.current.reverse, state.reverse ? 2 : 0);
+  setIntensity(lights.current.headlight, state.headlightFlash ? 3.2 : 0);
  });
  return <group ref={group}><BoxCar color="#7b8087" length={GREY_CAR_FOOTPRINT.length} width={GREY_CAR_FOOTPRINT.width} lights={lights} /></group>;
 }
@@ -104,7 +118,7 @@ function Hedge({ x }: { x: number }) {
 }
 
 export function ParkingLot({ time }: { time: number }) {
- const asphalt = useMemo(createAsphaltTexture, []);
+ const asphalt = useMemo(() => createAsphaltTexture(), []);
  useEffect(() => () => asphalt?.dispose(), [asphalt]);
  const { bayWidth, bayDepth, aisleWidth, parkedBayX, oppositeRowX, slotX } = PARKING;
  const lineX = useMemo(() => {
