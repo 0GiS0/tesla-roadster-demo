@@ -106,11 +106,11 @@ export function formatFailures(results) {
 }
 
 // Repo-relative files changed on this branch: committed (against origin/main), staged,
-// unstaged and untracked. Deleted files are excluded.
+// unstaged and untracked. Deleted files are kept: removing a file can break imports or links.
 export function changedFiles() {
   const lists = [
-    ["diff", "--name-only", "--diff-filter=d", "origin/main...HEAD"],
-    ["diff", "--name-only", "--diff-filter=d", "HEAD"],
+    ["diff", "--name-only", "origin/main...HEAD"],
+    ["diff", "--name-only", "HEAD"],
     ["ls-files", "--others", "--exclude-standard"],
   ];
   const files = new Set();
@@ -119,5 +119,5 @@ export function changedFiles() {
     if (result.status !== 0) continue;
     for (const line of result.stdout.split("\n")) if (line.trim()) files.add(line.trim());
   }
-  return [...files].filter((file) => existsSync(resolve(repoRoot, file)));
+  return [...files];
 }
