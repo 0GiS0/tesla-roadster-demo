@@ -40,4 +40,17 @@ DPR máximo 1,6, sombras de 1024 px y 256 partículas fijas, salvo que una medic
 - Código y comentarios en inglés; la interfaz y la documentación, en español.
 - Hecho significa: lint, tipos, pruebas, validación del GLB y build en verde. Los cambios de interfaz o modelo requieren además capturas antes y después. Tras un despliegue autorizado se verifica la página pública, el prefijo de Pages, la consola y el acceso al GLB.
 
+## Quién revisa qué
+
+El ruleset de `main` exige la revisión de un code owner. `.github/CODEOWNERS` decide quién cuenta como tal; en CODEOWNERS gana la última regla que coincide con cada fichero.
+
+| Rutas | Code owners |
+|---|---|
+| La web: regla por defecto `*`, código en `src/`, `model/` y `public/models/` | `@0GiS0` y `@returngis-demo` (basta la aprobación de uno) |
+| `AGENTS.md`, `.github/` y `.vscode/` | Solo `@0GiS0` |
+| `/docs/` y `/README.md` | Sin propietario (lights-out, ver [Lights-out](lights-out.md)) |
+
+- Las reglas de gobernanza van después de `*` y no incluyen a `@returngis-demo`, para que no hereden su propiedad.
+- Una PR que mezcle la web con `.github/`, `.vscode/` o `AGENTS.md` sigue necesitando la aprobación de `@0GiS0`.
+
 Más contexto: [Arquitectura de la web](arquitectura.md) y [Fábrica de software](fabrica-de-software.md).

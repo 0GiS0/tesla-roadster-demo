@@ -54,4 +54,4 @@ Un agente implementa el issue siguiendo `AGENTS.md` y `.github/copilot-instructi
 
 ## 5. Revisión y merge
 
-`.github/CODEOWNERS` asigna `@0GiS0` como propietaria por defecto y explícitamente de `AGENTS.md`, `.github/`, `.vscode/`, `model/` y `public/models/`. El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
+`.github/CODEOWNERS` asigna `@0GiS0` y `@returngis-demo` como propietarias de la web (regla `*`, `model/` y `public/models/`) y solo a `@0GiS0` de `AGENTS.md`, `.github/` y `.vscode/`. Quién revisa qué se detalla en [Guardarraíles](guardarrailes.md#quién-revisa-qué). El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
