@@ -13,15 +13,15 @@ El tour es una película montada con [HyperFrames](https://hyperframes.heygen.co
 2. `scripts/tour/film.mjs` genera el proyecto HyperFrames (`index.html` y `compositions/*.html`) desde el catálogo. No hay composiciones editadas a mano, y todo (GSAP, fuentes incluidas en HyperFrames, QR) es local.
 3. `hyperframes check` valida el proyecto y `hyperframes render` produce `tour.mp4`. Después `ffmpeg` e `img2webp` generan:
 
-- `tour.mp4`: película completa, sin audio (H.264, menos de 10 MB).
-- `tour.webp`: resumen animado corto (menos de 2 MB), el que se incrusta en el README.
-- `tour-poster.png`: fotograma de portada.
+- `docs/assets/tour.mp4`: película completa, sin audio (H.264, menos de 10 MB).
+- `docs/assets/tour.webp`: resumen animado corto (menos de 2 MB), el que se incrusta en el README.
+- `docs/assets/tour-poster.png`: fotograma de portada.
 
 Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina con error y el despliegue se detiene.
 
 **Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo, con su título, resumen y `source.label`.
 
-En el workflow `ci-pages.yml` el tour se genera tras `npm run build` (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). Solo se graba en los push a `main` (no en los pull requests, para que `🧪 validate` no tarde más); para revisarlo antes, ejecútalo en local. Se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
+El tour se genera en el workflow `.github/workflows/tour.yml` (`🎬 README tour`), no en `ci-pages.yml`: tras un despliegue en `main`, si cambiaron sus entradas (hash en `docs/assets/tour.hash`), lo graba con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1` (la versión de `hyperframes` está fijada en `devDependencies`) y abre una PR lights-out con `docs/assets/tour.*`. No se publica en Pages ni hay commits directos a `main`; ver `docs/lights-out.md`.
 
 Para generarlo en local (necesitas `ffmpeg`, `img2webp` y Chromium de Playwright):
 
