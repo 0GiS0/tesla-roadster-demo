@@ -5,7 +5,7 @@
 ## Qué cubre
 
 - Los ficheros bajo `docs/`.
-- El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica. El bloque entre `<!-- tour:start -->` y `<!-- tour:end -->` es el tour en vídeo: lo genera `npm run tour` (ver `docs/desarrollo.md`) y el flujo de docs-sync no debe tocarlo.
+- El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica. El bloque entre `<!-- tour:start -->` y `<!-- tour:end -->` es el tour en vídeo: lo regenera el flujo `🎬 README tour` (ver más abajo y `docs/desarrollo.md`) y el flujo de docs-sync no debe tocarlo.
 - `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (entradas `/docs/` y `/README.md` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
 - Los únicos requisitos son los checks obligatorios `🧪 validate` y `📚 docs`: si están en verde, la PR puede mergearse.
 
@@ -73,3 +73,14 @@ El `.lock.yml` lo genera gh-aw y no se edita a mano, así que no puede cumplir a
 ## Qué sigue protegido
 
 Todo lo que está fuera de `docs/` sigue teniendo propietario y necesita su revisión: código, `model/`, `public/models/`, `.github/`, `.vscode/` y `AGENTS.md`. Una PR que mezcle `docs/` o `README.md` con cualquiera de esas rutas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
+
+## Flujo del tour del README
+
+`.github/workflows/tour.yml` (`🎬 README tour`) es un flujo lights-out aparte de docs-sync:
+
+- Se lanza tras un despliegue de `🚀 Validate and deploy Pages` en `main` (solo si el job `🌐 deploy` terminó en success) a mano con `workflow_dispatch`, o en una pasada diaria de reconciliación (si un despliegue coincidió con una PR del tour abierta, se omitió).
+- Calcula un hash de las entradas del tour (`src/`, `public/`, `index.html`, `vite.config.ts`, `scripts/record-tour.mjs`, `scripts/tour/`, `docs/assets/qr-web.svg` y `package-lock.json`) y lo compara con `docs/assets/tour.hash`. Si coincide no hace nada, porque la codificación no es determinista y abriría una PR en cada despliegue.
+- Si cambió, graba el tour en `docs/assets/` (`tour.mp4`, `tour.webp`, `tour-poster.png`, `tour.hash`) y abre una PR `docs: update the README tour video` con las etiquetas `📝 documentation` y `🌙 lights-out`, usando `DOCS_SYNC_PR_TOKEN` para que se disparen los checks obligatorios. No abre otra si ya hay una abierta.
+- Activa el auto-merge (squash) solo si todos los ficheros de la PR están bajo `docs/`.
+- Sin bucle: la PR solo toca `docs/`, así que `🔍 changes` omite `🧪 validate` y `🌐 deploy` en el push de la fusión, y docs-sync (que exige un despliegue en success) tampoco se lanza.
+- El tour no se publica en Pages: el README lo enlaza con rutas relativas.
