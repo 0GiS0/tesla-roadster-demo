@@ -29,9 +29,10 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   si no, 💬 needs-info.
 - ✨ enhancement: 📐 needs-spec salvo que sea un cambio pequeño, en una sola parte
   de la web y con criterios de aceptación que se puedan comprobar.
-- 🏭 software-factory: nunca 🌙 lights-out, y siempre lleva 💡 lights-on, aunque no
-  cambie la web. Cambia cómo trabaja la fábrica (plantillas, skills, MCP, workflows,
-  CODEOWNERS), así que siempre lo revisa una persona.
+- 🏭 software-factory: nunca 🌙 lights-out y siempre lleva 💡 lights-on, aunque no
+  cambie la web. Si tiene criterios de aceptación concretos y comprobables, es
+  ✅ agent-ready; 📐 needs-spec solo si aún no se sabe cómo hacerlo. Siempre lo
+  revisa una persona.
 
 ## Ejemplos
 
@@ -54,3 +55,7 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 ## Lecciones
 
 <!-- La Automation 🔁 La fábrica aprende añade aquí un ejemplo por cada corrección. -->
+
+### Añadir un segundo code owner para revisar los cambios de la web (#59)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
