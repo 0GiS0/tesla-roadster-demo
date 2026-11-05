@@ -30,6 +30,20 @@ jobs:
         run: python3 model/validate_glb.py
       - name: 🏗️ Build
         run: npm run build
+      - name: 🎭 Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: 🎬 Record tour video into dist
+        run: npm run tour -- --dist dist --out dist
+      - name: 📼 Upload tour for PR review
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tour
+          path: |
+            dist/tour.mp4
+            dist/tour.webp
+            dist/tour-poster.png
+          if-no-files-found: error
       - name: 📤 Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
