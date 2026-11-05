@@ -18,6 +18,6 @@ Se genera **siempre**, para cada meme elegido como propuesta. Es apoyo para Issu
 4. Revisa: sin texto, logotipos, marcas, matrículas ni personas, y el chiste se entiende. Si falla, regenera **una vez**.
 5. Si se crea el Issue, adjúntala **siempre** con `gh issue create/edit --attach`, conservando el cuerpo y marcándola como imagen generada con IA ([comandos](references/prompts.md#publicación)).
 
-Cuando la escena ya esté implementada, su PR lleva el vídeo grabado con la skill [record-scene](../record-scene/SKILL.md) en el cuerpo; la imagen de concepto solo sirve para valorar la propuesta.
+La PR de la escena lleva su vídeo ([record-scene](../record-scene/SKILL.md)).
 
 No hagas commit de capturas ni de `concepto-<slug>.png`; solo se versiona `examples/`, y solo si lo pide la autora.
