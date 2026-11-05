@@ -19,11 +19,12 @@ function collect(path, out) {
 }
 
 // Replaces fenced blocks and inline code with spaces, preserving line numbers.
+function stripFences(text) {
+  return text.replace(/^( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^ {0,3}\2[`~]*[ \t]*$|(?![\s\S]))/gm, (s) => s.replace(/[^\n]/g, " "));
+}
+
 function stripCode(text) {
-  const blank = (s) => s.replace(/[^\n]/g, " ");
-  return text
-    .replace(/^( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^ {0,3}\2[`~]*[ \t]*$|(?![\s\S]))/gm, blank)
-    .replace(/(`+)[^`\n][\s\S]*?\1/g, blank);
+  return stripFences(text).replace(/(`+)[^`\n][\s\S]*?\1/g, (s) => s.replace(/[^\n]/g, " "));
 }
 
 function slug(heading) {
@@ -42,7 +43,7 @@ function anchorsOf(file) {
   if (!anchorCache.has(file)) {
     const seen = new Map();
     const anchors = new Set();
-    const text = stripCode(readFileSync(join(root, file), "utf8"));
+    const text = stripFences(readFileSync(join(root, file), "utf8"));
     for (const m of text.matchAll(/^ {0,3}#{1,6}[ \t]+(.+?)[ \t]*#*[ \t]*$/gm)) {
       const base = slug(m[1]);
       const n = seen.get(base) ?? 0;
@@ -61,7 +62,7 @@ function extractTargets(text) {
     const line = text.slice(0, index).split("\n").length;
     targets.push({ line, raw: raw.trim(), kind });
   };
-  for (const m of text.matchAll(/(!?)\[(?:[^[\]]|\[[^\]]*\])*\]\(\s*(<[^>]*>|[^\s)]*(?:\([^\s)]*\)[^\s)]*)*)/g)) {
+  for (const m of text.matchAll(/(!?)\[(?:[^[\]]|\[[^\]]*\])*\]\(\s*(<[^>]*>|[^\s()]*(?:\([^\s()]*\)[^\s()]*)*)/g)) {
     add(m.index, m[2].replace(/^<|>$/g, ""), m[1] ? "image" : "link");
   }
   for (const m of text.matchAll(/^ {0,3}\[[^\]]+\]:[ \t]*(<[^>]*>|\S+)/gm)) {
