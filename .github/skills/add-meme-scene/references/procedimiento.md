@@ -52,7 +52,7 @@ npm run build
 
 ## 7. Capturas y rendimiento
 
-`npm run dev` y abre `http://127.0.0.1:5173/tesla-roadster-demo/#meme/<slug>` (añade `?debug=1` para la muestra de rendimiento de cinco segundos en consola). Captura escritorio, vertical y horizontal baja, antes y después si la escena modifica una existente. Límites: DPR 1,6, sombras de 1024 px y 256 partículas.
+`npm run dev` y abre `http://127.0.0.1:5173/tesla-roadster-demo/?debug=1#meme/<slug>` (la consulta `?debug=1` va **antes** del hash; detrás no funciona y la web cae a la escena original). Registra en consola la muestra de rendimiento de cinco segundos. Captura escritorio, vertical y horizontal baja, antes y después si la escena modifica una existente. Límites: DPR 1,6, sombras de 1024 px y 256 partículas.
 
 ## 8. Revisión
 
