@@ -43,6 +43,11 @@ function hasFfmpegWebp() {
   return result.status === 0 && result.stdout.includes('libwebp_anim');
 }
 
+if (spawnSync('ffmpeg', ['-version']).status !== 0) fail('ffmpeg was not found on PATH');
+if (!hasFfmpegWebp() && spawnSync('img2webp', ['-version']).status !== 0) {
+  fail('neither ffmpeg libwebp_anim nor img2webp is available');
+}
+
 const distDir = resolve(arg('dist', 'dist'));
 const outDir = resolve(arg('out', distDir));
 const framesDir = mkdtempSync(join(tmpdir(), 'roadster-tour-'));
