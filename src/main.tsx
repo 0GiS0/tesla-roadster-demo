@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { useProgress } from '@react-three/drei';
 import { Scene } from './Scene';
 import { advance } from './scenario';
-import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor } from './sceneCatalog';
+import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
 import './style.css';
 class SceneBoundary extends Component<{children:React.ReactNode;onError:()=>void},{error:boolean}>{state={error:false};componentDidCatch(){this.props.onError()}static getDerivedStateFromError(){return {error:true}}render(){return this.state.error?<div className="fallback"><span className="eyebrow">NO SE HA PODIDO CARGAR LA ESCENA</span><h2>Volvamos a intentarlo.</h2><p>Comprueba la conexión y recarga para recuperar el modelo 3D.</p><button onClick={()=>location.reload()}>Recargar escena ↗</button></div>:this.props.children}}
@@ -89,7 +89,7 @@ function App(){
     {isMeme&&<div className="viewer-toolbar">
      <div className="source-card">
       <span className="eyebrow">INSPIRACIÓN</span>
-      <a href={definition.source?.url} target="_blank" rel="noreferrer">{definition.source?.label} ↗</a>
+      <a href={definition.source?.url} target="_blank" rel="noreferrer">{definition.source&&sourceLabel(definition.source)} ↗</a>
      </div>
      <div className="share-control">
       <button onClick={copyLink}>Copiar enlace</button>

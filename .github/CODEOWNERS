@@ -1,11 +1,18 @@
-# Default owner for every file in the repository
-* @0GiS0
+# Default owners for the web: every file not matched by a later rule
+* @0GiS0 @returngis-demo
 
-# Agent instructions, CI/workflow and repository governance
+# Agent instructions, CI/workflow and repository governance: @0GiS0 only.
+# The last matching rule wins, so keep these after `*` without @returngis-demo.
 AGENTS.md @0GiS0
 .github/ @0GiS0
 .vscode/ @0GiS0
 
-# 3D model sources and the deployed GLB asset
-model/ @0GiS0
-public/models/ @0GiS0
+# 3D model sources and the deployed GLB asset (part of the web)
+model/ @0GiS0 @returngis-demo
+public/models/ @0GiS0 @returngis-demo
+
+# Documentation has no code owner so lights-out PRs can auto-merge (see docs/lights-out.md)
+/docs/
+
+# The README is also lights-out: it is refreshed after each production deployment
+/README.md

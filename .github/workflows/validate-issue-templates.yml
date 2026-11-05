@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   check-jsonschema:
-    name: Check issue template schemas
+    name: 🧾 Check issue template schemas
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Check out repository
