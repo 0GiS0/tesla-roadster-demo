@@ -13,15 +13,15 @@ El tour es una película montada con [HyperFrames](https://hyperframes.heygen.co
 2. `scripts/tour/film.mjs` genera el proyecto HyperFrames (`index.html` y `compositions/*.html`) desde el catálogo. No hay composiciones editadas a mano, y todo (GSAP, fuentes incluidas en HyperFrames, QR) es local.
 3. `hyperframes check` valida el proyecto y `hyperframes render` produce `tour.mp4`. Después `ffmpeg` e `img2webp` generan:
 
-- `tour.mp4`: película completa, sin audio (H.264, menos de 10 MB).
-- `tour.webp`: resumen animado corto (menos de 2 MB), el que se incrusta en el README.
-- `tour-poster.png`: fotograma de portada.
+- `docs/assets/tour.mp4`: película completa, sin audio (H.264, menos de 10 MB).
+- `docs/assets/tour.webp`: resumen animado corto (menos de 2 MB), el que se incrusta en el README.
+- `docs/assets/tour-poster.png`: fotograma de portada.
 
-Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina con error y el despliegue se detiene.
+Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina con error (no afecta al despliegue).
 
 **Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo, con su título, resumen y `source.label`.
 
-En el workflow `ci-pages.yml` el tour se genera tras `npm run build` (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). Solo se graba en los push a `main` (no en los pull requests, para que `🧪 validate` no tarde más); para revisarlo antes, ejecútalo en local. Se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
+El tour no se graba en `ci-pages.yml` (`🧪 validate` no lo ejecuta) ni se publica en Pages: está versionado en `docs/assets/tour.mp4`, `tour.webp` y `tour-poster.png`, y el README lo enlaza con rutas relativas. Por ahora se regenera a mano con `npm run tour` (escribe por defecto en `docs/assets`) (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). Su regeneración automática tras cada despliegue llegará en #70.
 
 Para generarlo en local (necesitas `ffmpeg`, `img2webp` y Chromium de Playwright):
 
@@ -29,10 +29,10 @@ Para generarlo en local (necesitas `ffmpeg`, `img2webp` y Chromium de Playwright
 npm ci
 npx playwright install chromium
 npm run build
-npm run tour -- --out /tmp/tour
+npm run tour
 ```
 
-Con `--clips-dir DIR` se reutilizan los clips ya grabados para volver a montar la película rápido. En local también puedes montar la película con tu skill `returngis-record-demo`; CI usa `npm run tour`, que no depende de plugins locales.
+Con `--clips-dir DIR` se reutilizan los clips ya grabados para volver a montar la película rápido. En local también puedes montar la película con tu skill `returngis-record-demo`; `npm run tour` no depende de plugins locales.
 
 </details>
 
