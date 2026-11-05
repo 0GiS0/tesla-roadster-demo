@@ -8,6 +8,9 @@ on:
     types: [completed]
     branches: [main]
     conclusion: success
+  # Reconciliation: a deploy that finished while a docs PR was still open is skipped by
+  # skip-if-match, so a daily run picks up whatever is still undocumented.
+  schedule: daily
   workflow_dispatch:
   permissions:
     actions: read
