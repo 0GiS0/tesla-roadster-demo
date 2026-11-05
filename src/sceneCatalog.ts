@@ -1,19 +1,27 @@
-import { potholeFlight, rampFlight } from './scenario';
+import { parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
 import type { Scenario } from './scenario';
+
+export type SourcePlatform = 'X' | 'TikTok';
+
+export interface SceneSource { author: string; platform: SourcePlatform; url: string }
 
 export interface SceneDefinition {
  key: string;
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole';
+ environment: 'ramp' | 'pothole' | 'parking';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
-  fit?: { width: number; height: number; direction: [number, number, number] };
+  fit?: { width: number; height: number; direction: [number, number, number]; target?: [number, number, number] };
  };
  copy: { label: string; title: string; summary: string };
- source?: { label: string; url: string };
+ source?: SceneSource;
+}
+
+export function sourceLabel(source: SceneSource): string {
+ return `Visto en ${source.author} · Ver original en ${source.platform}`;
 }
 
 export const sceneCatalog: SceneDefinition[] = [
@@ -50,8 +58,31 @@ export const sceneCatalog: SceneDefinition[] = [
    summary: 'Un charco imposible, un cono y una salida con estilo.',
   },
   source: {
-   label: 'Visto en @Sentletse · Ver original en X',
+   author: '@Sentletse',
+   platform: 'X',
    url: 'https://x.com/Sentletse/status/2111059927531983230',
+  },
+ },
+ {
+  key: 'robo-de-plaza',
+  hash: '#meme/robo-de-plaza',
+  mode: 'meme',
+  scenario: parkingSpaceTheft,
+  environment: 'parking',
+  camera: {
+   desktop: { position: [-22, 14, 30], target: [-2, 2, 0] },
+   portrait: { position: [-26, 17, 38], target: [-2, 2, 0] },
+   fit: { width: 24, height: 12, direction: [-.3, .5, 1], target: [-3, 2, 0] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'Robo de plaza.',
+   summary: 'El último hueco del aparcamiento tiene dueño: baja del cielo con vapor.',
+  },
+  source: {
+   author: '@krishnak3212',
+   platform: 'TikTok',
+   url: 'https://www.tiktok.com/@krishnak3212/video/7697839711238311182',
   },
  },
 ];
