@@ -24,6 +24,7 @@ env:
 
 jobs:
   validate:
+    name: 🧩 validate skills
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
