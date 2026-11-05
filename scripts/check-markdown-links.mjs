@@ -31,6 +31,7 @@ function slug(heading) {
   return heading
     .trim()
     .replace(/<[^>]+>/g, "")
+    .replace(/[<>]/g, "")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/[*_`~]/g, "")
     .toLowerCase()
@@ -72,6 +73,14 @@ function extractTargets(text) {
     add(m.index, m[3], m[1].toLowerCase() === "a" ? "link" : "image");
   }
   return targets;
+}
+
+function markdownCell(value) {
+  return String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/\|/g, "\\|")
+    .replace(/`/g, "\\`")
+    .replace(/[\r\n]/g, " ");
 }
 
 const files = [];
@@ -124,7 +133,7 @@ if (problems.length === 0) {
   lines.push(`❌ ${problems.length} broken link(s) or image(s) found (${checked} checked in ${files.length} files):`, "");
   lines.push("| File | Line | Type | Target | Problem |", "| --- | --- | --- | --- | --- |");
   for (const p of problems) {
-    lines.push(`| \`${p.file}\` | ${p.line} | ${p.kind} | \`${p.raw.replace(/\|/g, "\\|")}\` | ${p.reason} |`);
+    lines.push(`| ${markdownCell(p.file)} | ${p.line} | ${markdownCell(p.kind)} | ${markdownCell(p.raw)} | ${markdownCell(p.reason)} |`);
     console.error(`::error file=${p.file},line=${p.line}::Broken ${p.kind} "${p.raw}": ${p.reason}`);
   }
 }
