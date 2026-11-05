@@ -1,0 +1,126 @@
+name: "🖼️ Propuesta de escena MEME"
+description: "Propón una nueva escena para la galería MEME a partir de un vídeo o una idea original."
+title: "🖼️ Añadir escena MEME: "
+labels: ["🖼️ meme", "🔍 needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponer una escena. Rellena los campos con el mayor detalle posible: el agente los usará para generar la especificación y la implementación.
+
+        El título empieza por el emoji 🖼️. Puedes cambiarlo por otro más concreto (por ejemplo 🗽 o 🍔), pero el título siempre debe empezar por un emoji.
+
+  - type: input
+    id: scene_name
+    attributes:
+      label: Nombre de la escena
+      description: Nombre corto y descriptivo que aparecerá en la galería.
+      placeholder: "Aparcado en la antorcha"
+    validations:
+      required: true
+
+  - type: input
+    id: slug
+    attributes:
+      label: Slug
+      description: "Identificador en minúsculas, sin espacios ni acentos, que forma el enlace compartible `#meme/<slug>`."
+      placeholder: "antorcha"
+    validations:
+      required: true
+
+  - type: input
+    id: source_link
+    attributes:
+      label: Enlace original
+      description: URL del vídeo, publicación o referencia de la que parte la idea.
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: input
+    id: author
+    attributes:
+      label: Autor original
+      description: Cuenta a la que se atribuye la idea (por ejemplo @usuario). Se citará como «Visto en @X · Ver original en X».
+      placeholder: "@usuario"
+    validations:
+      required: true
+
+  - type: input
+    id: video_segment
+    attributes:
+      label: Tramo del vídeo
+      description: Marca de tiempo de inicio y fin de la referencia, si existe (por ejemplo 19–26 s).
+      placeholder: "19 s – 26 s"
+    validations:
+      required: false
+
+  - type: textarea
+    id: choreography
+    attributes:
+      label: Coreografía
+      description: "Describe la secuencia paso a paso: movimiento del Roadster, cámara, vapor y cualquier acción del conductor."
+      placeholder: |
+        1. Plano general de la escena.
+        2. El Roadster llega desde lejos.
+        3. Aterriza con vapor.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Entorno
+      description: Describe el escenario, los colores y los objetos principales. Se construirá con geometría procedural original.
+      placeholder: "Cielo gris claro, pedestal de piedra, barandilla dorada..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: framing
+    attributes:
+      label: Encuadre
+      description: Describe el plano inicial y la cámara orbital, si la escena tiene un encuadre concreto.
+    validations:
+      required: false
+
+  - type: input
+    id: approx_duration
+    attributes:
+      label: Duración aproximada
+      description: Duración deseada de la escena en segundos.
+      placeholder: "12 s"
+    validations:
+      required: false
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Referencias
+      description: Enlaces adicionales, capturas o notas útiles. No subas material con marcas ni logotipos.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: acceptance_checklist
+    attributes:
+      label: Criterios de aceptación
+      description: Confirma lo que debe cumplir la escena al terminarse.
+      options:
+        - label: "Scenario puro y determinista, con el mismo resultado para el mismo tiempo de reproducción."
+        - label: "Tests de contacto, continuidad, determinismo y límites de reproducción."
+        - label: "Crédito visible: «Visto en @X · Ver original en X»."
+        - label: "Textos de la interfaz en español."
+        - label: "Encuadre correcto en escritorio, vertical y horizontal baja, con capturas antes y después."
+        - label: "Límites de rendimiento: DPR máximo 1,6, sombras de 1024 px y 256 partículas; medición con `?debug=1`."
+
+  - type: checkboxes
+    id: mandatory_checks
+    attributes:
+      label: Confirmaciones obligatorias
+      description: Estas casillas son obligatorias para aceptar la propuesta.
+      options:
+        - label: "Confirmo que la escena no incluye marcas, logotipos ni personajes con derechos protegidos."
+          required: true
+        - label: "Confirmo que la geometría es original y que la escena no depende de recursos externos."
+          required: true
