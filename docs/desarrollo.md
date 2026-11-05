@@ -19,7 +19,7 @@ El tour es un vídeo corto (10–15 s) montado con [HyperFrames](https://hyperfr
 
 Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina con error (no afecta al despliegue).
 
-**Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo. Su momento clave es opcional: `tourMoment: 6` (instante) o `tourMoment: { from: 2.5, to: 6 }` (rango del deslizador, en segundos); sin él se usa una ventana centrada al 55 % de la escena. Cada meme dura hasta 3,5 s y el tramo se acorta si hay muchos memes (mínimo 1,5 s).
+**Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo. Su momento clave es opcional: `tourMoment: 6` (instante) o `tourMoment: { from: 2.5, to: 6 }` (rango del deslizador, en segundos); sin él se usa una ventana centrada al 55 % de la escena. El tramo siempre dura lo mismo (hasta 3,5 s por meme) y se centra en el instante o en el centro del rango; con muchos memes se acorta (mínimo 1 s) para que la película dure entre 10 y 15 s, y el comando falla si no es posible.
 
 El tour no se graba en `ci-pages.yml` (`🧪 validate` no lo ejecuta) ni se publica en Pages: está versionado en `docs/assets/tour.mp4`, `tour.webp` y `tour-poster.png`, y el README lo enlaza con rutas relativas. Por ahora se regenera a mano con la skill `record-tour` (`npm run tour`, que escribe por defecto en `docs/assets`) (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). Su regeneración automática tras cada despliegue llegará en #70.
 
@@ -32,7 +32,7 @@ npm run build
 npm run tour
 ```
 
-Con `--clips-dir DIR` se reutilizan los clips ya grabados para volver a montar la película rápido (bórralos si cambias un `tourMoment`). Con `--build`, `npm run tour -- --build` compila antes y es el único comando que necesita un agente.
+Con `--clips-dir DIR` se reutilizan los clips ya grabados para volver a montar la película rápido (bórralos si cambia el contenido de una escena; el nombre de cada clip incluye su tramo, así que cambiar el catálogo o un `tourMoment` no reutiliza clips obsoletos). Con `--build`, `npm run tour -- --build` compila antes y es el único comando que necesita un agente.
 
 </details>
 

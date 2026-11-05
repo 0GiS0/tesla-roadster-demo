@@ -55,7 +55,7 @@ export function writeFilmProject({ catalog, projectDir, clipsDir, gsapPath }) {
 
   const segments = [];
   const addClip = (entry, light) => {
-    copyFileSync(join(clipsDir, `${entry.key}.mp4`), join(projectDir, 'assets', 'clips', `${entry.key}.mp4`));
+    copyFileSync(join(clipsDir, entry.clipFile), join(projectDir, 'assets', 'clips', `${entry.key}.mp4`));
     const id = `${entry.mode === 'meme' ? 'meme' : 'scene'}-${entry.key}`;
     segments.push({ id, duration: entry.moment.length, html: clipScene({ id, entry, duration: entry.moment.length, light }) });
   };

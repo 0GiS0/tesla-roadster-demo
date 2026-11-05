@@ -8,6 +8,7 @@
 //      are derived from it.
 // Usage: node scripts/record-tour.mjs [--build] [--dist dist] [--out docs/assets] [--clips-dir DIR] [--project-dir DIR]
 // --build runs `npm run build` first. With --clips-dir, existing clips are reused.
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -15,7 +16,7 @@ import { join, resolve } from 'node:path';
 import { preview } from 'vite';
 import { chromium } from 'playwright';
 import { loadCatalog } from './tour/catalog.mjs';
-import { planMoments } from './tour/moments.mjs';
+import { assertTotalInRange, planMoments } from './tour/moments.mjs';
 import { writeFilmProject } from './tour/film.mjs';
 
 const CAPTURE_FPS = 24;
@@ -58,11 +59,21 @@ const projectDir = resolve(arg('project-dir', join(workDir, 'film')));
 mkdirSync(outDir, { recursive: true });
 mkdirSync(clipsDir, { recursive: true });
 
-const catalog = planMoments(await loadCatalog());
+const { plan: catalog, total: plannedTotal } = planMoments(await loadCatalog());
+try {
+  assertTotalInRange(plannedTotal);
+} catch (error) {
+  fail(error.message);
+}
+// Clip names carry everything that shapes them, so a changed catalog never reuses a stale clip.
+for (const entry of catalog) {
+  const id = [entry.key, entry.moment.from.toFixed(3), entry.moment.length.toFixed(3), CAPTURE_FPS, WIDTH, HEIGHT].join('|');
+  entry.clipFile = `${entry.key}-${createHash('sha1').update(id).digest('hex').slice(0, 8)}.mp4`;
+}
 console.log(`record-tour: ${catalog.length} scenes: ${catalog.map((scene) => `${scene.key} [${scene.moment.from.toFixed(1)}s +${scene.moment.length.toFixed(1)}s]`).join(', ')}`);
 
 async function recordClip(browser, baseUrl, entry) {
-  const clip = join(clipsDir, `${entry.key}.mp4`);
+  const clip = join(clipsDir, entry.clipFile);
   if (existsSync(clip)) {
     console.log(`record-tour: reusing ${clip}`);
     return;

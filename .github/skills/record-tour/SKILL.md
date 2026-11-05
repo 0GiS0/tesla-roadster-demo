@@ -11,7 +11,7 @@ Un único comando, sin preguntas, que escribe en `docs/assets/`. Requisitos, opc
 
 1. Prepara el entorno (una vez por runner): `npm ci`, `npx playwright install --with-deps chromium` y `ffmpeg` + `img2webp` (paquete `webp`) en el PATH.
 2. Graba: `npm run tour -- --build`. Compila `dist`, graba solo el momento clave de cada escena a fotograma fijado (SwiftShader, sin GPU), monta con HyperFrames (`check` y `render`) y genera los tres archivos.
-3. Comprueba la salida de `record-tour:`: el MP4 dura 10–15 s y pesa < 5 MB, el WebP < 2 MB. Si un límite se supera, el comando falla.
+3. Comprueba la salida de `record-tour:`: el MP4 dura 10–15 s (el comando lo exige) y pesa < 5 MB, el WebP < 2 MB. Si un límite se supera, el comando falla.
 4. Revisa un fotograma (`ffmpeg -ss 5 -i docs/assets/tour.mp4 -frames:v 1 f.png`) y haz commit de `docs/assets/tour.*` y `tour-poster.png`.
 
 ## Memes nuevos
