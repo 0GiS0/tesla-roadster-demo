@@ -22,6 +22,7 @@
 - `.github/workflows/ci-pages.yml`: PR validation and deployment restricted to `main`.
 - `.github/skills/meme-concept-image/SKILL.md`: agent skill that generates concept images (Issue support material, never web assets) for meme proposals; `examples/` holds three approved results used as visual references, outside `public/`.
 - `.github/skills/add-meme-scene/SKILL.md`: agent skill that turns an approved meme proposal Issue into a web scene (Scenario, catalog, environment, tests, validations); detail in its `references/`.
+- `.github/skills/record-scene/SKILL.md`: agent skill whose script records a scene as an MP4 by deterministic frame stepping; every meme PR embeds this video in its body.
 - `README.md`: operation details; `docs/pre-pr-review.md`: review evidence, including explicitly historical results.
 
 ## Development and run
@@ -80,6 +81,7 @@ On macOS, the available executable may be `/Applications/Blender.app/Contents/Ma
 - For code/model changes, required type checks, meaningful tests, GLB validation and production build pass. Test contact, continuity, determinism and playback boundaries when affected; do not merely mirror implementation.
 - For documentation-only changes, verify paths, commands, accuracy and formatting; application tests are unnecessary.
 - For UI/model changes, inspect the actual rendered app and provide before/after screenshots with durable reviewer-accessible URLs. Label app captures, Blender renders and reference images distinctly.
+- Every PR that adds or changes a MEME scene embeds the scene video in its body: record it with the `record-scene` skill and attach it with `gh pr create/edit --attach './<slug>.mp4'`; verify on GitHub that it plays. Never commit the video.
 - Verify usable framing and controls on desktop, portrait and short landscape. Distinguish viewport emulation from real mobile hardware; report untested phone gestures/performance or real no-WebGL fallback behavior as limitations.
 - Complete an independent review of the actual diff, resolve actionable findings and have fixes verified. Present the concrete result and wait for **explicit user approval before any PR, including a draft**. Material changes require renewed affected review and approval.
 - After an authorized deployment, verify the public page without a session, the Pages prefix, browser console and correct GLB/resource access. A passing build alone does not verify publication.
