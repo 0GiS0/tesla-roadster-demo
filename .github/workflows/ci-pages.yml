@@ -88,6 +88,18 @@ jobs:
         run: python3 model/validate_glb.py
       - name: 🏗️ Build
         run: npm run build
+      - name: 🎭 Install Playwright Chromium
+        if: github.event_name != 'pull_request'
+        run: npx playwright install --with-deps chromium
+      - name: 🎞️ Install ffmpeg and WebP tools
+        if: github.event_name != 'pull_request'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg webp
+      - name: 🎬 Record clips, check and render tour film into dist
+        if: github.event_name != 'pull_request'
+        env:
+          HYPERFRAMES_SKIP_SKILLS: '1'
+          HYPERFRAMES_NO_UPDATE_CHECK: '1'
+        run: npm run tour -- --dist dist --out dist
       - name: 📤 Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
