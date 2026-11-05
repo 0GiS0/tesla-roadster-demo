@@ -18,7 +18,7 @@ Requisitos: ffmpeg en el PATH, `npm ci` (usa `playwright-core`) y Chromium de Pl
 1. Arranca la web: `npm run dev` (o `npm run build && npm exec vite preview -- --host 127.0.0.1`, cambiando `--url` a `http://127.0.0.1:4173/tesla-roadster-demo/`).
 2. Graba (`--portrait` genera la variante vertical 720×1280, opcional):
    `node .github/skills/record-scene/scripts/record-scene.mjs --scene <slug> --out <slug>.mp4`
-   Sin `--scene` graba la rampa original. Otras opciones: `--fps`, `--width`, `--height`, `--crf`, `--url`.
+   Sin `--scene` graba la rampa original. Salida por defecto 1280×720 (16:9), configurable con `--width`/`--height`; otras opciones: `--fps`, `--crf`, `--url`.
 3. Comprueba que pesa < 10 MB y revisa algún fotograma (`ffmpeg -ss 5 -i <slug>.mp4 -frames:v 1 f.png`).
 4. Adjúntalo al cuerpo de la PR con `gh pr create --attach './<slug>.mp4'` o `gh pr edit <n> --attach …` (los vídeos no admiten texto alternativo; añade un pie en el cuerpo) y verifica en GitHub que el reproductor aparece. Si falla, revisa la PR antes de reintentar para no duplicar.
 

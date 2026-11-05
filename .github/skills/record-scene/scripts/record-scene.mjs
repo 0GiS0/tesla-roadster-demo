@@ -28,7 +28,8 @@ if (values.help) {
   console.log(`Usage: node .github/skills/record-scene/scripts/record-scene.mjs [--scene <slug>] [--out <file.mp4>]
   [--url <base>] [--fps 30] [--width 1280] [--height 720] [--portrait] [--crf 26]
   --scene     meme slug (e.g. robo-de-plaza); omit for the original ramp scene
-  --portrait  vertical framing, fixed at 720x1280`);
+  --portrait  vertical framing, fixed at 720x1280
+  Output is exactly width x height (default 1280x720, 16:9).`);
   process.exit(0);
 }
 
@@ -53,6 +54,12 @@ try {
   page.on('pageerror', (error) => problems.push(error.message));
   await page.goto(`${base}${hash}`);
   await page.waitForSelector('button.primary:not([disabled])', { timeout: 60_000 });
+  // Recorder-only styling: the 3D stage fills the whole viewport so the output is exactly width x height.
+  await page.addStyleTag({ content: `
+    .viewer-stage, .stage { position: fixed !important; inset: 0 !important; z-index: 9999 !important;
+      width: 100vw !important; height: 100vh !important; min-height: 0 !important; }
+    .intro, .scene-label, .interaction-hint, .keyboard-hint, .loading { display: none !important; }` });
+  await page.evaluate(() => window.dispatchEvent(new Event('resize')));
   const canvas = page.locator('canvas').first();
   await canvas.waitFor();
 
@@ -69,17 +76,14 @@ try {
 
   for (let i = 0; i < frames; i += 1) {
     await seek(Math.min(i / fps, duration));
-    await canvas.screenshot({ path: join(frameDir, `${String(i).padStart(5, '0')}.png`) });
+    await page.screenshot({ path: join(frameDir, `${String(i).padStart(5, '0')}.png`) });
     if (i % 100 === 0) console.log(`  frame ${i}/${frames}`);
   }
   if (problems.length) console.warn(`Page errors: ${problems.join(' | ')}`);
 
-  const box = await canvas.boundingBox();
-  const evenW = Math.floor(box.width / 2) * 2;
-  const evenH = Math.floor(box.height / 2) * 2;
   const ffmpeg = spawnSync('ffmpeg', [
     '-y', '-loglevel', 'error', '-framerate', String(fps), '-i', join(frameDir, '%05d.png'),
-    '-vf', `crop=${evenW}:${evenH}:0:0`, '-c:v', 'libx264', '-preset', 'slow', '-crf', values.crf,
+    '-vf', `scale=${width}:${height}`, '-c:v', 'libx264', '-preset', 'slow', '-crf', values.crf,
     '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out,
   ], { stdio: 'inherit' });
   if (ffmpeg.status !== 0) throw new Error('ffmpeg failed');
