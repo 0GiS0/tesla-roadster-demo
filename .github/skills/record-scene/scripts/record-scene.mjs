@@ -37,6 +37,10 @@ const fps = Number(values.fps);
 const portrait = values.portrait;
 const width = portrait ? 720 : Number(values.width);
 const height = portrait ? 1280 : Number(values.height);
+if (![width, height].every((n) => Number.isInteger(n) && n > 0 && n % 2 === 0)) {
+  console.error('--width and --height must be positive even integers (required by yuv420p H.264).');
+  process.exit(1);
+}
 const slug = values.scene.replace(/^#?(meme\/)?/, '');
 const hash = slug ? `#meme/${slug}` : '';
 const out = resolve(values.out ?? `${slug || 'rampa'}${portrait ? '-vertical' : ''}.mp4`);
