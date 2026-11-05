@@ -5,7 +5,7 @@
 //      Modo MEME bridge, one segment per meme, outro).
 //   3. HyperFrames checks and renders tour.mp4; tour.webp and tour-poster.png
 //      are derived from it.
-// Usage: node scripts/record-tour.mjs [--dist dist] [--out dist] [--clips-dir DIR] [--project-dir DIR]
+// Usage: node scripts/record-tour.mjs [--dist dist] [--out docs/assets] [--clips-dir DIR] [--project-dir DIR]
 // With --clips-dir, existing clips are reused so the film can be re-rendered quickly.
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
@@ -45,7 +45,7 @@ if (spawnSync('ffmpeg', ['-version']).status !== 0) fail('ffmpeg was not found o
 if (spawnSync('img2webp', ['-version']).status !== 0) fail('img2webp (WebP tools) was not found on PATH');
 
 const distDir = resolve(arg('dist', 'dist'));
-const outDir = resolve(arg('out', distDir));
+const outDir = resolve(arg('out', 'docs/assets'));
 const workDir = mkdtempSync(join(tmpdir(), 'roadster-tour-'));
 const clipsDir = resolve(arg('clips-dir', join(workDir, 'clips')));
 const projectDir = resolve(arg('project-dir', join(workDir, 'film')));
