@@ -15,7 +15,7 @@ concurrency:
 jobs:
   # Runs on every pull request (no path filter) so it can be a required status check.
   docs:
-    name: docs
+    name: 📚 docs
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
