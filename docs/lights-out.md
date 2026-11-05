@@ -5,7 +5,7 @@
 ## Qué cubre
 
 - Los ficheros bajo `docs/`.
-- El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica.
+- El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica. El bloque entre `<!-- tour:start -->` y `<!-- tour:end -->` es el tour en vídeo: lo genera `npm run tour` (ver `docs/desarrollo.md`) y el flujo de docs-sync no debe tocarlo.
 - `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (entradas `/docs/` y `/README.md` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
 - Los únicos requisitos son los checks obligatorios `🧪 validate` y `📚 docs`: si están en verde, la PR puede mergearse.
 
