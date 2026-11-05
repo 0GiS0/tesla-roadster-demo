@@ -17,7 +17,11 @@ export default tseslint.config(
     languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {
-    files: ["eslint.config.js", "scripts/**/*.mjs", ".github/hooks/**/*.mjs"],
+    files: ["eslint.config.js", "scripts/**/*.mjs"],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
+  {
+    files: [".github/hooks/**/*.mjs"],
     languageOptions: { globals: globals.node },
   },
 );
