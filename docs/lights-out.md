@@ -4,8 +4,9 @@
 
 ## Qué cubre
 
-- Únicamente los ficheros bajo `docs/`.
-- `docs/` no tiene propietario en `.github/CODEOWNERS` (entrada `/docs/` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
+- Los ficheros bajo `docs/`.
+- El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica.
+- `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (entradas `/docs/` y `/README.md` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
 - El único requisito es el check obligatorio `validate`: si está en verde, la PR puede mergearse.
 
 ## Quién activa el auto-merge
@@ -14,4 +15,4 @@ No hay un flujo genérico por etiqueta. El Agentic Workflow que mantiene la docu
 
 ## Qué sigue protegido
 
-Todo lo que está fuera de `docs/` sigue teniendo propietario y necesita su revisión: código, `model/`, `public/models/`, `.github/`, `.vscode/` y `AGENTS.md`. Una PR que mezcle `docs/` con cualquiera de esas rutas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
+Todo lo que está fuera de `docs/` sigue teniendo propietario y necesita su revisión: código, `model/`, `public/models/`, `.github/`, `.vscode/` y `AGENTS.md`. Una PR que mezcle `docs/` o `README.md` con cualquiera de esas rutas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
