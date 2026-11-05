@@ -7,17 +7,23 @@ Documentación técnica del proyecto (antes en el README).
 
 <br>
 
-`scripts/record-tour.mjs` sirve `dist` con `vite preview`, abre Chromium headless con Playwright (versión fijada) y recorre la maniobra fijando el control deslizante «Tiempo de la maniobra». Como la animación depende solo del tiempo absoluto, captura fotograma a fotograma (24 fps, 1280×720) sin grabar en tiempo real, así que el resultado es fluido incluso en un runner sin GPU. Después `ffmpeg` genera:
+El tour es una película montada con [HyperFrames](https://hyperframes.heygen.com) a partir del catálogo de escenas (`src/sceneCatalog.ts`). Orden: título de entrada → escena original («El suelo era solo el principio») → puente «Modo MEME · Deja volar la imaginación» → un tramo por cada escena `mode: 'meme'` (título, resumen y crédito de la fuente visible) → cierre con la URL de Pages y el QR local. No usa material de Tesla: la escena original es la propia recreación de esta web.
 
-- `tour.mp4`: maniobra completa (H.264, `yuv420p`, menos de 10 MB).
-- `tour.webp`: bucle corto animado (menos de 5 MB), el que se incrusta arriba.
+1. `scripts/record-tour.mjs` sirve `dist` con `vite preview`, abre Chromium headless con Playwright (versión fijada) y, para cada escena del catálogo, navega a su ruta (`#meme/...`) y fija el control deslizante «Tiempo de la maniobra». Como la animación depende solo del tiempo absoluto, captura fotograma a fotograma (24 fps) sin grabar en tiempo real, así que el resultado es determinista incluso en un runner sin GPU. Cada clip se recodifica con `-g 30` (un fotograma clave por segundo; sin él HyperFrames congela fotogramas al buscar).
+2. `scripts/tour/film.mjs` genera el proyecto HyperFrames (`index.html` y `compositions/*.html`) desde el catálogo. No hay composiciones editadas a mano, y todo (GSAP, fuentes incluidas en HyperFrames, QR) es local.
+3. `hyperframes check` valida el proyecto y `hyperframes render` produce `tour.mp4`. Después `ffmpeg` e `img2webp` generan:
+
+- `tour.mp4`: película completa, sin audio (H.264, menos de 10 MB).
+- `tour.webp`: resumen animado corto (menos de 2 MB), el que se incrusta en el README.
 - `tour-poster.png`: fotograma de portada.
 
-Si WebGL o el modelo no cargan, el script falla con un mensaje claro y el despliegue se detiene.
+Si WebGL o el modelo no cargan, o `hyperframes check` falla, el script termina con error y el despliegue se detiene.
 
-En el workflow `ci-pages.yml` el tour se genera tras `npm run build`. En los PRs se sube como artefacto `tour` para revisarlo, sin permisos de despliegue. En `main` se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
+**Añadir un meme al tour:** basta con añadir su entrada `mode: 'meme'` (con `copy` y `source`) a `src/sceneCatalog.ts`. En el siguiente `npm run tour` aparece como un tramo nuevo, con su título, resumen y `source.label`.
 
-Para generarlo en local (necesitas `ffmpeg` y Chromium de Playwright):
+En el workflow `ci-pages.yml` el tour se genera tras `npm run build` (con `HYPERFRAMES_SKIP_SKILLS=1` y `HYPERFRAMES_NO_UPDATE_CHECK=1`; la versión de `hyperframes` está fijada en `devDependencies`). En los PRs se sube como artefacto `tour` para revisarlo, sin permisos de despliegue. En `main` se incluye en `dist` y se publica con la web en `/tour.mp4`, `/tour.webp` y `/tour-poster.png`, así que no hay commits de bots.
+
+Para generarlo en local (necesitas `ffmpeg`, `img2webp` y Chromium de Playwright):
 
 ```sh
 npm ci
@@ -25,6 +31,8 @@ npx playwright install chromium
 npm run build
 npm run tour -- --out /tmp/tour
 ```
+
+Con `--clips-dir DIR` se reutilizan los clips ya grabados para volver a montar la película rápido. En local también puedes montar la película con tu skill `returngis-record-demo`; CI usa `npm run tour`, que no depende de plugins locales.
 
 </details>
 

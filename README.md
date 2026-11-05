@@ -6,9 +6,9 @@
 
 [![Pruébala](https://img.shields.io/badge/▶_Pruébala-0gis0.github.io-e31b23?style=for-the-badge)](https://0gis0.github.io/tesla-roadster-demo/) ![WebGL 2](https://img.shields.io/badge/WebGL-2-990000?style=for-the-badge&logo=webgl&logoColor=white) ![React](https://img.shields.io/badge/React-19-20232a?style=for-the-badge&logo=react&logoColor=61dafb) ![Three.js](https://img.shields.io/badge/Three.js-r180-000000?style=for-the-badge&logo=threedotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?style=for-the-badge&logo=typescript&logoColor=white)
 
-<a href="https://0gis0.github.io/tesla-roadster-demo/tour.mp4"><img src="https://0gis0.github.io/tesla-roadster-demo/tour.webp" alt="Tour animado por la web del Roadster: la maniobra de la rampa, el giro en el aire y el aterrizaje" width="720"></a>
+<a href="https://0gis0.github.io/tesla-roadster-demo/tour.mp4"><img src="https://0gis0.github.io/tesla-roadster-demo/tour.webp" alt="Tour animado por la web del Roadster: la escena original de la rampa y los memes del catálogo" width="720"></a>
 
-<sub>▶ Pulsa la animación para ver el tour completo (28 s). Se regenera automáticamente en cada despliegue a GitHub Pages.</sub>
+<sub>▶ Pulsa la animación para ver el tour completo: la escena original, el Modo MEME y cada meme del catálogo con su fuente. Se regenera automáticamente en cada despliegue a GitHub Pages.</sub>
 
 </div>
 

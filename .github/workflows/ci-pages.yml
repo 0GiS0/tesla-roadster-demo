@@ -34,7 +34,10 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: 🎞️ Install ffmpeg and WebP tools
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg webp
-      - name: 🎬 Record tour video into dist
+      - name: 🎬 Record clips, check and render tour film into dist
+        env:
+          HYPERFRAMES_SKIP_SKILLS: '1'
+          HYPERFRAMES_NO_UPDATE_CHECK: '1'
         run: npm run tour -- --dist dist --out dist
       - name: 📼 Upload tour for PR review
         if: github.event_name == 'pull_request'
