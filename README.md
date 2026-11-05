@@ -1,3 +1,7 @@
+<img src="docs/assets/lights-out-banner.png" alt="Este README se actualiza con las luces apagadas" width="100%">
+
+🌙 Este README se actualiza con las luces apagadas: consulta [cómo funciona el modo lights-out](docs/lights-out.md).
+
 # Roadster · Más allá del asfalto
 
 An independent artistic recreation of the 2026 Roadster ramp demonstration. A self-contained, silent WebGL 2 experience in Spanish, built with React, TypeScript, Three.js and React Three Fiber. It starts paused. Play, pause, scrub, restart, repeat and orbit the camera with mouse or touch; native buttons and the time slider support keyboard use. Focus the 3D view with Tab, then use the arrow keys to orbit and +/− to zoom; Tab leaves the view. Instructions appear on keyboard focus. **Modo MEME** adds the 12-second “Bache volador” and the 10-second “Robo de plaza” scenes; direct links: https://0gis0.github.io/tesla-roadster-demo/#meme/bache-volador and https://0gis0.github.io/tesla-roadster-demo/#meme/robo-de-plaza . The original 28-second ramp remains the default and keeps its presentation layout.
