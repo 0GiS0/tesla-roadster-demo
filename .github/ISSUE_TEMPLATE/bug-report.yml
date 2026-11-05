@@ -1,0 +1,92 @@
+name: "🐞 Reportar un bug"
+description: "Reporta un fallo de la web con datos suficientes para reproducirlo."
+title: "🐛 "
+labels: ["🐛 bug", "🔍 needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar un fallo. El título debe empezar por un emoji: el precargado es 🐛, pero puedes cambiarlo por otro más concreto.
+
+  - type: checkboxes
+    id: duplicate-check
+    attributes:
+      label: Comprobaciones previas
+      options:
+        - label: He buscado Issues duplicados antes de crear este.
+          required: true
+
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: Qué ocurre
+      description: Describe el fallo con tus palabras.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Pasos para reproducirlo
+      description: Indica los pasos exactos desde que abres la web.
+      placeholder: |
+        1. Abrir la web
+        2. Seleccionar la escena
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-result
+    attributes:
+      label: Resultado esperado
+      description: Qué debería ocurrir en su lugar.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scene
+    attributes:
+      label: Escena
+      description: Escena en la que ocurre el fallo.
+      options:
+        - original
+        - bache-volador
+        - otra
+
+  - type: dropdown
+    id: format
+    attributes:
+      label: Formato
+      description: Formato de pantalla en el que ocurre el fallo.
+      options:
+        - escritorio
+        - vertical
+        - horizontal baja
+
+  - type: input
+    id: browser-device
+    attributes:
+      label: Navegador y dispositivo
+      description: Por ejemplo, Chrome 130 en Windows 11, o Safari en iPhone 15.
+      placeholder: "Navegador y versión, sistema operativo, dispositivo"
+
+  - type: input
+    id: url-hash
+    attributes:
+      label: URL con hash
+      description: Copia la URL de la barra de direcciones, incluido el hash si lo tiene.
+      placeholder: "#meme/bache-volador"
+
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Capturas o vídeo
+      description: Arrastra aquí capturas o vídeos que muestren el fallo.
+
+  - type: textarea
+    id: console-errors
+    attributes:
+      label: Errores de consola
+      description: Si los ves, pega aquí los errores de la consola del navegador.
+      render: shell
