@@ -20,6 +20,7 @@
 - `model/validate_glb.py`: standalone Python validation of export budgets and wheel contracts.
 - `vite.config.ts`: `/tesla-roadster-demo/` base path.
 - `.github/workflows/ci-pages.yml`: PR validation and deployment restricted to `main`.
+- `.github/skills/meme-concept-image/SKILL.md`: agent skill that generates concept images (Issue support material, never web assets) for meme proposals; `examples/` holds three approved results used as visual references, outside `public/`.
 - `README.md`: operation details; `docs/pre-pr-review.md`: review evidence, including explicitly historical results.
 
 ## Development and run
