@@ -1,0 +1,76 @@
+name: 📚 Docs check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Runs on every pull request (no path filter) so it can be a required status check.
+  docs:
+    name: 📚 docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: 📝 Lint Markdown
+        id: lint
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          npx --yes markdownlint-cli2@0.24.0 2>&1 | tee "$RUNNER_TEMP/markdownlint.log"
+
+      - name: 🔗 Check relative links and images
+        id: links
+        continue-on-error: true
+        run: node scripts/check-markdown-links.mjs
+
+      - name: 🧾 Write job summary
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+        run: |
+          {
+            echo "### 📝 Markdown lint"
+            echo
+            if [ "$LINT_OUTCOME" = success ]; then
+              echo "✅ No Markdown lint issues."
+            else
+              echo "❌ markdownlint reported issues:"
+              echo
+              echo '```text'
+              cat "$RUNNER_TEMP/markdownlint.log" 2> /dev/null || echo "No log available."
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🚦 Fail when a check failed
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          OUTCOMES: ${{ steps.lint.outcome }} ${{ steps.links.outcome }}
+        run: |
+          for outcome in $OUTCOMES; do
+            if [ "$outcome" != success ]; then
+              echo "::error::Documentation checks failed; see the job summary for details."
+              exit 1
+            fi
+          done
