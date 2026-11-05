@@ -32,7 +32,7 @@ export const rampFlight:Scenario={id:'ramp-flight',title:'Rampa · Vuelo · Ater
 }};
 const smoothStep=(n:number)=>{const t=clamp(n);return t*t*(3-2*t)};
 export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',duration:12,evaluate(time){
- const t=clamp(time,0,12);let x=-12,y=WHEEL_RADIUS,phase='Aproximación',wheelAngle=0,vapor=0;
+ const t=clamp(time,0,12);let x:number,y=WHEEL_RADIUS,phase='Aproximación',wheelAngle:number,vapor=0;
  if(t<3){x=-12+5*smoothStep(t/3);wheelAngle=-(x+12)/WHEEL_RADIUS;}
  else if(t<5){x=-7;y=WHEEL_RADIUS+4*smoothStep((t-3)/2);wheelAngle=-5/WHEEL_RADIUS;phase='Despegue';vapor=smoothStep((t-3)/.8);}
  else if(t<8){const u=(t-5)/3;x=-7+14*smoothStep(u);y=WHEEL_RADIUS+4;wheelAngle=-5/WHEEL_RADIUS;phase='Cruce del bache';vapor=1;}
