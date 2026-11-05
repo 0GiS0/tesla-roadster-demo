@@ -8,7 +8,65 @@ on:
 permissions:
   contents: read
 jobs:
+  changes:
+    name: 🔍 changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - name: 🔍 Detect changes that affect the app
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          # Fail safe: anything unexpected means the app is considered changed.
+          set -uo pipefail
+          emit() { echo "app=$1" >> "$GITHUB_OUTPUT"; echo "app=$1 ($2)"; }
+
+          case "$EVENT_NAME" in
+            pull_request)
+              files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files?per_page=100" \
+                --jq '.[] | .filename, (.previous_filename // empty)') || { emit true "could not list pull request files"; exit 0; }
+              ;;
+            push)
+              if [[ "$BEFORE_SHA" =~ ^0+$ ]]; then emit true "new branch, no base to compare"; exit 0; fi
+              # A force-push can leave BEFORE_SHA unreachable or diverged; only a fast-forward is trusted.
+              status=$(gh api "repos/$GITHUB_REPOSITORY/compare/$BEFORE_SHA...$AFTER_SHA?per_page=1" --jq '.status') || { emit true "could not compare commits"; exit 0; }
+              if [ "$status" != ahead ]; then emit true "push is not a fast-forward ($status)"; exit 0; fi
+              files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/compare/$BEFORE_SHA...$AFTER_SHA?per_page=100" \
+                --jq '.files[] | .filename, (.previous_filename // empty)') || { emit true "could not compare commits"; exit 0; }
+              ;;
+            *)
+              emit true "manual or unsupported event"; exit 0
+              ;;
+          esac
+
+          if [ -z "$files" ]; then emit true "empty file list"; exit 0; fi
+
+          # The compare API truncates at 300 files and the pull request files API at 3000.
+          limit=3000
+          if [ "$EVENT_NAME" = push ]; then limit=300; fi
+          if [ "$(wc -l <<< "$files")" -ge "$limit" ]; then emit true "file list may be truncated"; exit 0; fi
+
+          while IFS= read -r file; do
+            case "$file" in
+              docs/* | *.md | .github/CODEOWNERS | .github/ISSUE_TEMPLATE/*) ;;
+              *) emit true "app change: $file"; exit 0 ;;
+            esac
+          done <<< "$files"
+          emit false "only documentation changed"
   validate:
+    name: 🧪 validate
+    needs: changes
+    if: needs.changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Check out repository
@@ -36,6 +94,7 @@ jobs:
         with:
           path: dist
   deploy:
+    name: 🌐 deploy
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: validate
     permissions:
