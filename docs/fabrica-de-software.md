@@ -1,7 +1,7 @@
 # Fábrica de software
 
 > **Propósito:** explicar el recorrido de un cambio: plantilla de issue → triaje → agente → revisión → merge.
-> **Qué mantener:** las plantillas y etiquetas, las reglas de triaje (resumen), los controles de CI y la propiedad de código. Revisa esta página cuando cambien `.github/ISSUE_TEMPLATE/`, `.github/triage/reglas.md`, `.github/workflows/` o `.github/CODEOWNERS`.
+> **Qué mantener:** las plantillas y etiquetas, las reglas de triaje (resumen), los controles de CI y la propiedad de código. Revisa esta página cuando cambien `.github/ISSUE_TEMPLATE/`, `.github/skills/triage-issue/`, `.github/workflows/` o `.github/CODEOWNERS`.
 
 ## Recorrido
 
@@ -29,7 +29,9 @@ El workflow `validate-issue-templates.yml` valida las plantillas con `check-json
 
 ## 2. Triaje
 
-Las reglas viven en `.github/triage/reglas.md` y las lee una Automation («🚦 Triaje de la fábrica») en cada issue nuevo. Otra Automation («🔁 La fábrica aprende») propone cambios a ese archivo siempre mediante una pull request que revisa una persona. Resumen de las decisiones:
+El triaje es una skill: `.github/skills/triage-issue/`. Su `SKILL.md` describe el procedimiento y `references/reglas.md` contiene las reglas y los ejemplos. Una Automation («🚦 Triaje de la fábrica») la usa en cada issue nuevo; su prompt solo debe decir algo como «usa la skill `triage-issue` para triar este issue». Otra Automation («🔁 La fábrica aprende») propone cambios a `references/reglas.md` siempre mediante una pull request que revisa una persona.
+
+Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷 Validate skills`: `waza check`, el recuento de tokens y la comparación con `main` (`waza tokens compare`, umbral del 10 %). Así lo que aprende la fábrica queda medido por waza antes de que lo revise una persona. Resumen de las decisiones:
 
 - `✅ agent-ready`: meme con descripción y referencia, o fallo reproducible.
 - `📐 needs-spec`: algo nuevo que no es un meme o que toca varias partes de la web.
@@ -38,7 +40,7 @@ Las reglas viven en `.github/triage/reglas.md` y las lee una Automation («🚦 
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
 - Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
 
-El detalle y los ejemplos están en `.github/triage/reglas.md`; esa es la fuente.
+El detalle y los ejemplos están en `.github/skills/triage-issue/references/reglas.md`; esa es la fuente.
 
 ## 3. Agente
 
