@@ -39,6 +39,14 @@ Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y 
 - **Memes nuevos:** entran solos desde `src/sceneCatalog.ts`; `tourMoment` (instante o rango) es opcional.
 - **Contenido:** `SKILL.md` y `references/detalles.md`. Reutiliza `scripts/record-tour.mjs` y `scripts/tour/`.
 
+### `triage-issue`
+
+Tria un issue nuevo de la fábrica: elige una etiqueta (`✅ agent-ready`, `📐 needs-spec` o `💬 needs-info`), la luz (`💡 lights-on` o `🌙 lights-out`, solo si es `✅ agent-ready`) y deja un único comentario corto.
+
+- **Procedimiento:** si el issue ya está triado no hace nada; si no, aplica las reglas y ejemplos de `references/reglas.md`, quita `🔍 needs-triage` y comenta con el formato «Triaje / Por qué / Siguiente paso».
+- **Límites:** no escribe código, no asigna, cierra ni edita issues y no inventa etiquetas. Ante la duda elige la opción más prudente.
+- **Contenido:** `SKILL.md` y `references/reglas.md` (las reglas se editan con PR revisada).
+
 ## MCP
 
 `.github/mcp.json` configura un único servidor, **playwright**, en local con `npx @playwright/mcp@0.0.83` en modo aislado y sin interfaz (`--isolated`, `--headless`), con service workers bloqueados. Solo puede navegar a `http://127.0.0.1:5173`, `http://127.0.0.1:4173` y `https://0gis0.github.io`.
