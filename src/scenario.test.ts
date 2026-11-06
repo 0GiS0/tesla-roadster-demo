@@ -1,7 +1,7 @@
 import { describe,it,expect } from 'vitest';
-import { Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight } from './scenario';
-import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor } from './sceneCatalog';
+import { Euler,Vector3,Quaternion } from 'three';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLES_EFFECT_PARTICLE_BUDGET } from './scenario';
+import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
 describe('Rigid vehicle follows the ramp',()=>{
  it('keeps axle spacing and every wheel center on the surface through the floor transition',()=>{
@@ -58,7 +58,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(3);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(4);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -66,6 +66,46 @@ describe('Bache volador meme scene',()=>{
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',original)).toBe('https://example.test/tesla-roadster-demo/');
   expect(advance(11,.5,true,meme.scenario.duration)).toEqual({time:11.5,playing:true});
   expect(advance(11,2,true,meme.scenario.duration)).toEqual({time:12,playing:false});
+ });
+});
+describe('Cables meme scene',()=>{
+ it('reaches and stays on the cable support without the wheel axles crossing it',()=>{
+ for(let time=0;time<=cablesTangle.duration;time+=.025){
+  const pose=cablesTangle.evaluate(time),rotation=new Euler().setFromQuaternion(new Quaternion(...pose.quaternion));
+  expect(pose.position.every(Number.isFinite)).toBe(true);
+  if(time<3.5)expect(pose.position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS);
+  else expect(pose.position[1]-HALF_WHEELBASE*Math.abs(Math.sin(rotation.z))-WHEEL_RADIUS).toBeCloseTo(CABLE_SUPPORT_HEIGHT,6);
+ }
+ expect(cablesTangle.evaluate(3.5).position[1]).toBeCloseTo(CABLE_CONTACT_HEIGHT);
+ expect(cablesTangle.evaluate(12).position).toEqual(cablesTangle.evaluate(10).position);
+ expect(cablesTangle.evaluate(12).quaternion).toEqual(cablesTangle.evaluate(10).quaternion);
+ expect(cablesTangle.evaluate(12).vapor).toBe(0);
+ expect(new Euler().setFromQuaternion(new Quaternion(...cablesTangle.evaluate(4).quaternion)).z).not.toBe(0);
+ });
+ it('is deterministic and continuous through ascent, impact, swinging and the ending',()=>{
+ for(const time of [.8,3.5,4.8,5.2,10,12]){
+  const before=cablesTangle.evaluate(time-.001),after=cablesTangle.evaluate(time+.001);
+  expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.03);
+  expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.02);
+  expect(cablesTangle.evaluate(time)).toEqual(cablesTangle.evaluate(time));
+ }
+ expect(cablesTangle.evaluate(12).phase).toBe('Maniobra completada');
+ });
+ it('clamps playback and keeps vapor and sparks within the fixed particle budget',()=>{
+ expect(cablesTangle.evaluate(-4)).toEqual(cablesTangle.evaluate(0));
+ expect(cablesTangle.evaluate(18)).toEqual(cablesTangle.evaluate(12));
+ expect(advance(11,2,true,cablesTangle.duration)).toEqual({time:12,playing:false});
+ expect(CABLES_EFFECT_PARTICLE_BUDGET.vapor+CABLES_EFFECT_PARTICLE_BUDGET.sparks).toBe(CABLES_EFFECT_PARTICLE_BUDGET.total);
+ expect(CABLES_EFFECT_PARTICLE_BUDGET.total).toBe(256);
+ for(let time=0;time<=12;time+=.1)expect(cablesTangle.evaluate(time).vapor).toBeGreaterThanOrEqual(0);
+ });
+ it('registers its YouTube source under the canonical shareable hash',()=>{
+ const scene=sceneFromHash('#meme/cables');
+ expect(scene.scenario).toBe(cablesTangle);
+ expect(scene.hash).toBe('#meme/cables');
+ expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
+ expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
+ expect(sceneCatalog).toHaveLength(4);
  });
 });
 describe('share-link clipboard fallback',()=>{

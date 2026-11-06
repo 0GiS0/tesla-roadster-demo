@@ -43,6 +43,21 @@ export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',du
  const speed=t<3?10*u*(1-u):t<5||t<10&&t>=8?12*u*(1-u):t<8?28*u*(1-u):15*u*(1-u);
  return {position:[x,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle,vapor,phase,speed};
 }};
+export const CABLE_SUPPORT_HEIGHT=7.6;
+export const CABLE_CONTACT_HEIGHT=CABLE_SUPPORT_HEIGHT+WHEEL_RADIUS;
+export const CABLES_EFFECT_PARTICLE_BUDGET={vapor:160,sparks:96,total:256} as const;
+const CABLES_DURATION=12;
+export const cablesTangle:Scenario={id:'cables',title:'Cables',duration:CABLES_DURATION,evaluate(time){
+ const t=clamp(time,0,CABLES_DURATION),impactTime=3.5,settlingTime=Math.max(0,Math.min(t-impactTime,10-impactTime));
+ const roll=t<impactTime?0:.055*(1-Math.exp(-.8*settlingTime))+.32*Math.sin(3.2*settlingTime)*Math.exp(-.62*settlingTime);
+ const rise=smooth((t-.8)/(impactTime-.8));
+ const y=t<impactTime?WHEEL_RADIUS+(CABLE_CONTACT_HEIGHT-WHEEL_RADIUS)*rise:CABLE_CONTACT_HEIGHT+HALF_WHEELBASE*Math.abs(Math.sin(roll));
+ const vapor=t<.8?0:t<4.8?smooth((t-.8)/.35)*(1-smooth((t-3.4)/1.4)):0;
+ const phase=t<.8?'Atasco':t<impactTime?'Despegue':t<5.2?'Enredado':t<10?'Balanceo':t<CABLES_DURATION?'Atrapado':'Maniobra completada';
+ const q=new Quaternion().setFromEuler(new Euler(0,0,roll));
+ const riseProgress=clamp((t-.8)/(impactTime-.8)),speed=t<.8||t>=impactTime?0:(CABLE_CONTACT_HEIGHT-WHEEL_RADIUS)/(impactTime-.8)*6*riseProgress*(1-riseProgress);
+ return {position:[0,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:clamp(vapor),phase,speed};
+}};
 /** Parking-lot layout shared by the scenario, the environment and the tests. Bays run along Z, the aisle along X. */
 export const PARKING = {
  groundY: 0,
