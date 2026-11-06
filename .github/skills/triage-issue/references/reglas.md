@@ -22,6 +22,12 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
   la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
 
+### Complejidad
+
+- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
+- 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
+
 ### Según el tipo de issue
 
 - 🖼️ meme: ✅ agent-ready si trae descripción y referencia; si no, 💬 needs-info.

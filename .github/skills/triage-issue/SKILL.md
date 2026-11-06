@@ -10,7 +10,7 @@ description: "Tria un issue nuevo de la fábrica de memes: elige una etiqueta (�
 ## Pasos
 
 1. Si el issue ya tiene ✅ agent-ready, 📐 needs-spec o 💬 needs-info, ya está triado: no hagas nada.
-2. Lee el issue y las reglas y ejemplos de [reglas](references/reglas.md). Si un ejemplo se parece a este issue, síguelo.
+2. Lee el issue y [reglas](references/reglas.md). Si un ejemplo se parece, síguelo.
 3. Elige UNA de estas etiquetas:
    - ✅ agent-ready: está claro qué hay que hacer y se puede comprobar al terminar.
    - 📐 needs-spec: hay que pensarlo antes: sección nueva, cambio de diseño o varias partes de la web.
@@ -18,8 +18,9 @@ description: "Tria un issue nuevo de la fábrica de memes: elige una etiqueta (�
 4. Si es ✅ agent-ready, elige también la luz:
    - 💡 lights-on si cambia la web.
    - 🌙 lights-out si solo toca la documentación o el inventario de memes.
-5. Quita 🔍 needs-triage si la tiene y pon las etiquetas elegidas.
-6. Deja un solo comentario corto, con este formato:
+5. Pon también UNA complejidad: 🟢 complexity-low, 🟡 complexity-medium o 🔴 complexity-high.
+6. Quita 🔍 needs-triage si la tiene y pon las etiquetas elegidas.
+7. Deja un solo comentario corto, con este formato:
 
    ```text
    **🏷️ Triaje:** <etiqueta>
