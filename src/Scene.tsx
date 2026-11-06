@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { BufferGeometry, CanvasTexture, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, Group, InstancedMesh, Object3D, Path, Quaternion, RepeatWrapping, Spherical, Shape, ShapeGeometry, SRGBColorSpace, TubeGeometry, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
-import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_HEIGHT, RADIUS, createParkingSpaceTheft } from './scenario';
+import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_CENTERLINE_HEIGHT, CABLE_SUPPORT_RADIUS, CABLE_SUPPORT_X, RADIUS, createParkingSpaceTheft } from './scenario';
 import type { SceneDefinition } from './sceneCatalog';
 import { ParkingLot } from './ParkingLot';
 import { fitCameraPlacement, parkingDropHeight } from './framing';
@@ -236,7 +236,7 @@ function Building({position,color,side}:{position:[number,number,number];color:s
 type CableSpan={start:[number,number,number];end:[number,number,number];sag:number;radius:number};
 function cableSpans():CableSpan[]{
  const spans:CableSpan[]=[];
- for(const x of [-1.5,0,1.5])spans.push({start:[x,11.4,-10.5],end:[x,11.4,10.5],sag:11.4-CABLE_SUPPORT_HEIGHT,radius:.055});
+ for(const x of CABLE_SUPPORT_X)spans.push({start:[x,11.4,-10.5],end:[x,11.4,10.5],sag:11.4-CABLE_SUPPORT_CENTERLINE_HEIGHT,radius:CABLE_SUPPORT_RADIUS});
  for(const x of [-18,-6,6,18])spans.push({start:[x,11.4,-10.5],end:[x,11.4,10.5],sag:2.4+(Math.abs(x)%3)*.25,radius:.04});
  for(const z of [-10.5,10.5])spans.push({start:[-18,11.4,z],end:[18,11.4,z],sag:2.8,radius:.045});
  for(const [startZ,endZ,sag] of [[-10.5,10.5,2.6],[10.5,-10.5,3.2],[-10.5,10.5,4.1],[10.5,-10.5,2.2]] as const)spans.push({start:[-18,11.4,startZ],end:[18,11.4,endZ],sag,radius:.035});
@@ -251,7 +251,7 @@ function CableLine({span}:{span:CableSpan}){
  return <mesh geometry={geometry} castShadow><meshStandardMaterial color="#252321" metalness={.3} roughness={.58}/></mesh>;
 }
 function UtilityPoles(){
- const locations=useMemo(()=>[-18,-6,-1.5,0,1.5,6,18].flatMap(x=>[-10.5,10.5].map(z=>[x,z] as const)),[]);
+ const locations=useMemo(()=>[-18,-6,...CABLE_SUPPORT_X,6,18].flatMap(x=>[-10.5,10.5].map(z=>[x,z] as const)),[]);
  const poles=useRef<InstancedMesh>(null),arms=useRef<InstancedMesh>(null),insulators=useRef<InstancedMesh>(null);
  useEffect(()=>{
   const dummy=new Object3D();

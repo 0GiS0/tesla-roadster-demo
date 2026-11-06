@@ -44,6 +44,9 @@ export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',du
  return {position:[x,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle,vapor,phase,speed};
 }};
 export const CABLE_SUPPORT_HEIGHT=7.6;
+export const CABLE_SUPPORT_RADIUS=.055;
+export const CABLE_SUPPORT_CENTERLINE_HEIGHT=CABLE_SUPPORT_HEIGHT-CABLE_SUPPORT_RADIUS;
+export const CABLE_SUPPORT_X=[-HALF_WHEELBASE,0,HALF_WHEELBASE] as const;
 export const CABLE_CONTACT_HEIGHT=CABLE_SUPPORT_HEIGHT+WHEEL_RADIUS;
 export const CABLES_EFFECT_PARTICLE_BUDGET={vapor:160,sparks:96,total:256} as const;
 const CABLES_DURATION=12;
