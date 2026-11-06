@@ -5,10 +5,15 @@ import { Scene } from './Scene';
 import { advance } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
+import { createMemeInvite, inviteMotion, invitesEnabled, type MemeInvite } from './memeInvite';
 import './style.css';
 class SceneBoundary extends Component<{children:React.ReactNode;onError:()=>void},{error:boolean}>{state={error:false};componentDidCatch(){this.props.onError()}static getDerivedStateFromError(){return {error:true}}render(){return this.state.error?<div className="fallback"><span className="eyebrow">NO SE HA PODIDO CARGAR LA ESCENA</span><h2>Volvamos a intentarlo.</h2><p>Comprueba la conexión y recarga para recuperar el modelo 3D.</p><button onClick={()=>location.reload()}>Recargar escena ↗</button></div>:this.props.children}}
 function supports3D(){try{return !!document.createElement('canvas').getContext('webgl2')}catch{return false}}
 const supported=supports3D();
+const memeCount=sceneCatalog.filter(scene=>scene.mode==='meme').length;
+const invitesOn=invitesEnabled(location.search,navigator.webdriver===true);
+const reducedMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
+function sessionStore(){try{return window.sessionStorage}catch{return null}}
 const clock=(n:number)=>`0:${String(Math.floor(n)).padStart(2,'0')}`;
 function Icon({name}:{name:'play'|'pause'|'reset'|'camera'}){return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">{name==='play'?<path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/>:name==='pause'?<><path d="M8 5v14M16 5v14" strokeWidth="3"/></>:name==='reset'?<><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></>:<><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></>}</svg>}
 function Loading(){const {active,progress}=useProgress();return active?<div className="loading" role="status"><span className="loader"/>Preparando la pista <span>{Math.round(progress)}%</span></div>:null}
@@ -19,9 +24,17 @@ function App(){
  const [ready,setReady]=useState(false);
  const [shareMessage,setShareMessage]=useState('');
  const [shareFallback,setShareFallback]=useState(false);
+ const [inviteVisible,setInviteVisible]=useState(false);
+ const [endCardDismissed,setEndCardDismissed]=useState(false);
+ const invite=useRef<MemeInvite|null>(null);
  const last=useRef(0);
+ useEffect(()=>{
+  const controller=createMemeInvite({enabled:invitesOn,storage:sessionStore(),onShow:()=>setInviteVisible(true),onHide:()=>setInviteVisible(false)});
+  invite.current=controller;
+  return()=>controller.dispose();
+ },[]);
  const chooseDefinition=useCallback((next:ReturnType<typeof sceneFromHash>)=>{
-  setDefinition(next);setPlayback({time:0,playing:false});setCameraReset(n=>n+1);setShareMessage('');setShareFallback(false);
+  setDefinition(next);setEndCardDismissed(false);setPlayback({time:0,playing:false});setCameraReset(n=>n+1);setShareMessage('');setShareFallback(false);
  },[]);
  useEffect(()=>{
   const onHash=()=>chooseDefinition(sceneFromHash(location.hash));
@@ -46,6 +59,18 @@ function App(){
  const phase=scenario.evaluate(playback.time).phase;
  const isMeme=definition.mode==='meme';
  const memeScenes=sceneCatalog.filter(scene=>scene.mode==='meme');
+ const finished=!isMeme&&playback.time>=duration;
+ const showEndCard=invitesOn&&finished&&!endCardDismissed&&ready;
+ const showInvite=inviteVisible&&!isMeme;
+ useEffect(()=>{if(finished)invite.current?.trigger()},[finished]);
+ useEffect(()=>{if(isMeme)invite.current?.dismiss()},[isMeme]);
+ useEffect(()=>{
+  if(!showInvite&&!showEndCard)return;
+  const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'){invite.current?.dismiss();setEndCardDismissed(true)}};
+  window.addEventListener('keydown',onKey);
+  return()=>window.removeEventListener('keydown',onKey);
+ },[showInvite,showEndCard]);
+ const enterMeme=()=>{invite.current?.dismiss();selectScene(memeScenes[0])};
  const toggle=()=>setPlayback(p=>({time:p.time>=duration?0:p.time,playing:!p.playing}));
  const selectScene=(target:typeof defaultScene)=>{
   const hash=sceneHashFor(target);
@@ -63,7 +88,13 @@ function App(){
   <header>
    <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="Roadster, inicio">ROADSTER<span className="wordmark-line"/></a>
    <div className="header-meta"><span className="status-dot"/> PRESENTACIÓN · 2026</div>
-   <button className="mode-toggle" aria-pressed={isMeme} onClick={()=>selectScene(isMeme?defaultScene:memeScenes[0])}>Modo MEME</button>
+   <div className="mode-anchor">
+    <button className={`mode-toggle${showInvite?` inviting ${inviteMotion(reducedMotion())}`:''}`} aria-pressed={isMeme} title={isMeme?'Salir del Modo MEME':undefined} onClick={()=>isMeme?selectScene(defaultScene):enterMeme()}>Modo MEME{!isMeme&&<span className="mode-count" aria-label={`, ${memeCount} memes`}>{memeCount}</span>}</button>
+    <div className="invite-live" aria-live="polite">{showInvite&&<div className="meme-invite" role="note">
+     <p>¿Y si el Roadster hiciera otras cosas? <button className="invite-link" onClick={enterMeme}>Prueba el Modo MEME →</button></p>
+     <button className="invite-close" aria-label="Cerrar invitación" onClick={()=>invite.current?.dismiss()}>×</button>
+    </div>}</div>
+   </div>
    <span className="edition">ESTUDIO DE MOVIMIENTO <span>01 / 02</span></span>
   </header>
   <section className={`workspace ${isMeme?'meme-workspace':''}`} aria-label="Escena 3D interactiva de la maniobra del Roadster">
@@ -111,6 +142,10 @@ function App(){
      </SceneBoundary>
      {supported&&<Loading/>}
      <p className="keyboard-hint" id="camera-keyboard-help">Cámara: flechas para girar · + / − para acercar o alejar · Tab para salir</p>
+     <div className="end-live" aria-live="polite">{showEndCard&&<div className="end-card" role="note">
+      <p>Fin de la maniobra. ¿Lo vemos en versión meme?</p>
+      <div><button className="end-cta" onClick={enterMeme}>Entrar en Modo MEME</button><button className="invite-close" aria-label="Cerrar aviso de fin" onClick={()=>setEndCardDismissed(true)}>×</button></div>
+     </div>}</div>
      {!isMeme&&<>
       <div className="scene-label"><span className="cross">+</span><div>RAMPA DE PRUEBAS<span>RECREACIÓN INTERACTIVA</span></div></div>
       <div className="interaction-hint"><span>↔</span> Arrastra para explorar <i/> Pellizca para acercar</div>

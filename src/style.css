@@ -41,3 +41,23 @@
 }
 
 .meme-mode .share-control .share-status{color:#625b4e}
+
+/* Meme mode call to action */
+.mode-anchor{position:relative}
+.mode-toggle{display:inline-flex;align-items:center;gap:9px;min-height:40px;border-color:#e63b43;background:#e63b431f;color:#fff;font-size:12px;font-weight:700;letter-spacing:1.4px}
+.mode-toggle:hover{background:#e63b4340}
+.mode-toggle[aria-pressed="true"]{background:#e63b43;color:#fff}
+.mode-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#e63b43;color:#fff;font-size:11px;letter-spacing:0}
+.mode-toggle.inviting{box-shadow:0 0 0 3px #e63b4366}
+.mode-toggle.inviting.pulse{animation:meme-pulse 1.2s ease-in-out 3}
+@keyframes meme-pulse{0%,100%{box-shadow:0 0 0 0 #e63b4300}50%{box-shadow:0 0 0 8px #e63b4366}}
+@media(prefers-reduced-motion:reduce){.mode-toggle.inviting.pulse{animation:none}}
+.meme-invite{position:absolute;z-index:5;top:calc(100% + 10px);right:0;width:min(280px,80vw);display:flex;gap:8px;align-items:flex-start;padding:12px;background:#151b26;border:1px solid #e63b43;border-radius:5px;box-shadow:0 8px 24px #0008}
+.meme-invite p,.end-card p{margin:0;font-size:13px;line-height:1.45;color:#eef1f5}
+.invite-link{display:inline;padding:0;border:0;background:none;color:#ff6b72;font-weight:700;text-decoration:underline}
+.invite-close{flex:none;min-width:32px;min-height:32px;border:1px solid #ffffff30;border-radius:3px;background:transparent;color:#d6dbe3;font-size:16px;line-height:1}
+.end-card{position:absolute;z-index:4;top:50%;left:50%;transform:translate(-50%,-50%);width:min(340px,86%);display:grid;gap:12px;padding:16px;background:#111722ee;border:1px solid #e63b43;border-radius:5px}
+.end-card>div{display:flex;gap:8px;align-items:center}
+.end-cta{min-height:44px;flex:1;border:0;border-radius:3px;background:#e63b43;color:#fff;font-size:12px;font-weight:700;letter-spacing:1px}
+@media(max-width:800px){.mode-toggle{min-height:44px;padding:8px 10px;font-size:11px;letter-spacing:1px}.invite-close{min-width:44px;min-height:44px}}
+@media(max-height:600px) and (min-width:650px) and (orientation:landscape){.mode-toggle{min-height:44px;padding:6px 9px;font-size:11px}.meme-invite{width:250px;padding:9px}.meme-invite p,.end-card p{font-size:12px}}
