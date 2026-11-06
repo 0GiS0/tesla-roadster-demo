@@ -1,8 +1,9 @@
 name: 🏷️ PR labels
 
 # Copies the labels of the Issues a PR closes onto the PR, and labels PRs that
-# change the triage rules file. It only adds labels, never removes them. It runs from the base branch and never checks out or runs
-# PR code: it only calls the GitHub API with the repository GITHUB_TOKEN.
+# change the triage rules file. It only adds labels, never removes them. It
+# runs from the base branch and never checks out or runs PR code: it only
+# calls the GitHub API with the repository GITHUB_TOKEN.
 on:
   pull_request_target:
     types: [opened, reopened, edited, ready_for_review, synchronize]
@@ -103,8 +104,9 @@ jobs:
           fi
 
           # Only file names are read from the API; PR code is never checked out or run.
-          if ! gh api --paginate "repos/$GH_REPO/pulls/$PR_NUMBER/files" --jq '.[].filename' \
-            | grep -qxF "$rules_file"; then
+          changed_files="$(gh api --paginate "repos/$GH_REPO/pulls/$PR_NUMBER/files" --jq '.[].filename')"
+
+          if ! grep -qxF "$rules_file" <<<"$changed_files"; then
             echo "The PR does not touch $rules_file."
             exit 0
           fi
