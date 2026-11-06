@@ -7,6 +7,14 @@
 
 Viven en `.github/skills/<nombre>/SKILL.md`.
 
+### `add-meme-scene`
+
+Convierte una propuesta de escena MEME aprobada (issue `🖼️ meme` con los campos de `meme-proposal.yml`, o el formato antiguo de #8–#11) en una escena de la web.
+
+- **Procedimiento:** `Scenario` puro en `src/scenario.ts`, registro en `src/sceneCatalog.ts` (hash `#meme/<slug>`, `source` y `tourMoment` opcional), entorno nuevo si hace falta en `src/Scene.tsx`, tests en `src/scenario.test.ts`, validaciones (`npm run typecheck`, `npm test`, `python3 model/validate_glb.py`, `npm run build`) y capturas en escritorio, vertical y horizontal baja. Se detiene antes de abrir la PR: hace falta aprobación explícita.
+- **Límites:** no propone ni valora memes, no genera imágenes de concepto, no cambia la escena original ni refactoriza.
+- **Contenido:** `SKILL.md` y `references/procedimiento.md`.
+
 ### `meme-concept-image`
 
 Genera una imagen de concepto en el estilo low-poly de la web para cada propuesta de escena MEME elegida (issue `🖼️ meme` o borrador con los campos de `meme-proposal.yml`) y la adjunta siempre al issue.
@@ -14,6 +22,14 @@ Genera una imagen de concepto en el estilo low-poly de la web para cada propuest
 - **Procedimiento:** captura de referencia con Playwright de la escena existente; prompt en inglés con la plantilla de `references/prompts.md` (sin UI, texto, logotipos, marcas, matrículas ni personas); imagen a 1536×1024; revisión y, si falla, una regeneración; adjuntarla con `gh issue create/edit --attach` indicando que está generada con IA.
 - **Límites:** es apoyo para issues, nunca un recurso de la web ni se añade a `public/`. No se versionan capturas ni `concepto-<slug>.png`; solo `examples/`, y solo si lo pide la autora.
 - **Contenido:** `SKILL.md`, `references/prompts.md` y `examples/` (tres resultados aprobados como referencia visual).
+
+### `record-scene`
+
+Graba una escena (original o MEME) de principio a fin como MP4 H.264 para adjuntarlo al cuerpo de la PR. Toda PR que añade o cambia una escena MEME lleva su vídeo.
+
+- **Procedimiento:** con la web en marcha (`npm run dev`), `node .github/skills/record-scene/scripts/record-scene.mjs --scene <slug> --out <slug>.mp4` (1280×720 por defecto; sin `--scene` graba la rampa original). Debe pesar < 10 MB y se adjunta con `gh pr create --attach` o `gh pr edit --attach`.
+- **Límites:** el vídeo no se versiona ni va a `public/`; el tour del README usa `record-tour`.
+- **Contenido:** `SKILL.md`, `references/detalles.md` y `scripts/`.
 
 ### `record-tour`
 
