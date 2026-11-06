@@ -24,11 +24,9 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 
 ### Complejidad
 
-- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D, animación o
-  dependencias; se comprueba de un vistazo (textos, favicon, meta tags, docs).
-- 🟡 complexity-medium: funcionalidad acotada, varios archivos o recursos
-  que generar; toda escena 🖼️ meme.
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias o alcance abierto.
+- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
+- 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
 
 ### Según el tipo de issue
 
@@ -45,19 +43,19 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 ## Ejemplos
 
 ### El coche que vuela para no pisar un charco
-- Decisión: ✅ agent-ready · 💡 lights-on · 🟡 complexity-medium
+- Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: es un meme nuevo con descripción y enlace a la imagen original.
 
 ### Añadir votaciones para elegir el mejor meme
-- Decisión: 📐 needs-spec · 🔴 complexity-high
+- Decisión: 📐 needs-spec
 - Por qué: no es un meme, es una funcionalidad nueva (guardar votos, evitar votos repetidos).
 
 ### El autoservicio de McDonald's en el cielo
-- Decisión: 💬 needs-info · 🟡 complexity-medium
+- Decisión: 💬 needs-info
 - Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
 
 ### Corregir el texto alternativo del meme del charco
-- Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
+- Decisión: ✅ agent-ready · 🌙 lights-out
 - Por qué: solo cambia el inventario y la accesibilidad, no la escena.
 
 ## Lecciones
@@ -65,5 +63,5 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 <!-- La Automation 🔁 La fábrica aprende añade aquí un ejemplo por cada corrección. -->
 
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
-- Decisión: ✅ agent-ready · 💡 lights-on · 🟢 complexity-low
+- Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
