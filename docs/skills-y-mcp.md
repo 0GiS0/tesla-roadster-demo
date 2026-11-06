@@ -47,6 +47,8 @@ Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y 
 
 `.github/workflows/validate-skills.yml` se ejecuta cuando cambian `.github/skills/**` o el propio workflow (en PR y en pushes a `main`). Instala waza con versión y checksum SHA-256 fijados, comprueba que las skills están listas, cuenta sus tokens y compara el resultado con la línea base de `main`.
 
+La comparación mide todos los archivos de cada skill, `SKILL.md` y `references/` incluidos, y falla si alguno crece más de un 10 % respecto a `main` (los archivos nuevos quedan exentos). En cada PR del mismo repositorio, la ejecución publica siempre una tabla con el resultado de cada skill en un único comentario que se actualiza en las ejecuciones siguientes (las PR desde forks solo tienen el resumen del job).
+
 ## Relación con la fábrica
 
 Los cambios en skills y MCP son cambios de la fábrica (`🏭 software-factory`): siempre los revisa una persona. Ver [Fábrica de software](fabrica-de-software.md).
