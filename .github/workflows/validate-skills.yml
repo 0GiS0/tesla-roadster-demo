@@ -151,11 +151,23 @@ jobs:
             exit 0
           fi
           git rev-parse --verify "${BASE_REF}^{commit}"
-          status=0
-          waza tokens compare "$BASE_REF" HEAD --skills --threshold 10 --strict \
-            --format json > "$report/compare.json" 2> "$report/compare.err" || status=$?
-          waza tokens compare "$BASE_REF" HEAD --skills --threshold 10 --strict || true
-          exit "$status"
+          # Without --skills waza only sees SKILL.md; running it repo-wide also covers
+          # references/. The result is then restricted to the skills directory and the
+          # threshold is enforced here, so unrelated markdown never fails this check.
+          waza tokens compare "$BASE_REF" HEAD --threshold 10 --format json \
+            > "$report/compare-raw.json" 2> "$report/compare.err" || true
+          if ! jq -e '.files' "$report/compare-raw.json" > /dev/null 2>&1; then
+            cat "$report/compare.err"
+            echo "::error::waza tokens compare produced no valid result."
+            exit 1
+          fi
+          jq '.files |= map(select(.file | startswith(".github/skills/")))' \
+            "$report/compare-raw.json" > "$report/compare.json"
+          jq -r '.files[] | "\(.status)\t\(.before.tokens // 0)\t\(.after.tokens // 0)\t\(.file)"' "$report/compare.json"
+          if jq -e '[.files[] | select(.exceeded == true)] | length > 0' "$report/compare.json" > /dev/null; then
+            echo "::error::A skill file grew more than 10% compared with main."
+            exit 1
+          fi
 
       - name: 🧾 Build job summary and PR comment
         id: report
@@ -250,13 +262,13 @@ jobs:
                   .threshold as $t
                   | [.files[] | select(.file | startswith($p))]
                   | if length == 0 then "➡️ sin cambios"
-                    else map("\(if (.exceeded == true or (.status == "modified" and .percentChange > $t)) then "❌" else "✅" end) \(.before.tokens // 0) → \(.after.tokens // 0)") | join("<br>")
+                    else map("\(if .exceeded == true then "❌" else "✅" end) \(.file[$p | length:] | gsub("[^A-Za-z0-9._/-]"; "_")): \(.before.tokens // 0) → \(.after.tokens // 0)") | join("<br>")
                     end' "$compare")
                 jq -r --arg p "$prefix" '
                   .threshold as $t
                   | .files[] | select(.file | startswith($p))
-                  | select(.exceeded == true or (.status == "modified" and .percentChange > $t))
-                  | "- Tokens: \(.before.tokens // 0) → \(.after.tokens // 0) (\(.percentChange | floor)% frente a main, umbral \($t)%, límite \(.limit // "?")). Reduce SKILL.md o mueve detalle a archivos de referencia."' \
+                  | select(.exceeded == true)
+                  | "- \(.file[$p | length:] | gsub("[^A-Za-z0-9._/-]"; "_")): \(.before.tokens // 0) → \(.after.tokens // 0) tokens (+\(.percentChange | floor)% frente a main, umbral \($t)%). Reduce el archivo o divide su contenido."' \
                   "$compare" >> "$problems"
               fi
 
@@ -369,11 +381,9 @@ jobs:
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" \
               --field body=@report/comment.md > /dev/null
             echo "Updated comment $comment_id."
-          elif [ "$(cat report/failed)" = true ]; then
+          else
             gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
               --field body=@report/comment.md > /dev/null
             echo "Created comment."
-          else
-            echo "All checks passed and no previous comment exists; nothing to post."
           fi
 
