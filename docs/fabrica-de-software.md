@@ -47,6 +47,7 @@ Un agente implementa el issue siguiendo `AGENTS.md` y `.github/copilot-instructi
 ## 4. Pull request y checks
 
 - `ci-pages.yml` → job `validate`: lint, tipos, pruebas, validación del GLB y build. Es el check que exige el ruleset.
+- `docs.yml` → job `📚 docs`: ejecuta `markdownlint-cli2` y `scripts/check-markdown-links.mjs` en cada PR y en pushes a `main`. Es el segundo check obligatorio, junto a `🧪 validate`.
 - `validate-skills.yml`: valida las skills de `.github/skills/` (waza, con versión y checksum fijados) cuando cambian.
 - `validate-issue-templates.yml`: valida las plantillas cuando cambian.
 - `pr-labels.yml` → `🏷️ PR labels`: copia a la PR las etiquetas de los Issues que cierra (`Closes`/`Fixes #N`), para poder filtrar por categoría y por `💡 lights-on` / `🌙 lights-out`. Detalle en [Etiquetas de las PR](#etiquetas-de-las-pr).
