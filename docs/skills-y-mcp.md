@@ -15,6 +15,14 @@ Genera una imagen de concepto en el estilo low-poly de la web para cada propuest
 - **Límites:** es apoyo para issues, nunca un recurso de la web ni se añade a `public/`. No se versionan capturas ni `concepto-<slug>.png`; solo `examples/`, y solo si lo pide la autora.
 - **Contenido:** `SKILL.md`, `references/prompts.md` y `examples/` (tres resultados aprobados como referencia visual).
 
+### `record-tour`
+
+Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y el momento clave de cada meme del catálogo. Está pensada para que un agente la ejecute sin intervención humana en un runner Linux sin GPU.
+
+- **Procedimiento:** `npm run tour -- --build` (compila, graba a fotograma fijado con SwiftShader, monta con HyperFrames y escribe `docs/assets/tour.mp4`, `tour.webp` y `tour-poster.png`). Límites comprobados por el comando: MP4 < 5 MB y WebP < 2 MB.
+- **Memes nuevos:** entran solos desde `src/sceneCatalog.ts`; `tourMoment` (instante o rango) es opcional.
+- **Contenido:** `SKILL.md` y `references/detalles.md`. Reutiliza `scripts/record-tour.mjs` y `scripts/tour/`.
+
 ## MCP
 
 `.github/mcp.json` configura un único servidor, **playwright**, en local con `npx @playwright/mcp@0.0.83` en modo aislado y sin interfaz (`--isolated`, `--headless`), con service workers bloqueados. Solo puede navegar a `http://127.0.0.1:5173`, `http://127.0.0.1:4173` y `https://0gis0.github.io`.

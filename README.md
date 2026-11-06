@@ -13,7 +13,7 @@
 <!-- tour:start — bloque del tour en vídeo: se regenera a mano con `npm run tour` (ver docs/desarrollo.md). Docs sync no debe modificarlo. -->
 <a href="docs/assets/tour.mp4"><img src="docs/assets/tour.webp" alt="Tour animado por la web del Roadster: la escena original de la rampa y los memes del catálogo" width="720"></a>
 
-<sub>▶ Pulsa la animación para ver el tour completo: la escena original, el Modo MEME y cada meme del catálogo con su fuente.</sub>
+<sub>▶ Pulsa la animación para ver el tour en vídeo: la escena original y el momento clave de cada meme del catálogo.</sub>
 <!-- tour:end -->
 
 </div>
