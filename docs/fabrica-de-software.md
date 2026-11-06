@@ -47,10 +47,22 @@ Un agente implementa el issue siguiendo `AGENTS.md` y `.github/copilot-instructi
 ## 4. Pull request y checks
 
 - `ci-pages.yml` → job `validate`: lint, tipos, pruebas, validación del GLB y build. Es el check que exige el ruleset.
+- `docs.yml` → job `📚 docs`: ejecuta `markdownlint-cli2` y `scripts/check-markdown-links.mjs` en cada PR y en pushes a `main`. Es el segundo check obligatorio, junto a `🧪 validate`.
 - `validate-skills.yml`: valida las skills de `.github/skills/` (waza, con versión y checksum fijados) cuando cambian.
 - `validate-issue-templates.yml`: valida las plantillas cuando cambian.
+- `pr-labels.yml` → `🏷️ PR labels`: copia a la PR las etiquetas de los Issues que cierra (`Closes`/`Fixes #N`), para poder filtrar por categoría y por `💡 lights-on` / `🌙 lights-out`. Detalle en [Etiquetas de las PR](#etiquetas-de-las-pr).
 - Los workflows llevan emoji en el `name:` y en los de cada step, y las acciones se fijan por SHA completo de commit.
 - Las PR solo validan: el despliegue se ejecuta tras un push a `main` o con una ejecución manual sobre `main`.
+
+### Etiquetas de las PR
+
+El workflow `🏷️ PR labels` (`.github/workflows/pr-labels.yml`) se ejecuta al abrir, reabrir o editar una PR y al sacarla de borrador. Lee los Issues que la PR cierra (`closingIssuesReferences`) y le añade sus etiquetas de categoría (`🖼️ meme`, `🏭 software-factory`, `🤖 agents`, `📝 documentation`…) y de luces (`💡 lights-on` / `🌙 lights-out`).
+
+- **No copia** las etiquetas de estado del Issue: `🔍 needs-triage`, `✅ agent-ready`, `📐 needs-spec`, `💬 needs-info`, `🧑‍🏫 triage-corrected`, `♻️ duplicate`, `⛔ wontfix` y `🚫 invalid`.
+- **Nunca quita** etiquetas que la PR ya tenga. Si la PR no cierra ningún Issue, termina bien sin cambios.
+- **Seguridad:** usa `pull_request_target`, así que corre desde `main` con `GITHUB_TOKEN` y permisos mínimos (`contents: read`, `issues: read`, `pull-requests: write`). No hace checkout ni ejecuta código de la PR; solo llama a la API con `gh`.
+- **Manual:** `workflow_dispatch` con el número de la PR sirve para etiquetar una PR existente o repetir la ejecución.
+- **Cloud agent:** las ejecuciones de workflows disparadas por PR abiertas por el cloud agent pueden quedar a la espera de «Approve and run workflows». Está pendiente de comprobar con la primera PR real; si ocurre, se aprueba la ejecución o se lanza `🏷️ PR labels` a mano con `workflow_dispatch`.
 
 ## 5. Revisión y merge
 
