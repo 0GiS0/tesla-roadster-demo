@@ -1,7 +1,7 @@
 # Reglas del triaje de la fábrica de memes
 
-Este archivo lo lee la Automation 🚦 Triaje de la fábrica en cada issue nuevo.
-Lo cambia la Automation 🔁 La fábrica aprende, siempre con una PR que revisa una persona.
+Este archivo es parte de la skill `triage-issue`: la lee la Automation 🚦 Triaje de la fábrica
+en cada issue nuevo. Lo cambia la Automation 🔁 La fábrica aprende, siempre con una PR que revisa una persona.
 
 ## Qué es la web
 
