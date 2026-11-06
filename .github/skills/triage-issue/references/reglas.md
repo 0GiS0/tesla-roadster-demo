@@ -22,6 +22,20 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
   la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
 
+### Complejidad
+
+Pon siempre UNA:
+
+- 🟢 complexity-low: 1–2 archivos y sin lógica nueva; no toca 3D ni animación ni
+  añade dependencias, y se comprueba de un vistazo (textos, enlaces, favicon,
+  meta tags, un estilo concreto, documentación).
+- 🟡 complexity-medium: una funcionalidad acotada de la interfaz, varios archivos
+  o recursos que generar (imágenes, audio). Toda escena 🖼️ meme (3D, animación y grabación).
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias nuevas o alcance abierto.
+
+Freno: 🌙 lights-out solo se mantiene con ✅ agent-ready + 🟢 complexity-low y sin
+🖼️ meme ni 🏭 software-factory; si no, pasa a 💡 lights-on con el motivo. Nunca lo añadas tú.
+
 ### Según el tipo de issue
 
 - 🖼️ meme: ✅ agent-ready si trae descripción y referencia; si no, 💬 needs-info.
@@ -37,7 +51,7 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 ## Ejemplos
 
 ### El coche que vuela para no pisar un charco
-- Decisión: ✅ agent-ready · 💡 lights-on
+- Decisión: ✅ agent-ready · 💡 lights-on · 🟡 complexity-medium
 - Por qué: es un meme nuevo con descripción y enlace a la imagen original.
 
 ### Añadir votaciones para elegir el mejor meme
@@ -49,13 +63,21 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 - Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
 
 ### Corregir el texto alternativo del meme del charco
-- Decisión: ✅ agent-ready · 🌙 lights-out
+- Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
 - Por qué: solo cambia el inventario y la accesibilidad, no la escena.
+
+### Cambiar el favicon de la web
+- Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
+- Por qué: un archivo, sin lógica nueva, se comprueba de un vistazo.
+
+### Escena meme pedida con 🌙 lights-out
+- Decisión: ✅ agent-ready · 💡 lights-on (cambia 🌙 lights-out) · 🟡 complexity-medium
+- Por qué: toda escena meme es 🟡 y nunca va por el carril autónomo.
 
 ## Lecciones
 
 <!-- La Automation 🔁 La fábrica aprende añade aquí un ejemplo por cada corrección. -->
 
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
-- Decisión: ✅ agent-ready · 💡 lights-on
+- Decisión: ✅ agent-ready · 💡 lights-on · 🟢 complexity-low
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.

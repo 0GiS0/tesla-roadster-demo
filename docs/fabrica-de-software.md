@@ -39,6 +39,8 @@ Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷
 - `💡 lights-on`: cambia lo que ve el público.
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
 - Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
+- Complejidad: el triaje pone siempre una de `🟢 complexity-low` (1–2 archivos, sin lógica nueva, se comprueba de un vistazo: favicon, textos, enlaces, meta tags, documentación), `🟡 complexity-medium` (funcionalidad acotada, varios archivos o recursos que generar; toda escena `🖼️ meme`) o `🔴 complexity-high` (modelo 3D, arquitectura, dependencias nuevas o alcance abierto).
+- Freno de `🌙 lights-out`: una persona admin puede crear el issue con `🌙 lights-out` para pedir que lo resuelva un agente sin intervención humana, y el triaje decide si de verdad puede ir por ese carril. Solo se mantiene con `✅ agent-ready` + `🟢 complexity-low` y sin `🖼️ meme` ni `🏭 software-factory`; en cualquier otro caso lo cambia por `💡 lights-on` y explica el motivo en su comentario. El triaje nunca añade `🌙 lights-out`, y los memes no se disparan nunca solos.
 
 El detalle y los ejemplos están en `.github/skills/triage-issue/references/reglas.md`; esa es la fuente.
 
