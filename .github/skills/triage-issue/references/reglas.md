@@ -17,23 +17,18 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   votaciones, cuentas de usuario… o algo que toca varias partes de la web.
 - 💬 needs-info: falta la imagen o el enlace de referencia, el texto del meme,
   o no se sabe qué falla ni dónde.
-- 💡 lights-on: la luz por defecto; el cambio lo revisa una persona.
-- 🌙 lights-out: solo lo pone una persona admin al crear el issue; el triaje
-  nunca lo añade y solo lo mantiene si pasa el freno (ver Complejidad).
+- 💡 lights-on: cambia lo que ve el público en la web.
+- 🌙 lights-out: solo cambia la documentación o el inventario (pie de foto,
+  texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
+  la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
 
 ### Complejidad
 
-Pon siempre UNA:
-
-- 🟢 complexity-low: 1–2 archivos y sin lógica nueva; no toca 3D ni animación ni
-  añade dependencias, y se comprueba de un vistazo (textos, enlaces, favicon,
-  meta tags, un estilo concreto, documentación).
-- 🟡 complexity-medium: una funcionalidad acotada de la interfaz, varios archivos
-  o recursos que generar (imágenes, audio). Toda escena 🖼️ meme (3D, animación y grabación).
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias nuevas o alcance abierto.
-
-Freno: 🌙 lights-out solo se mantiene con ✅ agent-ready + 🟢 complexity-low y sin
-🖼️ meme ni 🏭 software-factory; si no, pasa a 💡 lights-on con el motivo. Nunca lo añadas tú.
+- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D, animación o
+  dependencias; se comprueba de un vistazo (textos, favicon, meta tags, docs).
+- 🟡 complexity-medium: funcionalidad acotada, varios archivos o recursos
+  que generar; toda escena 🖼️ meme.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias o alcance abierto.
 
 ### Según el tipo de issue
 
@@ -61,17 +56,9 @@ Freno: 🌙 lights-out solo se mantiene con ✅ agent-ready + 🟢 complexity-lo
 - Decisión: 💬 needs-info · 🟡 complexity-medium
 - Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
 
-### Corregir el texto alternativo del meme del charco (con 🌙 lights-out)
+### Corregir el texto alternativo del meme del charco
 - Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
 - Por qué: solo cambia el inventario y la accesibilidad, no la escena.
-
-### Cambiar el favicon de la web (con 🌙 lights-out)
-- Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
-- Por qué: un archivo, sin lógica nueva, se comprueba de un vistazo.
-
-### Escena meme pedida con 🌙 lights-out
-- Decisión: ✅ agent-ready · 💡 lights-on (cambia 🌙 lights-out) · 🟡 complexity-medium
-- Por qué: toda escena meme es 🟡 y nunca va por el carril autónomo.
 
 ## Lecciones
 

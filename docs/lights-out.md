@@ -9,15 +9,6 @@
 - `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (entradas `/docs/` y `/README.md` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
 - Los únicos requisitos son los checks obligatorios `🧪 validate` y `📚 docs`: si están en verde, la PR puede mergearse.
 
-## Carril autónomo y freno del triaje
-
-La etiqueta `🌙 lights-out` en un Issue pide que lo resuelva un agente sin intervención humana. Solo una persona admin la pone; el triaje (skill `triage-issue`) nunca la añade, y actúa de **freno** según la complejidad del Issue (`🟢 complexity-low`, `🟡 complexity-medium` o `🔴 complexity-high`):
-
-- Se mantiene `🌙 lights-out` solo si el Issue es `✅ agent-ready` + `🟢 complexity-low` y no es `🖼️ meme` ni `🏭 software-factory`. Por ejemplo, cambiar el favicon.
-- En cualquier otro caso, el triaje cambia `🌙 lights-out` por `💡 lights-on` y explica el motivo en su comentario. Por ejemplo, una escena meme es `🟡 complexity-medium`: los memes no se disparan nunca solos.
-
-No existe una etiqueta específica para la nube: el carril autónomo es `🌙 lights-out` + `✅ agent-ready` + `🟢 complexity-low`. Los criterios y ejemplos están en `.github/skills/triage-issue/references/reglas.md`; ver también [Fábrica de software](fabrica-de-software.md#2-triaje).
-
 ## Quién activa el auto-merge
 
 No hay un flujo genérico por etiqueta. El Agentic Workflow [`📚 Docs sync`](../.github/workflows/docs-sync.md) mantiene la documentación y activa el auto-merge solo en sus propias PR. Para ello el repositorio debe tener activada la opción *Allow auto-merge*.
