@@ -12,7 +12,7 @@ description: "Tria un issue nuevo de la fábrica de memes: elige una etiqueta (�
 1. Si el issue ya tiene ✅ agent-ready, 📐 needs-spec o 💬 needs-info, ya está triado: no hagas nada.
 2. Lee el issue y las reglas. Si un ejemplo se parece, síguelo.
 3. Elige UNA etiqueta: ✅ agent-ready (está claro y se puede comprobar), 📐 needs-spec (hay que pensarlo antes) o 💬 needs-info (falta algo).
-4. Si es ✅ agent-ready, elige la luz: 💡 lights-on si cambia la web; 🌙 lights-out si solo toca documentación o inventario.
+4. Si es ✅ agent-ready, pon la luz: 💡 lights-on, salvo que el issue ya traiga 🌙 lights-out y pase el freno (paso 6).
 5. Pon UNA complejidad: 🟢 complexity-low, 🟡 complexity-medium o 🔴 complexity-high.
 6. Freno: 🌙 lights-out solo vale con ✅ agent-ready + 🟢 complexity-low y sin 🖼️ meme ni 🏭 software-factory. Si el issue lo trae y no cumple, cámbialo por 💡 lights-on y explica por qué. Nunca añadas 🌙 lights-out.
 7. Quita 🔍 needs-triage si la tiene y pon las etiquetas elegidas.

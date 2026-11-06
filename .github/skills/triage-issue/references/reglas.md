@@ -17,10 +17,9 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
   votaciones, cuentas de usuario… o algo que toca varias partes de la web.
 - 💬 needs-info: falta la imagen o el enlace de referencia, el texto del meme,
   o no se sabe qué falla ni dónde.
-- 💡 lights-on: cambia lo que ve el público en la web.
-- 🌙 lights-out: solo cambia la documentación o el inventario (pie de foto,
-  texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
-  la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
+- 💡 lights-on: la luz por defecto; el cambio lo revisa una persona.
+- 🌙 lights-out: solo lo pone una persona admin al crear el issue; el triaje
+  nunca lo añade y solo lo mantiene si pasa el freno (ver Complejidad).
 
 ### Complejidad
 
@@ -62,11 +61,11 @@ Freno: 🌙 lights-out solo se mantiene con ✅ agent-ready + 🟢 complexity-lo
 - Decisión: 💬 needs-info
 - Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
 
-### Corregir el texto alternativo del meme del charco
+### Corregir el texto alternativo del meme del charco (con 🌙 lights-out)
 - Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
 - Por qué: solo cambia el inventario y la accesibilidad, no la escena.
 
-### Cambiar el favicon de la web
+### Cambiar el favicon de la web (con 🌙 lights-out)
 - Decisión: ✅ agent-ready · 🌙 lights-out · 🟢 complexity-low
 - Por qué: un archivo, sin lógica nueva, se comprueba de un vistazo.
 
