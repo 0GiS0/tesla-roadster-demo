@@ -13,7 +13,7 @@
 <!-- tour:start — bloque del tour en vídeo: se regenera a mano con `npm run tour` (ver docs/desarrollo.md). Docs sync no debe modificarlo. -->
 <a href="docs/assets/tour.mp4"><img src="docs/assets/tour.webp" alt="Tour animado por la web del Roadster: la escena original de la rampa y los memes del catálogo" width="720"></a>
 
-<sub>▶ Pulsa la animación para ver el tour completo: la escena original, el Modo MEME y cada meme del catálogo con su fuente.</sub>
+<sub>▶ Pulsa la animación para ver el tour en vídeo: la escena original y el momento clave de cada meme del catálogo.</sub>
 <!-- tour:end -->
 
 </div>
@@ -28,7 +28,7 @@ El **Modo MEME** añade «Bache volador» (12 segundos) y «Robo de plaza» (10 
 - 🕹️ Orbita la cámara con ratón, táctil o teclado.
 - 🧩 Sin cuentas, sin backend y sin recursos externos: todo se sirve desde el propio proyecto.
 
-> Recreación artística independiente. No está afiliada a Tesla ni pretende simular las especificaciones ni la física de un vehículo real.
+> Recreación artística independiente. No está afiliada a Tesla ni pretende simular las especificaciones ni la física de un vehículo real. Más detalles en el [aviso legal](#aviso-legal).
 
 ## 🚀 Pruébala
 
@@ -54,6 +54,15 @@ Necesitas un navegador con **WebGL 2** y aceleración por hardware. Si no está 
 ## 🎤 Preparado para BiznagaFest 2026
 
 Este proyecto se comparte en [**BiznagaFest 2026**](https://www.biznagafest.com/) · 7 de noviembre de 2026 · FYCMA, Málaga.
+
+<a id="aviso-legal"></a>
+
+## ⚖️ Aviso legal
+
+- **Marcas:** «Tesla» y «Roadster» son marcas de Tesla, Inc. Este proyecto no está afiliado, patrocinado ni respaldado por Tesla.
+- **Finalidad:** es un proyecto sin ánimo de lucro, con fines de parodia y divulgación técnica.
+- **Memes:** los memes originales pertenecen a sus autores, que se citan en cada escena. Si alguno quiere que se retire su escena, puede [abrir un Issue](https://github.com/0GiS0/tesla-roadster-demo/issues/new/choose).
+- **Licencia:** la [licencia MIT](LICENSE) cubre solo el código y los recursos propios (como el modelo 3D original). No cubre las marcas de terceros ni los memes originales.
 
 ## 👩‍💻 Sobre mí
 

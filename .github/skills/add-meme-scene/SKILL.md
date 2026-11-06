@@ -11,7 +11,7 @@ Describe el procedimiento **actual**, sin refactorizar. Detalle y rutas en [proc
 
 1. `gh issue view <n>` y valida los campos contra `.github/ISSUE_TEMPLATE/meme-proposal.yml` (o el formato antiguo de #8–#11). Si falta algo obligatorio, pregunta.
 2. Añade el `Scenario` en `src/scenario.ts`: puro, determinista y dependiente del tiempo absoluto.
-3. Regístralo en `src/sceneCatalog.ts`: hash `#meme/<slug>` y `source` con el crédito real (X, TikTok, YouTube…).
+3. Regístralo en `src/sceneCatalog.ts`: hash `#meme/<slug>`, `source` con el crédito real (X, TikTok, YouTube…) y, si quieres, `tourMoment` (instante o rango en segundos) con el momento clave que mostrará el tour.
 4. Si el entorno es nuevo, amplía la unión cerrada `environment` (`SceneDefinition`) y su rama de render en `src/Scene.tsx`.
 5. Añade tests en `src/scenario.test.ts`: contacto, continuidad, determinismo y límites.
 6. Valida: `npm run typecheck`, `npm test`, `python3 model/validate_glb.py`, `npm run build`.
