@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import { Euler,Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET } from './scenario';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
 describe('Rigid vehicle follows the ramp',()=>{
@@ -73,11 +73,16 @@ describe('Cables meme scene',()=>{
  expect(CABLE_SUPPORT_CENTERLINE_HEIGHT+CABLE_SUPPORT_RADIUS).toBeCloseTo(CABLE_SUPPORT_HEIGHT,8);
  expect(CABLE_SUPPORT_X).toContain(-HALF_WHEELBASE);
  expect(CABLE_SUPPORT_X).toContain(HALF_WHEELBASE);
+ expect(CABLE_SUPPORT_WHEEL_Z.every(z=>Math.abs(z)<CABLE_SUPPORT_SPAN_HALF_LENGTH)).toBe(true);
+ for(const z of CABLE_SUPPORT_WHEEL_Z)expect(cableSupportHeightAt(z)+CABLE_SUPPORT_RADIUS).toBeCloseTo(CABLE_SUPPORT_HEIGHT,8);
  for(let time=0;time<=cablesTangle.duration;time+=.025){
   const pose=cablesTangle.evaluate(time),rotation=new Euler().setFromQuaternion(new Quaternion(...pose.quaternion));
   expect(pose.position.every(Number.isFinite)).toBe(true);
   if(time<3.5)expect(pose.position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS);
-  else expect(pose.position[1]-HALF_WHEELBASE*Math.abs(Math.sin(rotation.z))-WHEEL_RADIUS).toBeCloseTo(CABLE_SUPPORT_CENTERLINE_HEIGHT+CABLE_SUPPORT_RADIUS,6);
+  else for(const z of CABLE_SUPPORT_WHEEL_Z){
+   const tireBottom=pose.position[1]-HALF_WHEELBASE*Math.abs(Math.sin(rotation.z))-WHEEL_RADIUS;
+   expect(tireBottom).toBeCloseTo(cableSupportHeightAt(z)+CABLE_SUPPORT_RADIUS,6);
+  }
  }
  expect(cablesTangle.evaluate(3.5).position[1]).toBeCloseTo(CABLE_CONTACT_HEIGHT);
  expect(cablesTangle.evaluate(12).position).toEqual(cablesTangle.evaluate(10).position);
