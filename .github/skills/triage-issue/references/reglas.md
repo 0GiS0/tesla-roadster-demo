@@ -27,8 +27,9 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 - 🖼️ meme: ✅ agent-ready si trae descripción y referencia; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos para reproducirlo y qué debería pasar;
   si no, 💬 needs-info.
-- ✨ enhancement: 📐 needs-spec salvo que sea un cambio pequeño, en una sola parte
-  de la web y con criterios de aceptación que se puedan comprobar.
+- ✨ enhancement: 📐 needs-spec si aún faltan decisiones de alcance o integración;
+  ✅ agent-ready si el cambio está acotado y sus criterios son comprobables, aunque
+  abarque varias partes de la web.
 - 🏭 software-factory: nunca 🌙 lights-out y siempre lleva 💡 lights-on, aunque no
   cambie la web. Si tiene criterios de aceptación concretos y comprobables, es
   ✅ agent-ready; 📐 needs-spec solo si aún no se sabe cómo hacerlo. Siempre lo
@@ -59,3 +60,7 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
 - Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
+
+### Invitar a descubrir el Modo MEME (#78)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: Aunque combina interfaz, temporización, accesibilidad y grabaciones, concreta el comportamiento y cómo comprobarlo.
