@@ -54,11 +54,11 @@ Freno: 🌙 lights-out solo se mantiene con ✅ agent-ready + 🟢 complexity-lo
 - Por qué: es un meme nuevo con descripción y enlace a la imagen original.
 
 ### Añadir votaciones para elegir el mejor meme
-- Decisión: 📐 needs-spec
+- Decisión: 📐 needs-spec · 🔴 complexity-high
 - Por qué: no es un meme, es una funcionalidad nueva (guardar votos, evitar votos repetidos).
 
 ### El autoservicio de McDonald's en el cielo
-- Decisión: 💬 needs-info
+- Decisión: 💬 needs-info · 🟡 complexity-medium
 - Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
 
 ### Corregir el texto alternativo del meme del charco (con 🌙 lights-out)
