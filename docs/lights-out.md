@@ -70,6 +70,43 @@ El `.lock.yml` lo genera gh-aw y no se edita a mano, así que no puede cumplir a
 - `github/gh-aw-actions/setup` está fijada por SHA, pero sin comentario con la versión.
 - `actionlint` marca falsos positivos en este fichero (`queue` en `concurrency` y `job.workflow_ref`) porque la versión instalada no conoce esas claves de GitHub Actions.
 
+## Asignación automática de Issues sencillos
+
+El workflow `🌙 Lights-out assign` (`.github/workflows/lights-out-assign.yml`) pasa al carril autónomo los Issues que el triaje deja sencillos y listos.
+
+### Condiciones
+
+Se evalúan **todas las etiquetas actuales** del Issue en cada evento `labeled` (el orden en que el triaje las añade no está garantizado). Deben cumplirse a la vez:
+
+- Issue abierto.
+- `✅ agent-ready` y `🟢 complexity-low`.
+- Al menos una etiqueta de área permitida. De momento solo `🎨 ux`; la lista es la variable `ALLOWED_AREA_LABELS` al principio del workflow.
+- Ni `🖼️ meme` ni `🏭 software-factory`.
+- Quien añadió la etiqueta (`github.event.sender`) tiene permiso `write` o superior.
+
+### Qué hace
+
+1. Asigna el Issue a `copilot-swe-agent[bot]` con `POST /repos/{owner}/{repo}/issues/{n}/assignees` y `agent_assignment.base_branch: main` (API en *public preview*).
+2. Quita `💡 lights-on`, añade `🌙 lights-out` y deja un comentario con el motivo.
+
+Es idempotente: no hace nada si el Issue ya está asignado a Copilot o ya tiene una PR abierta de Copilot. Las etiquetas y el comentario los pone el `GITHUB_TOKEN`, y sus eventos no disparan workflows, así que no hay bucle.
+
+### Secreto para asignar el agente
+
+| Secreto | Para qué | Cómo crearlo |
+| --- | --- | --- |
+| `COPILOT_ASSIGN_TOKEN` | Asignar Copilot al Issue. | Token *fine-grained* de usuario con **Metadata: Read** y **Actions**, **Contents**, **Issues** y **Pull requests**: Read and write. El `GITHUB_TOKEN` y los tokens de GitHub App no pueden asignar Copilot. |
+
+Solo se usa en el paso de asignación; el resto de pasos usan el `GITHUB_TOKEN` con `issues: write`.
+
+### Supuesto sobre el triaje
+
+La Automation de triaje pone las etiquetas actuando como la propietaria (no como bot), por lo que su evento `labeled` debería disparar el workflow. Para comprobarlo tras el merge, abre un Issue de prueba con `✅ agent-ready`, `🟢 complexity-low` y `🎨 ux` (o deja que el triaje lo etiquete) y mira en *Actions → 🌙 Lights-out assign* si hay una ejecución con el actor correcto. Si el triaje no dispara el evento, habrá que añadir `workflow_dispatch` o un `schedule` corto.
+
+### Riesgo de «Require approval for workflow runs»
+
+Con *Settings → Copilot → Cloud agent → Require approval for workflow runs* activado, los checks de la PR del agente no se ejecutan hasta pulsar «Approve and run workflows», y el flujo se queda parado. Desactivarlo permite que el código de la PR de Copilot ejecute workflows sin aprobación humana: es un riesgo aceptado solo si los checks obligatorios, los permisos mínimos de los workflows y la revisión de la PR siguen protegiendo `main`.
+
 ## Qué sigue protegido
 
 Solo la gobernanza y el modelo 3D siguen teniendo propietario y necesitan su revisión: `.github/`, `.vscode/`, `AGENTS.md`, `model/` y `public/models/`. Una PR que mezcle cualquier otra ruta con esas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
