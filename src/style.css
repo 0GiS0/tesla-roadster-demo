@@ -40,4 +40,5 @@
  .meme-mode .viewer-toolbar{height:40px;min-height:40px;padding:3px 3%;gap:8px}
 }
 
+.share-control button{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
 .meme-mode .share-control .share-status{color:#625b4e}
