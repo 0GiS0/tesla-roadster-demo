@@ -21,6 +21,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  issues: read
 
 concurrency:
   group: lights-out-automerge-${{ github.event.pull_request.number || inputs.pr_number }}
@@ -80,7 +81,11 @@ jobs:
                   }
                 }
               }' \
-            --jq '.data.repository.pullRequest.closingIssuesReferences.nodes' > "$RUNNER_TEMP/issues.json"
+            --jq '.data.repository.pullRequest.closingIssuesReferences.nodes // error("no closingIssuesReferences in the response")' \
+            > "$RUNNER_TEMP/issues.json" || {
+              echo "::error::Could not read the Issues linked to PR #$PR_NUMBER. Check that the job has 'issues: read'."
+              exit 1
+            }
 
           echo "head_sha=$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
           echo "is_copilot=$(jq -r '(.user.login == "Copilot")' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"

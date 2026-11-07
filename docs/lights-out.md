@@ -127,6 +127,7 @@ Límites conocidos, aceptados porque el auto-merge de GitHub es persistente: el 
 ### Por qué `pull_request_target` y `COPILOT_ASSIGN_TOKEN`
 
 - Con `pull_request_target` el workflow y el script del guardarraíl salen siempre de `main`: una PR no puede editarlos para llegar al token. El workflow no descarga ni ejecuta código de la PR.
+- Los permisos del `GITHUB_TOKEN` son `contents: read`, `pull-requests: write` e `issues: read`. Este último es imprescindible: sin él, la consulta GraphQL de los Issues enlazados devuelve una lista vacía y la PR se rechazaría con «no linked Issue». Si la consulta falla, el job termina con error en vez de tratar la PR como «sin Issue».
 - Un merge hecho con el `GITHUB_TOKEN` no lanza workflows en el push a `main`, así que `🚀 Validate and deploy Pages` no se ejecutaría y la web no se desplegaría. Por eso el paso que saca la PR de borrador y activa el auto-merge usa el secreto `COPILOT_ASSIGN_TOKEN` (el de la asignación, ver arriba); el resto de pasos usan el `GITHUB_TOKEN`.
 
 ### Probarlo a mano
