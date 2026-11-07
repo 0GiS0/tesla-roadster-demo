@@ -68,6 +68,7 @@ El `.lock.yml` lo genera gh-aw y no se edita a mano, así que no puede cumplir a
 
 - Los jobs generados (`activation`, `agent`, `detection`, `safe_outputs`, `conclusion`, `pre_activation`) y sus pasos no llevan emoji en el `name:`. Sí lo llevan el `name:` del workflow, el job `🔀 Enable auto-merge` y los pasos escritos a mano.
 - `github/gh-aw-actions/setup` está fijada por SHA, pero sin comentario con la versión.
+- Dependabot lo ignora (`exclude-paths` en `.github/dependabot.yml`): sus acciones se actualizan recompilando, no con PRs de Dependabot.
 - `actionlint` marca falsos positivos en este fichero (`queue` en `concurrency` y `job.workflow_ref`) porque la versión instalada no conoce esas claves de GitHub Actions.
 
 ## Asignación automática de Issues sencillos
