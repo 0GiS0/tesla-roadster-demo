@@ -155,4 +155,6 @@ Limitaciones:
 
 El workflow de Actions valida los pull requests sin desplegar. Los push a `main`, o una ejecución manual que seleccione explícitamente `main`, validan y despliegan en el entorno `github-pages` mediante GitHub OIDC. Ningún código de PR recibe permisos de despliegue. Tras una fusión aprobada explícitamente, configura el origen de Pages del repositorio como **GitHub Actions**. URL pública esperada: https://0gis0.github.io/tesla-roadster-demo/ . La publicación y la verificación de la URL pública siguen pendientes de la revisión independiente y la aprobación del usuario requeridas; este cambio no activa Pages ni se fusiona por sí mismo.
 
+🤖 Dependabot (`.github/dependabot.yml`) revisa cada semana las acciones de `.github/workflows/` y abre PRs `ci(deps): ...` que actualizan el SHA y su comentario `# vX.Y.Z`. Se revisan como cualquier otra PR. Ignora `docs-sync.lock.yml`, que se regenera con `gh aw compile` (ver [lights-out](lights-out.md)). Para añadir otro ecosistema, basta con otra entrada en `updates`.
+
 </details>
