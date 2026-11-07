@@ -70,4 +70,4 @@ El workflow `🏷️ PR labels` (`.github/workflows/pr-labels.yml`) se ejecuta a
 
 ## 5. Revisión y merge
 
-`.github/CODEOWNERS` asigna `@0GiS0` y `@returngis-demo` como propietarias de la web (regla `*`, `model/` y `public/models/`) y solo a `@0GiS0` de `AGENTS.md`, `.github/` y `.vscode/`. Quién revisa qué se detalla en [Guardarraíles](guardarrailes.md#quién-revisa-qué). El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
+`.github/CODEOWNERS` asigna `@0GiS0` y `@returngis-demo` como propietarias del modelo 3D (`model/` y `public/models/`; no hay regla `*`) y solo a `@0GiS0` de `AGENTS.md`, `.github/` y `.vscode/`. Quién revisa qué se detalla en [Guardarraíles](guardarrailes.md#quién-revisa-qué). El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
