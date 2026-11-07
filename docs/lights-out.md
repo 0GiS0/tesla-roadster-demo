@@ -91,7 +91,7 @@ Se evalúan **todas las etiquetas actuales** del Issue en cada evento `labeled` 
 
 Es idempotente: no hace nada si el Issue ya está asignado a Copilot o ya tiene una PR abierta de Copilot. Las etiquetas y el comentario los pone el `GITHUB_TOKEN`, y sus eventos no disparan workflows, así que no hay bucle.
 
-### Secreto necesario
+### Secreto para asignar el agente
 
 | Secreto | Para qué | Cómo crearlo |
 | --- | --- | --- |
