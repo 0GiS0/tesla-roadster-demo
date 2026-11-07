@@ -21,6 +21,7 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 | `src/style.css` | Diseños de escritorio, vertical y horizontal baja, y foco de teclado. |
 | `src/scenario.test.ts` | Pruebas de contacto, continuidad, determinismo, límites y enlaces. |
 | `src/parkingScene.test.ts` | Pruebas de «Robo de plaza»: contacto, huellas, coche gris y encuadre. |
+| `src/main.test.tsx` | Prueba del botón «Copiar enlace»: icono decorativo y etiqueta sin cambios. |
 | `model/create_roadster.py` | Geometría original procedural en Blender. |
 | `model/roadster.blend`, `public/models/roadster.glb` | Modelo editable y recurso desplegado. |
 | `model/validate_glb.py` | Validación independiente del GLB (presupuestos y ruedas). |
