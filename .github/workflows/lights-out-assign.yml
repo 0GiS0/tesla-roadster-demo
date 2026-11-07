@@ -24,6 +24,7 @@ env:
   # allow more areas.
   ALLOWED_AREA_LABELS: |
     🎨 ux
+    ♿ accessibility
 
 jobs:
   assign:

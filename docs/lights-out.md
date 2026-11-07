@@ -80,7 +80,7 @@ Se evalúan **todas las etiquetas actuales** del Issue en cada evento `labeled` 
 
 - Issue abierto.
 - `✅ agent-ready` y `🟢 complexity-low`.
-- Al menos una etiqueta de área permitida. De momento solo `🎨 ux`; la lista es la variable `ALLOWED_AREA_LABELS` al principio del workflow. La etiqueta de área la pone el triaje (como máximo una, según `references/reglas.md` de la skill `triage-issue`) o una persona; sin ella el flujo no se activa.
+- Al menos una etiqueta de área permitida. De momento `🎨 ux` y `♿ accessibility`; la lista es la variable `ALLOWED_AREA_LABELS` al principio del workflow. La etiqueta de área la pone el triaje (como máximo una, según `references/reglas.md` de la skill `triage-issue`) o una persona; sin ella el flujo no se activa.
 - Ni `🖼️ meme` ni `🏭 software-factory`.
 - Quien añadió la etiqueta (`github.event.sender`) tiene permiso `write` o superior.
 
