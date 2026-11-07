@@ -19,7 +19,7 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 | `src/framing.ts` | Encuadre de cámara según la relación de aspecto y altura de caída inicial de «Robo de plaza». |
 | `src/share.ts` | Copia del enlace al portapapeles con resultado explícito. |
 | `src/style.css` | Diseños de escritorio, vertical y horizontal baja, y foco de teclado. |
-| `src/scenario.test.ts` | Pruebas de contacto, continuidad, determinismo, límites y enlaces. |
+| `src/scenario.test.ts` | Pruebas de contacto, continuidad, determinismo, límites, enlaces y apoyos de «Cables». |
 | `src/parkingScene.test.ts` | Pruebas de «Robo de plaza»: contacto, huellas, coche gris y encuadre. |
 | `src/main.test.tsx` | Prueba del botón «Copiar enlace»: icono decorativo y etiqueta sin cambios. |
 | `model/create_roadster.py` | Geometría original procedural en Blender. |
@@ -31,7 +31,7 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 
 Cada escena implementa `{ id, title, duration, evaluate(time) }`. `evaluate` devuelve una pose (posición, cuaternión, giro de ruedas, vapor, fase y velocidad) que depende solo del tiempo absoluto de reproducción. Por eso pausar, saltar y repetir son deterministas.
 
-Hay tres escenarios:
+Hay cuatro escenarios:
 
 - `rampFlight` (`ramp-flight`): 28 s. 0–13 s subida; 13–18 s giro; 18–19 s vuelo nivelado; 19–27 s descenso; 28 s terminado.
 - `potholeFlight` (`bache-volador`): 12 s.
