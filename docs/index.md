@@ -32,6 +32,6 @@ Además, el repositorio funciona como una *fábrica de software*: las ideas entr
 
 - [`README.md`](../README.md): ejecución local, modelo y despliegue.
 - [`AGENTS.md`](../AGENTS.md): instrucciones para agentes; es la fuente de las reglas de trabajo.
-- [`.github/triage/reglas.md`](../.github/triage/reglas.md): reglas del triaje.
+- [`.github/skills/triage-issue/`](../.github/skills/triage-issue/SKILL.md): skill del triaje; las reglas están en [`references/reglas.md`](../.github/skills/triage-issue/references/reglas.md).
 
 Cuando la documentación y el código discrepan, manda el código.

@@ -10,7 +10,7 @@ class SceneBoundary extends Component<{children:React.ReactNode;onError:()=>void
 function supports3D(){try{return !!document.createElement('canvas').getContext('webgl2')}catch{return false}}
 const supported=supports3D();
 const clock=(n:number)=>`0:${String(Math.floor(n)).padStart(2,'0')}`;
-function Icon({name}:{name:'play'|'pause'|'reset'|'camera'}){return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">{name==='play'?<path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/>:name==='pause'?<><path d="M8 5v14M16 5v14" strokeWidth="3"/></>:name==='reset'?<><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></>:<><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></>}</svg>}
+function Icon({name}:{name:'play'|'pause'|'reset'|'camera'|'link'}){return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">{name==='play'?<path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none"/>:name==='pause'?<><path d="M8 5v14M16 5v14" strokeWidth="3"/></>:name==='reset'?<><path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/></>:name==='link'?<><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/></>:<><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></>}</svg>}
 function Loading(){const {active,progress}=useProgress();return active?<div className="loading" role="status"><span className="loader"/>Preparando la pista <span>{Math.round(progress)}%</span></div>:null}
 function App(){
  const [definition,setDefinition]=useState(()=>sceneFromHash(location.hash));
@@ -92,7 +92,7 @@ function App(){
       <a href={definition.source?.url} target="_blank" rel="noreferrer">{definition.source&&sourceLabel(definition.source)} ↗</a>
      </div>
      <div className="share-control">
-      <button onClick={copyLink}>Copiar enlace</button>
+      <button onClick={copyLink}><Icon name="link"/>Copiar enlace</button>
       <span className="share-status" role="status">{shareMessage}</span>
       {shareFallback&&<input aria-label="Enlace para compartir" readOnly onFocus={e=>e.currentTarget.select()} value={shareUrl}/>}
      </div>

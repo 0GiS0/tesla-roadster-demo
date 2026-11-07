@@ -39,6 +39,14 @@ Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y 
 - **Memes nuevos:** entran solos desde `src/sceneCatalog.ts`; `tourMoment` (instante o rango) es opcional.
 - **Contenido:** `SKILL.md` y `references/detalles.md`. Reutiliza `scripts/record-tour.mjs` y `scripts/tour/`.
 
+### `triage-issue`
+
+Tria un issue nuevo de la fábrica: elige una etiqueta (`✅ agent-ready`, `📐 needs-spec` o `💬 needs-info`), la luz (`💡 lights-on` o `🌙 lights-out`, solo si es `✅ agent-ready`), la complejidad, como máximo una etiqueta de área (`🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`) y deja un único comentario corto.
+
+- **Procedimiento:** si el issue ya está triado no hace nada; si no, aplica las reglas y ejemplos de `references/reglas.md`, quita `🔍 needs-triage` y comenta con el formato «Triaje / Por qué / Siguiente paso».
+- **Límites:** no escribe código, no asigna, cierra ni edita issues y no inventa etiquetas. Ante la duda elige la opción más prudente.
+- **Contenido:** `SKILL.md` y `references/reglas.md` (las reglas se editan con PR revisada).
+
 ## MCP
 
 `.github/mcp.json` configura un único servidor, **playwright**, en local con `npx @playwright/mcp@0.0.83` en modo aislado y sin interfaz (`--isolated`, `--headless`), con service workers bloqueados. Solo puede navegar a `http://127.0.0.1:5173`, `http://127.0.0.1:4173` y `https://0gis0.github.io`.
@@ -46,6 +54,8 @@ Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y 
 ## Validación
 
 `.github/workflows/validate-skills.yml` se ejecuta cuando cambian `.github/skills/**` o el propio workflow (en PR y en pushes a `main`). Instala waza con versión y checksum SHA-256 fijados, comprueba que las skills están listas, cuenta sus tokens y compara el resultado con la línea base de `main`.
+
+La comparación mide todos los archivos de cada skill, `SKILL.md` y `references/` incluidos, y falla si alguno crece más de un 10 % respecto a `main` (los archivos nuevos quedan exentos). En cada PR del mismo repositorio, la ejecución publica siempre una tabla con el resultado de cada skill en un único comentario que se actualiza en las ejecuciones siguientes (las PR desde forks solo tienen el resumen del job).
 
 ## Relación con la fábrica
 

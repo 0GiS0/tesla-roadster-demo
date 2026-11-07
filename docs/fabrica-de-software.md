@@ -1,7 +1,7 @@
 # Fábrica de software
 
 > **Propósito:** explicar el recorrido de un cambio: plantilla de issue → triaje → agente → revisión → merge.
-> **Qué mantener:** las plantillas y etiquetas, las reglas de triaje (resumen), los controles de CI y la propiedad de código. Revisa esta página cuando cambien `.github/ISSUE_TEMPLATE/`, `.github/triage/reglas.md`, `.github/workflows/` o `.github/CODEOWNERS`.
+> **Qué mantener:** las plantillas y etiquetas, las reglas de triaje (resumen), los controles de CI y la propiedad de código. Revisa esta página cuando cambien `.github/ISSUE_TEMPLATE/`, `.github/skills/triage-issue/`, `.github/workflows/` o `.github/CODEOWNERS`.
 
 ## Recorrido
 
@@ -29,7 +29,9 @@ El workflow `validate-issue-templates.yml` valida las plantillas con `check-json
 
 ## 2. Triaje
 
-Las reglas viven en `.github/triage/reglas.md` y las lee una Automation («🚦 Triaje de la fábrica») en cada issue nuevo. Otra Automation («🔁 La fábrica aprende») propone cambios a ese archivo siempre mediante una pull request que revisa una persona. Resumen de las decisiones:
+El triaje es una skill: `.github/skills/triage-issue/`. Su `SKILL.md` describe el procedimiento y `references/reglas.md` contiene las reglas y los ejemplos. Una Automation («🚦 Triaje de la fábrica») la usa en cada issue nuevo; su prompt solo debe decir algo como «usa la skill `triage-issue` para triar este issue». Otra Automation («🔁 La fábrica aprende») propone cambios a `references/reglas.md` siempre mediante una pull request que revisa una persona.
+
+Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷 Validate skills`: `waza check`, el recuento de tokens y la comparación con `main` (`waza tokens compare`, umbral del 10 %). Así lo que aprende la fábrica queda medido por waza antes de que lo revise una persona. Resumen de las decisiones:
 
 - `✅ agent-ready`: meme con descripción y referencia, o fallo reproducible.
 - `📐 needs-spec`: algo nuevo que no es un meme o que toca varias partes de la web.
@@ -37,8 +39,10 @@ Las reglas viven en `.github/triage/reglas.md` y las lee una Automation («🚦 
 - `💡 lights-on`: cambia lo que ve el público.
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
 - Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
+- Complejidad: además, el triaje pone siempre una de `🟢 complexity-low`, `🟡 complexity-medium` (toda escena `🖼️ meme`) o `🔴 complexity-high`.
+- Área: como máximo una de `🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`. No se pone en issues `🖼️ meme` o `🏭 software-factory`, se respeta la que ya haya puesto una persona y se omite si ninguna encaja con claridad. Es lo que permite que actúe [`🌙 Lights-out assign`](lights-out.md).
 
-El detalle y los ejemplos están en `.github/triage/reglas.md`; esa es la fuente.
+El detalle y los ejemplos están en `.github/skills/triage-issue/references/reglas.md`; esa es la fuente.
 
 ## 3. Agente
 
@@ -50,20 +54,21 @@ Un agente implementa el issue siguiendo `AGENTS.md` y `.github/copilot-instructi
 - `docs.yml` → job `📚 docs`: ejecuta `markdownlint-cli2` y `scripts/check-markdown-links.mjs` en cada PR y en pushes a `main`. Es el segundo check obligatorio, junto a `🧪 validate`.
 - `validate-skills.yml`: valida las skills de `.github/skills/` (waza, con versión y checksum fijados) cuando cambian.
 - `validate-issue-templates.yml`: valida las plantillas cuando cambian.
-- `pr-labels.yml` → `🏷️ PR labels`: copia a la PR las etiquetas de los Issues que cierra (`Closes`/`Fixes #N`), para poder filtrar por categoría y por `💡 lights-on` / `🌙 lights-out`. Detalle en [Etiquetas de las PR](#etiquetas-de-las-pr).
+- `pr-labels.yml` → `🏷️ PR labels`: copia a la PR las etiquetas de los Issues que cierra (`Closes`/`Fixes #N`) y etiqueta las PR que modifican las reglas del triaje, para poder filtrar por categoría y por `💡 lights-on` / `🌙 lights-out`. Detalle en [Etiquetas de las PR](#etiquetas-de-las-pr).
 - Los workflows llevan emoji en el `name:` y en los de cada step, y las acciones se fijan por SHA completo de commit.
 - Las PR solo validan: el despliegue se ejecuta tras un push a `main` o con una ejecución manual sobre `main`.
 
 ### Etiquetas de las PR
 
-El workflow `🏷️ PR labels` (`.github/workflows/pr-labels.yml`) se ejecuta al abrir, reabrir o editar una PR y al sacarla de borrador. Lee los Issues que la PR cierra (`closingIssuesReferences`) y le añade sus etiquetas de categoría (`🖼️ meme`, `🏭 software-factory`, `🤖 agents`, `📝 documentation`…) y de luces (`💡 lights-on` / `🌙 lights-out`).
+El workflow `🏷️ PR labels` (`.github/workflows/pr-labels.yml`) se ejecuta al abrir, reabrir, editar o actualizar (`synchronize`) una PR y al sacarla de borrador. Lee los Issues que la PR cierra (`closingIssuesReferences`) y le añade sus etiquetas de categoría (`🖼️ meme`, `🏭 software-factory`, `🤖 agents`, `📝 documentation`…) y de luces (`💡 lights-on` / `🌙 lights-out`).
 
+- **Regla de aprendizaje del triaje:** si la PR modifica `.github/skills/triage-issue/references/reglas.md`, añade `🔁 triage-learning`, `🏭 software-factory`, `🤖 agents` y `💡 lights-on`, aunque la haga una persona y no cierre ningún Issue. Lee solo los nombres de archivo con la API (`pulls/N/files`, paginada). Se vuelve a evaluar en cada `synchronize` porque el agente de Copilot abre la PR antes de subir los commits.
 - **No copia** las etiquetas de estado del Issue: `🔍 needs-triage`, `✅ agent-ready`, `📐 needs-spec`, `💬 needs-info`, `🧑‍🏫 triage-corrected`, `♻️ duplicate`, `⛔ wontfix` y `🚫 invalid`.
-- **Nunca quita** etiquetas que la PR ya tenga. Si la PR no cierra ningún Issue, termina bien sin cambios.
+- **Nunca quita** etiquetas que la PR ya tenga. Si la PR no cierra ningún Issue ni toca las reglas, termina bien sin cambios.
 - **Seguridad:** usa `pull_request_target`, así que corre desde `main` con `GITHUB_TOKEN` y permisos mínimos (`contents: read`, `issues: read`, `pull-requests: write`). No hace checkout ni ejecuta código de la PR; solo llama a la API con `gh`.
 - **Manual:** `workflow_dispatch` con el número de la PR sirve para etiquetar una PR existente o repetir la ejecución.
 - **Cloud agent:** las ejecuciones de workflows disparadas por PR abiertas por el cloud agent pueden quedar a la espera de «Approve and run workflows». Está pendiente de comprobar con la primera PR real; si ocurre, se aprueba la ejecución o se lanza `🏷️ PR labels` a mano con `workflow_dispatch`.
 
 ## 5. Revisión y merge
 
-`.github/CODEOWNERS` asigna `@0GiS0` y `@returngis-demo` como propietarias de la web (regla `*`, `model/` y `public/models/`) y solo a `@0GiS0` de `AGENTS.md`, `.github/` y `.vscode/`. Quién revisa qué se detalla en [Guardarraíles](guardarrailes.md#quién-revisa-qué). El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
+`.github/CODEOWNERS` asigna `@0GiS0` y `@returngis-demo` como propietarias del modelo 3D (`model/` y `public/models/`; no hay regla `*`) y solo a `@0GiS0` de `AGENTS.md`, `.github/` y `.vscode/`. Quién revisa qué se detalla en [Guardarraíles](guardarrailes.md#quién-revisa-qué). El agente no fusiona por su cuenta: la integración requiere aprobación explícita, y antes de abrir una PR se hace una revisión independiente del diff.
