@@ -31,7 +31,7 @@ UNA como máximo, de esta lista cerrada: 🎨 ux (interfaz, controles, rendimien
 🚀 deployment (CI, Pages), 📝 documentation (solo docs). Ninguna si es 🖼️ meme o
 🏭 software-factory, si ya hay una de una persona o si ninguna encaja con claridad.
 Plantilla de mejora, `Área`: Interfaz, Controles o Rendimiento → 🎨 ux;
-Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux + 🟢 low activa `🌙 Lights-out assign`.
+Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ accessibility + 🟢 low activa `🌙 Lights-out assign`.
 
 ### Según el tipo de issue
 
