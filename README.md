@@ -22,7 +22,7 @@
 
 Una experiencia WebGL 2 silenciosa y autocontenida, en español, construida con React, TypeScript, Three.js y React Three Fiber. Una rampa, un impulso… y el coche sube, gira en el aire y aterriza. Todo en 28 segundos que puedes reproducir, pausar, recorrer con el control de tiempo y mirar desde cualquier ángulo.
 
-El **Modo MEME** añade «Bache volador» (12 segundos) y «Robo de plaza» (10 segundos), con [enlace directo a Bache volador](https://0gis0.github.io/tesla-roadster-demo/#meme/bache-volador) y [enlace directo a Robo de plaza](https://0gis0.github.io/tesla-roadster-demo/#meme/robo-de-plaza). La escena original de la rampa sigue siendo la predeterminada.
+El **Modo MEME** añade «Bache volador» (12 segundos), «Robo de plaza» (10 segundos) y «Cables» (12 segundos), con [enlace directo a Bache volador](https://0gis0.github.io/tesla-roadster-demo/#meme/bache-volador), [enlace directo a Robo de plaza](https://0gis0.github.io/tesla-roadster-demo/#meme/robo-de-plaza) y [enlace directo a Cables](https://0gis0.github.io/tesla-roadster-demo/#meme/cables). La escena original de la rampa sigue siendo la predeterminada.
 
 - 🎬 Reproduce, pausa, reinicia y repite la maniobra.
 - 🕹️ Orbita la cámara con ratón, táctil o teclado.
