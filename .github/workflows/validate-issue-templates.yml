@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: validate-issue-templates-${{ github.event.pull_request.number || github.ref }}
+  group: validate-issue-templates-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
