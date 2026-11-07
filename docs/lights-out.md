@@ -113,14 +113,16 @@ El workflow `🔀 Lights-out auto-merge` (`.github/workflows/lights-out-automerg
 
 ### Cuándo actúa
 
-Se dispara con `pull_request_target` (`review_requested`, `ready_for_review` y `synchronize`) y con `workflow_dispatch`. Lee el estado actual de la PR y solo continúa si se cumple **todo** (lógica en `.github/scripts/lights-out-guard.sh`):
+Se dispara con `pull_request_target` (`review_requested`, `ready_for_review`, `synchronize` y `edited`, este último para cambios en los Issues enlazados) y con `workflow_dispatch`. Lee el estado actual de la PR y solo continúa si se cumple **todo** (lógica en `.github/scripts/lights-out-guard.sh`):
 
 - La PR está abierta, la firma Copilot, la rama sale de este repositorio y apunta a `main`.
 - Tiene al menos un Issue enlazado (palabras clave de cierre) y todos están abiertos y con `🌙 lights-out`.
 - El diff es pequeño: hasta 150 líneas cambiadas (`MAX_CHANGED_LINES`) y 10 ficheros (`MAX_CHANGED_FILES`), variables al principio del workflow.
 - Ningún fichero, incluidos los nombres anteriores en renombrados, está en `.github/`, `.vscode/`, `model/` o `public/models/`, ni es `AGENTS.md`, `package.json` o `package-lock.json` de la raíz.
 
-Si se cumple, saca la PR de borrador y ejecuta `gh pr merge --auto --squash --match-head-commit <SHA evaluado>`, de modo que un push posterior no se fusione sin evaluar. Si no se cumple, no hace nada y la PR queda para revisión humana (el motivo aparece en el resumen de la ejecución). Si una PR de Copilot deja de ser elegible tras un nuevo push, el workflow cancela su auto-merge. Los checks obligatorios `🧪 validate` y `📚 docs` siguen siendo la barrera final.
+Si se cumple, saca la PR de borrador y ejecuta `gh pr merge --auto --squash --match-head-commit <SHA evaluado>`. Si no se cumple, no hace nada y la PR queda para revisión humana (el motivo aparece en el resumen de la ejecución). Si una PR de Copilot deja de ser elegible tras un nuevo push o una edición, el workflow cancela su auto-merge. Los checks obligatorios `🧪 validate` y `📚 docs` siguen siendo la barrera final.
+
+Límites conocidos, aceptados porque el auto-merge de GitHub es persistente: el SHA solo se fija al activarlo, y la cancelación es una evaluación posterior, no una barrera previa al merge. Además, cerrar el Issue o quitarle `🌙 lights-out` con el auto-merge ya activo no reevalúa la PR; en ese caso hay que desactivarlo a mano (`gh pr merge <n> --disable-auto`). Un push con permiso de escritura a la rama de Copilot por parte de la propietaria se considera de confianza.
 
 ### Por qué `pull_request_target` y `COPILOT_ASSIGN_TOKEN`
 

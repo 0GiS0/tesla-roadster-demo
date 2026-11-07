@@ -10,7 +10,7 @@ name: 🔀 Lights-out auto-merge
 # to reach the user token. It never checks out or runs code from the PR.
 on:
   pull_request_target:
-    types: [review_requested, ready_for_review, synchronize]
+    types: [review_requested, ready_for_review, synchronize, edited]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -128,6 +128,6 @@ jobs:
           if [ "$(gh pr view "$PR_NUMBER" --json isDraft --jq '.isDraft')" = "true" ]; then
             gh pr ready "$PR_NUMBER"
           fi
-          # Pin the evaluated commit: a later push must not be merged unchecked.
+          # Pin the commit evaluated when auto-merge is enabled.
           gh pr merge "$PR_NUMBER" --auto --squash --match-head-commit "$HEAD_SHA"
           echo "🔀 Auto-merge enabled on PR #$PR_NUMBER" >> "$GITHUB_STEP_SUMMARY"
