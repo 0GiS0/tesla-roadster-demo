@@ -1,4 +1,4 @@
-# 🤖 Dependabot version updates, limited to GitHub Actions.
+# 🤖 Dependabot version updates for GitHub Actions and the web's npm packages.
 # Every action in .github/workflows/ is pinned to a full commit SHA with a
 # `# vX.Y.Z` comment; Dependabot bumps both the SHA and that comment.
 version: 2
@@ -27,4 +27,33 @@ updates:
     # ✍️ Conventional Commits, no emoji: "ci(deps): bump actions/checkout from ... to ...".
     commit-message:
       prefix: "ci"
+      include: "scope"
+
+  # 📦 Web dependencies (package.json + package-lock.json: React, Three.js, Vite...).
+  - package-ecosystem: npm
+    directory: "/"
+
+    # 📅 Same weekly slot as the actions entry.
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+
+    # 🧺 One PR for all minor and patch bumps; majors are not grouped, so each
+    # one opens its own PR (they may break the web).
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+    # 🏷️ Existing repository label only: dependency bumps need human review.
+    labels:
+      - "💡 lights-on"
+
+    # ✍️ Conventional Commits, no emoji: "build(deps): bump ..." / "build(deps-dev): bump ...".
+    commit-message:
+      prefix: "build"
+      prefix-development: "build"
       include: "scope"
