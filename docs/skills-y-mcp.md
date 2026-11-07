@@ -41,7 +41,7 @@ Graba el tour corto de la web (10–15 s) con HyperFrames: la escena original y 
 
 ### `triage-issue`
 
-Tria un issue nuevo de la fábrica: elige una etiqueta (`✅ agent-ready`, `📐 needs-spec` o `💬 needs-info`), la luz (`💡 lights-on` o `🌙 lights-out`, solo si es `✅ agent-ready`) y deja un único comentario corto.
+Tria un issue nuevo de la fábrica: elige una etiqueta (`✅ agent-ready`, `📐 needs-spec` o `💬 needs-info`), la luz (`💡 lights-on` o `🌙 lights-out`, solo si es `✅ agent-ready`), la complejidad, como máximo una etiqueta de área (`🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`) y deja un único comentario corto.
 
 - **Procedimiento:** si el issue ya está triado no hace nada; si no, aplica las reglas y ejemplos de `references/reglas.md`, quita `🔍 needs-triage` y comenta con el formato «Triaje / Por qué / Siguiente paso».
 - **Límites:** no escribe código, no asigna, cierra ni edita issues y no inventa etiquetas. Ante la duda elige la opción más prudente.
