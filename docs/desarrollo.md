@@ -66,8 +66,10 @@ npm run dev
 Abre **http://127.0.0.1:5173/tesla-roadster-demo/**. Todos los recursos de ejecución son locales, incluido el modelo original `public/models/roadster.glb`. No hacen falta cuentas, backend, fuentes externas, texturas ni recursos de CDN. Se requiere WebGL 2 con aceleración por hardware. Una pantalla alternativa visible cubre los gráficos no disponibles y los fallos al cargar el modelo.
 
 ```sh
+npm run lint
 npm run typecheck
 npm test
+python3 model/validate_glb.py
 npm run build
 ```
 
