@@ -1,6 +1,6 @@
 # 🌙 Lights-out
 
-*Lights-out* es el modo en el que una PR se mergea sin revisión humana porque el cambio es seguro por construcción. Hoy solo aplica a la documentación.
+*Lights-out* es el modo en el que una PR se mergea sin revisión humana porque el cambio es seguro por construcción. Aplica a la documentación y a las PR pequeñas del cloud agent para Issues `🌙 lights-out`.
 
 ## Qué cubre
 
@@ -11,7 +11,7 @@
 
 ## Quién activa el auto-merge
 
-No hay un flujo genérico por etiqueta. El Agentic Workflow [`📚 Docs sync`](../.github/workflows/docs-sync.md) mantiene la documentación y activa el auto-merge solo en sus propias PR. Para ello el repositorio debe tener activada la opción *Allow auto-merge*.
+Para las PR del cloud agent, el workflow [`🔀 Lights-out auto-merge`](#auto-merge-de-las-pr-del-cloud-agent). Para la documentación, no hay un flujo genérico por etiqueta: el Agentic Workflow [`📚 Docs sync`](../.github/workflows/docs-sync.md) mantiene la documentación y activa el auto-merge solo en sus propias PR. Para ello el repositorio debe tener activada la opción *Allow auto-merge*.
 
 ## Cómo funciona `📚 Docs sync`
 
@@ -106,6 +106,38 @@ La Automation de triaje pone las etiquetas actuando como la propietaria (no como
 ### Riesgo de «Require approval for workflow runs»
 
 Con *Settings → Copilot → Cloud agent → Require approval for workflow runs* activado, los checks de la PR del agente no se ejecutan hasta pulsar «Approve and run workflows», y el flujo se queda parado. Desactivarlo permite que el código de la PR de Copilot ejecute workflows sin aprobación humana: es un riesgo aceptado solo si los checks obligatorios, los permisos mínimos de los workflows y la revisión de la PR siguen protegiendo `main`.
+
+## Auto-merge de las PR del cloud agent
+
+El workflow `🔀 Lights-out auto-merge` (`.github/workflows/lights-out-automerge.yml`) cierra el carril: activa el auto-merge en la PR que el cloud agent abre para un Issue `🌙 lights-out`. Es el equivalente al job `🔀 Enable auto-merge` de docs-sync.
+
+### Cuándo actúa
+
+Se dispara con `pull_request_target` (`review_requested`, `ready_for_review` y `synchronize`) y con `workflow_dispatch`. Lee el estado actual de la PR y solo continúa si se cumple **todo** (lógica en `.github/scripts/lights-out-guard.sh`):
+
+- La PR está abierta, la firma Copilot, la rama sale de este repositorio y apunta a `main`.
+- Tiene al menos un Issue enlazado (palabras clave de cierre) y todos están abiertos y con `🌙 lights-out`.
+- El diff es pequeño: hasta 150 líneas cambiadas (`MAX_CHANGED_LINES`) y 10 ficheros (`MAX_CHANGED_FILES`), variables al principio del workflow.
+- Ningún fichero, incluidos los nombres anteriores en renombrados, está en `.github/`, `.vscode/`, `model/` o `public/models/`, ni es `AGENTS.md`, `package.json` o `package-lock.json` de la raíz.
+
+Si se cumple, saca la PR de borrador y ejecuta `gh pr merge --auto --squash --match-head-commit <SHA evaluado>`, de modo que un push posterior no se fusione sin evaluar. Si no se cumple, no hace nada y la PR queda para revisión humana (el motivo aparece en el resumen de la ejecución). Si una PR de Copilot deja de ser elegible tras un nuevo push, el workflow cancela su auto-merge. Los checks obligatorios `🧪 validate` y `📚 docs` siguen siendo la barrera final.
+
+### Por qué `pull_request_target` y `COPILOT_ASSIGN_TOKEN`
+
+- Con `pull_request_target` el workflow y el script del guardarraíl salen siempre de `main`: una PR no puede editarlos para llegar al token. El workflow no descarga ni ejecuta código de la PR.
+- Un merge hecho con el `GITHUB_TOKEN` no lanza workflows en el push a `main`, así que `🚀 Validate and deploy Pages` no se ejecutaría y la web no se desplegaría. Por eso el paso que saca la PR de borrador y activa el auto-merge usa el secreto `COPILOT_ASSIGN_TOKEN` (el de la asignación, ver arriba); el resto de pasos usan el `GITHUB_TOKEN`.
+
+### Probarlo a mano
+
+*Actions → 🔀 Lights-out auto-merge → Run workflow*, en `main`, con el número de la PR. Aplica exactamente los mismos guardarraíles. Sirve para una PR ya existente, para la que no habrá un evento nuevo.
+
+### Pruebas de los guardarraíles
+
+```sh
+bash .github/scripts/lights-out-guard.test.sh
+```
+
+Cubre casos sintéticos: PR válida, rutas protegidas (incluido un renombrado desde una ruta protegida), límites de líneas y ficheros, Issue sin `🌙 lights-out` o cerrado, sin Issue, autor distinto de Copilot, rama de fork y destino distinto de `main`.
 
 ## Qué sigue protegido
 
