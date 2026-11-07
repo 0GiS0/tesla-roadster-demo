@@ -1,26 +1,22 @@
 # Reglas del triaje de la fábrica de memes
 
-Este archivo es parte de la skill `triage-issue`: la lee la Automation 🚦 Triaje de la fábrica
-en cada issue nuevo. Lo cambia la Automation 🔁 La fábrica aprende, siempre con una PR que revisa una persona.
+Parte de `triage-issue`: la lee 🚦 Triaje y la cambia 🔁 La fábrica aprende con PR revisada.
 
 ## Qué es la web
 
-Una web estática en GitHub Pages que recrea el coche volador de Tesla y los memes
-que salieron después. Cada meme es una escena con su imagen, su pie de foto y su
-texto alternativo. La sección de inventario lista todos los memes publicados.
+Web estática en GitHub Pages: el coche volador de Tesla y sus memes. Cada meme es una
+escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 ## Reglas
 
-- ✅ agent-ready: un meme nuevo con descripción y una imagen o enlace de referencia;
-  o un fallo concreto que se puede reproducir. Se puede comprobar al terminar.
-- 📐 needs-spec: algo nuevo que no es un meme: una sección, un cambio de diseño,
-  votaciones, cuentas de usuario… o algo que toca varias partes de la web.
-- 💬 needs-info: falta la imagen o el enlace de referencia, el texto del meme,
-  o no se sabe qué falla ni dónde.
-- 💡 lights-on: cambia lo que ve el público en la web.
-- 🌙 lights-out: solo cambia la documentación o el inventario (pie de foto,
-  texto alternativo, la lista de memes). Esta excepción tiene prioridad sobre
-  la regla general de 💡 lights-on, aunque el pie de foto sea visible para el público.
+- ✅ agent-ready: un meme nuevo con descripción y imagen o enlace de referencia; o un
+  fallo reproducible. Se puede comprobar al terminar.
+- 📐 needs-spec: algo nuevo que no es un meme (sección, diseño, votaciones, cuentas…)
+  o que toca varias partes de la web.
+- 💬 needs-info: falta la imagen o el enlace, el texto del meme, o qué falla y dónde.
+- 💡 lights-on: cambia lo que ve el público.
+- 🌙 lights-out: solo cambia documentación o inventario (pie de foto, texto alternativo,
+  lista de memes); tiene prioridad sobre 💡 lights-on aunque el pie sea visible.
 
 ### Complejidad
 
@@ -28,35 +24,44 @@ texto alternativo. La sección de inventario lista todos los memes publicados.
 - 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
 - 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
 
+### Área
+
+UNA como máximo, de esta lista cerrada: 🎨 ux (interfaz, controles, rendimiento),
+♿ accessibility, 🧊 3d (modelos, luces, entornos), 🎬 animation (trayectorias, efectos),
+🚀 deployment (CI, Pages), 📝 documentation (solo docs). Ninguna si es 🖼️ meme o
+🏭 software-factory, si ya hay una de una persona o si ninguna encaja con claridad.
+Plantilla de mejora, `Área`: Interfaz, Controles o Rendimiento → 🎨 ux;
+Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux + 🟢 low activa `🌙 Lights-out assign`.
+
 ### Según el tipo de issue
 
 - 🖼️ meme: ✅ agent-ready si trae descripción y referencia; si no, 💬 needs-info.
-- 🐛 bug: ✅ agent-ready si trae pasos para reproducirlo y qué debería pasar;
-  si no, 💬 needs-info.
-- ✨ enhancement: 📐 needs-spec salvo que sea un cambio pequeño, en una sola parte
-  de la web y con criterios de aceptación que se puedan comprobar.
-- 🏭 software-factory: nunca 🌙 lights-out y siempre lleva 💡 lights-on, aunque no
-  cambie la web. Si tiene criterios de aceptación concretos y comprobables, es
-  ✅ agent-ready; 📐 needs-spec solo si aún no se sabe cómo hacerlo. Siempre lo
-  revisa una persona.
+- 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
+- ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
+- 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
+  y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
 
 ## Ejemplos
 
 ### El coche que vuela para no pisar un charco
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: es un meme nuevo con descripción y enlace a la imagen original.
+- Por qué: meme nuevo con descripción y enlace a la imagen.
 
 ### Añadir votaciones para elegir el mejor meme
 - Decisión: 📐 needs-spec
-- Por qué: no es un meme, es una funcionalidad nueva (guardar votos, evitar votos repetidos).
+- Por qué: funcionalidad nueva (guardar votos, evitar repetidos).
 
 ### El autoservicio de McDonald's en el cielo
 - Decisión: 💬 needs-info
-- Por qué: no trae imagen ni enlace de referencia; no se sabe qué escena recrear.
+- Por qué: sin imagen ni enlace; no se sabe qué escena recrear.
 
 ### Corregir el texto alternativo del meme del charco
 - Decisión: ✅ agent-ready · 🌙 lights-out
 - Por qué: solo cambia el inventario y la accesibilidad, no la escena.
+
+### Hacer más grande el botón de reiniciar en móvil
+- Decisión: ✅ agent-ready · 💡 lights-on · 🟢 complexity-low · 🎨 ux
+- Por qué: cambio pequeño de interfaz, comprobable y en una sola parte.
 
 ## Lecciones
 

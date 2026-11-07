@@ -40,6 +40,7 @@ Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
 - Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
 - Complejidad: además, el triaje pone siempre una de `🟢 complexity-low`, `🟡 complexity-medium` (toda escena `🖼️ meme`) o `🔴 complexity-high`.
+- Área: como máximo una de `🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`. No se pone en issues `🖼️ meme` o `🏭 software-factory`, se respeta la que ya haya puesto una persona y se omite si ninguna encaja con claridad. Es lo que permite que actúe [`🌙 Lights-out assign`](lights-out.md).
 
 El detalle y los ejemplos están en `.github/skills/triage-issue/references/reglas.md`; esa es la fuente.
 
