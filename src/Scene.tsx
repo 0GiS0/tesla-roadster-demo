@@ -1,12 +1,14 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
-import { BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, Group, InstancedMesh, Object3D, Path, Quaternion, RepeatWrapping, Spherical, Shape, ShapeGeometry, SRGBColorSpace, Vector3 } from 'three';
+import { BufferGeometry, CanvasTexture, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, Group, InstancedMesh, Object3D, Path, Quaternion, RepeatWrapping, Spherical, Shape, ShapeGeometry, SRGBColorSpace, TubeGeometry, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
-import { RADIUS, createParkingSpaceTheft } from './scenario';
+import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_ENDPOINT_HEIGHT, CABLE_SUPPORT_FLAT_HALF_LENGTH, CABLE_SUPPORT_RADIUS, CABLE_SUPPORT_SPAN_HALF_LENGTH, CABLE_SUPPORT_WHEEL_Z, CABLE_SUPPORT_X, RADIUS, cableSupportHeightAt, createParkingSpaceTheft } from './scenario';
 import type { SceneDefinition } from './sceneCatalog';
 import { ParkingLot } from './ParkingLot';
 import { fitCameraPlacement, parkingDropHeight } from './framing';
+
+const CABLE_CAR_COLORS=['#777b72','#b6a98e','#59675e','#a34f39','#858b8c','#70665b'];
 
 function Vehicle({time,onReady,definition}:{time:number;onReady:()=>void;definition:SceneDefinition}) {
  const {scene}=useGLTF(`${import.meta.env.BASE_URL}models/roadster.glb`);
@@ -53,9 +55,9 @@ function Rails(){
 }
 // Fixed seeds and analytic particle ages: scrubbing and pausing never mutate the plume.
 function Vapor({time,definition}:{time:number;definition:SceneDefinition}){
- const ref=useRef<InstancedMesh>(null);const dummy=useMemo(()=>new Object3D(),[]);const parking=definition.environment==='parking';
- useFrame(()=>{if(!ref.current)return;const p=definition.scenario.evaluate(time);for(let i=0;i<256;i++){const seed=(Math.sin(i*127.1+31.7)*43758.5453)%1;const age=((time*.55+i*.61803398875)%1+1)%1;const lane=i%4;const spread=.035+age*(parking?1.5:.85);const lateral=(lane<2?-1.1:1.1)+Math.sin(i*9.3)*spread,depth=(lane%2?-.65:.65)+Math.cos(i*4.7)*spread;const fall=age*(2+Math.min(8,p.position[1]));dummy.position.set(p.position[0]+(parking?depth:lateral),parking?Math.max(.12,p.position[1]-.3-fall):p.position[1]-.3-fall,p.position[2]+(parking?lateral:depth));dummy.scale.setScalar(p.vapor*(.13+age*.8)*(1-age*.65)*(1+Math.abs(seed)*.4));dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix)}ref.current.instanceMatrix.needsUpdate=true;ref.current.visible=p.vapor>.001});
- return <instancedMesh ref={ref} args={[undefined,undefined,256]} frustumCulled={false}><planeGeometry args={[2,2]}/><shaderMaterial transparent depthWrite={false} toneMapped={false}
+ const ref=useRef<InstancedMesh>(null);const dummy=useMemo(()=>new Object3D(),[]);const parking=definition.environment==='parking',cables=definition.environment==='cables',count=cables?CABLES_EFFECT_PARTICLE_BUDGET.vapor:256;
+ useFrame(()=>{if(!ref.current)return;const p=definition.scenario.evaluate(time);for(let i=0;i<count;i++){const seed=(Math.sin(i*127.1+31.7)*43758.5453)%1;const age=((time*.55+i*.61803398875)%1+1)%1;const lane=i%4;const spread=.035+age*(parking?1.5:.85);const lateral=(lane<2?-1.1:1.1)+Math.sin(i*9.3)*spread,depth=(lane%2?-.65:.65)+Math.cos(i*4.7)*spread;const fall=age*(2+Math.min(8,p.position[1]));dummy.position.set(p.position[0]+(parking?depth:lateral),parking?Math.max(.12,p.position[1]-.3-fall):p.position[1]-.3-fall,p.position[2]+(parking?lateral:depth));dummy.scale.setScalar(p.vapor*(.13+age*.8)*(1-age*.65)*(1+Math.abs(seed)*.4));dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix)}ref.current.instanceMatrix.needsUpdate=true;ref.current.visible=p.vapor>.001});
+ return <instancedMesh ref={ref} args={[undefined,undefined,count]} frustumCulled={false}><planeGeometry args={[2,2]}/><shaderMaterial transparent depthWrite={false} toneMapped={false}
  vertexShader={`varying vec2 vUv; void main(){vUv=uv;vec4 center=modelViewMatrix*instanceMatrix*vec4(0.0,0.0,0.0,1.0);float size=length(instanceMatrix[0].xyz);center.xy+=position.xy*size;gl_Position=projectionMatrix*center;}`}
  fragmentShader={`varying vec2 vUv; void main(){float r=length(vUv*2.0-1.0);float alpha=pow(max(0.0,1.0-r*r),3.0)*0.48;gl_FragColor=vec4(0.94,0.97,1.0,alpha);}`}/>
 </instancedMesh>;
@@ -231,6 +233,137 @@ function Building({position,color,side}:{position:[number,number,number];color:s
   <mesh position={[0,1.95,front*3.16]}><boxGeometry args={[8.4,.18,.38]}/><meshStandardMaterial color="#e2d6c1"/></mesh>
  </group>;
 }
+type CableSpan={start:[number,number,number];end:[number,number,number];sag:number;radius:number;controls?:[number,number,number][]};
+function cableSpans():CableSpan[]{
+ const spans:CableSpan[]=[];
+ const supportZ=[-CABLE_SUPPORT_SPAN_HALF_LENGTH,-CABLE_SUPPORT_FLAT_HALF_LENGTH,...CABLE_SUPPORT_WHEEL_Z,0,CABLE_SUPPORT_FLAT_HALF_LENGTH,CABLE_SUPPORT_SPAN_HALF_LENGTH].sort((a,b)=>a-b);
+ for(const x of CABLE_SUPPORT_X){
+  const controls=supportZ.map(z=>[x,cableSupportHeightAt(z),z] as [number,number,number]);
+  spans.push({start:controls[0],end:controls[controls.length-1],sag:0,radius:CABLE_SUPPORT_RADIUS,controls});
+ }
+ for(const x of [-18,-6,6,18])spans.push({start:[x,CABLE_SUPPORT_ENDPOINT_HEIGHT,-CABLE_SUPPORT_SPAN_HALF_LENGTH],end:[x,CABLE_SUPPORT_ENDPOINT_HEIGHT,CABLE_SUPPORT_SPAN_HALF_LENGTH],sag:2.4+(Math.abs(x)%3)*.25,radius:.04});
+ for(const z of [-10.5,10.5])spans.push({start:[-18,11.4,z],end:[18,11.4,z],sag:2.8,radius:.045});
+ for(const [startZ,endZ,sag] of [[-10.5,10.5,2.6],[10.5,-10.5,3.2],[-10.5,10.5,4.1],[10.5,-10.5,2.2]] as const)spans.push({start:[-18,11.4,startZ],end:[18,11.4,endZ],sag,radius:.035});
+ return spans;
+}
+function CableLine({span}:{span:CableSpan}){
+ const geometry=useMemo(()=>{
+  const [sx,sy,sz]=span.start,[ex,ey,ez]=span.end;
+  const points=span.controls?.map(([x,y,z])=>new Vector3(x,y,z))??[new Vector3(sx,sy,sz),new Vector3((sx+ex)/2,(sy+ey)/2-span.sag,(sz+ez)/2),new Vector3(ex,ey,ez)];
+  return new TubeGeometry(new CatmullRomCurve3(points),span.controls?48:24,span.radius,5,false);
+ },[span]);
+ useEffect(()=>()=>geometry.dispose(),[geometry]);
+ return <mesh geometry={geometry} castShadow><meshStandardMaterial color="#252321" metalness={.3} roughness={.58}/></mesh>;
+}
+function UtilityPoles(){
+ const locations=useMemo(()=>[-18,-6,...CABLE_SUPPORT_X,6,18].flatMap(x=>[-10.5,10.5].map(z=>[x,z] as const)),[]);
+ const poles=useRef<InstancedMesh>(null),arms=useRef<InstancedMesh>(null),insulators=useRef<InstancedMesh>(null);
+ useEffect(()=>{
+  const dummy=new Object3D();
+  locations.forEach(([x,z],i)=>{
+   dummy.position.set(x,6.2,z);dummy.updateMatrix();poles.current?.setMatrixAt(i,dummy.matrix);
+   dummy.position.set(x,11.35,z);dummy.updateMatrix();arms.current?.setMatrixAt(i,dummy.matrix);
+  });
+  locations.forEach(([x,z],i)=>[-2,-1,0,1,2].forEach((offset,j)=>{
+   dummy.position.set(x+offset,11.72,z);dummy.updateMatrix();insulators.current?.setMatrixAt(i*5+j,dummy.matrix);
+  }));
+  if(poles.current)poles.current.instanceMatrix.needsUpdate=true;
+  if(arms.current)arms.current.instanceMatrix.needsUpdate=true;
+  if(insulators.current)insulators.current.instanceMatrix.needsUpdate=true;
+ },[locations]);
+ return <>
+  <instancedMesh ref={poles} args={[undefined,undefined,locations.length]} castShadow><boxGeometry args={[.34,12.4,.34]}/><meshStandardMaterial color="#68452d" roughness={.95}/></instancedMesh>
+  <instancedMesh ref={arms} args={[undefined,undefined,locations.length]} castShadow><boxGeometry args={[5.2,.26,.34]}/><meshStandardMaterial color="#704a30" roughness={.95}/></instancedMesh>
+  <instancedMesh ref={insulators} args={[undefined,undefined,locations.length*5]}><cylinderGeometry args={[.11,.14,.48,6]}/><meshStandardMaterial color="#c6c1ae" roughness={.38}/></instancedMesh>
+ </>;
+}
+function CablesTraffic(){
+ const cars=useMemo(()=>[-22,-16,-10,10,16,22].flatMap((x,index)=>[
+  {x,z:-5.3,color:CABLE_CAR_COLORS[index%CABLE_CAR_COLORS.length]},
+  {x,z:5.3,color:CABLE_CAR_COLORS[(index+2)%CABLE_CAR_COLORS.length]},
+ ]),[]);
+ const bodies=useRef<InstancedMesh>(null),roofs=useRef<InstancedMesh>(null),glass=useRef<InstancedMesh>(null),wheels=useRef<InstancedMesh>(null);
+ useEffect(()=>{
+  const dummy=new Object3D();
+  cars.forEach((car,i)=>{
+   dummy.rotation.set(0,car.z<0?Math.PI:0,0);
+   dummy.position.set(car.x,.66,car.z);dummy.updateMatrix();bodies.current?.setMatrixAt(i,dummy.matrix);
+   dummy.position.set(car.x-.12,1.22,car.z);dummy.updateMatrix();roofs.current?.setMatrixAt(i,dummy.matrix);
+   dummy.position.set(car.x-.12,1.23,car.z);dummy.updateMatrix();glass.current?.setMatrixAt(i,dummy.matrix);
+   bodies.current?.setColorAt(i,new Color(car.color));roofs.current?.setColorAt(i,new Color(car.color));
+   [-1,1].forEach(side=>[-1,1].forEach((axle,j)=>{
+    dummy.position.set(car.x+axle*1.35,.34,car.z+side*.88);dummy.rotation.set(Math.PI/2,car.z<0?Math.PI:0,0);dummy.updateMatrix();
+    wheels.current?.setMatrixAt(i*4+(side===-1?0:2)+j,dummy.matrix);
+   }));
+  });
+  for(const mesh of [bodies.current,roofs.current,glass.current,wheels.current])if(mesh)mesh.instanceMatrix.needsUpdate=true;
+  if(bodies.current?.instanceColor)bodies.current.instanceColor.needsUpdate=true;
+  if(roofs.current?.instanceColor)roofs.current.instanceColor.needsUpdate=true;
+ },[cars]);
+ return <>
+  <instancedMesh ref={bodies} args={[undefined,undefined,cars.length]} castShadow><boxGeometry args={[4.35,.76,1.86]}/><meshStandardMaterial color="#ffffff" roughness={.72}/></instancedMesh>
+  <instancedMesh ref={roofs} args={[undefined,undefined,cars.length]} castShadow><boxGeometry args={[2.35,.48,1.62]}/><meshStandardMaterial color="#ffffff" roughness={.68}/></instancedMesh>
+  <instancedMesh ref={glass} args={[undefined,undefined,cars.length]}><boxGeometry args={[2.17,.34,1.65]}/><meshStandardMaterial color="#394344" roughness={.38}/></instancedMesh>
+  <instancedMesh ref={wheels} args={[undefined,undefined,cars.length*4]}><cylinderGeometry args={[.34,.34,.22,10]}/><meshStandardMaterial color="#202020" roughness={.9}/></instancedMesh>
+ </>;
+}
+function CablesBuildings(){
+ const positions=useMemo(()=>[-26,-18,-10,-2,6,14,22].flatMap((x,i)=>[
+  {x,z:-18,side:-1 as const,color:['#c7a77e','#b98768','#d0b998','#ad8069'][i%4]},
+  {x,z:18,side:1 as const,color:['#c7a77e','#b98768','#d0b998','#ad8069'][i%4]},
+ ]),[]);
+ const walls=useRef<InstancedMesh>(null),roofs=useRef<InstancedMesh>(null),windows=useRef<InstancedMesh>(null),doors=useRef<InstancedMesh>(null);
+ useEffect(()=>{
+  const dummy=new Object3D();
+  positions.forEach(({x,z,side,color},i)=>{
+   dummy.position.set(x,2.3,z);dummy.updateMatrix();walls.current?.setMatrixAt(i,dummy.matrix);walls.current?.setColorAt(i,new Color(color));
+   dummy.position.set(x,4.95,z);dummy.updateMatrix();roofs.current?.setMatrixAt(i,dummy.matrix);roofs.current?.setColorAt(i,new Color('#a65e41'));
+   [-2.5,0,2.5].forEach((offset,j)=>{
+    dummy.position.set(x+offset,2.85,z-side*3.06);dummy.updateMatrix();windows.current?.setMatrixAt(i*3+j,dummy.matrix);
+   });
+   dummy.position.set(x+3,1.15,z-side*3.08);dummy.updateMatrix();doors.current?.setMatrixAt(i,dummy.matrix);
+  });
+  for(const mesh of [walls.current,roofs.current,windows.current,doors.current])if(mesh)mesh.instanceMatrix.needsUpdate=true;
+  if(walls.current?.instanceColor)walls.current.instanceColor.needsUpdate=true;
+  if(roofs.current?.instanceColor)roofs.current.instanceColor.needsUpdate=true;
+ },[positions]);
+ return <>
+  <instancedMesh ref={walls} args={[undefined,undefined,positions.length]} castShadow receiveShadow><boxGeometry args={[8,4.6,6]}/><meshStandardMaterial color="#ffffff" roughness={.93}/></instancedMesh>
+  <instancedMesh ref={roofs} args={[undefined,undefined,positions.length]} castShadow><boxGeometry args={[8.8,.7,6.2]}/><meshStandardMaterial color="#ffffff" roughness={.9}/></instancedMesh>
+  <instancedMesh ref={windows} args={[undefined,undefined,positions.length*3]}><boxGeometry args={[1.2,1.1,.12]}/><meshStandardMaterial color="#637b81" roughness={.4}/></instancedMesh>
+  <instancedMesh ref={doors} args={[undefined,undefined,positions.length]}><boxGeometry args={[1.25,2.25,.16]}/><meshStandardMaterial color="#80664d" roughness={.86}/></instancedMesh>
+ </>;
+}
+function CablesStreet(){
+ const spans=useMemo(()=>cableSpans(),[]);
+ return <group>
+  <mesh rotation={[-Math.PI/2,0,0]} position={[0,-.08,0]} receiveShadow><planeGeometry args={[90,32]}/><meshStandardMaterial color="#56554c" roughness={.96}/></mesh>
+  {[-1,1].map(side=><group key={side}>
+   <mesh position={[0,.02,side*13.8]} receiveShadow><boxGeometry args={[90,.18,4.2]}/><meshStandardMaterial color="#c2b69e" roughness={.92}/></mesh>
+   <mesh position={[0,.12,side*11.7]}><boxGeometry args={[90,.24,.3]}/><meshStandardMaterial color="#807967" roughness={.95}/></mesh>
+  </group>)}
+  <CablesBuildings/><CablesTraffic/><UtilityPoles/>
+  {spans.map((span,index)=><CableLine key={index} span={span}/>)}
+  {[-12,-8,8,12].map(x=><mesh key={`mark-${x}`} position={[x,.015,0]} rotation={[-Math.PI/2,0,0]}><planeGeometry args={[3.5,.1]}/><meshBasicMaterial color="#b4a98d"/></mesh>)}
+ </group>;
+}
+function SparkShower({time}:{time:number}){
+ const ref=useRef<InstancedMesh>(null),dummy=useMemo(()=>new Object3D(),[]);
+ useFrame(()=>{
+  if(!ref.current)return;
+  for(let i=0;i<CABLES_EFFECT_PARTICLE_BUDGET.sparks;i++){
+   const eventTime=3.45+(i%32)/32*2.7,age=time-eventTime,life=.78;
+   if(age<0||age>life){dummy.scale.setScalar(0);dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix);continue;}
+   const angle=i*2.399963,velocity=1.1+(i%7)*.18,fade=1-age/life;
+   dummy.position.set(Math.cos(angle)*velocity*age,CABLE_CONTACT_HEIGHT+.9+Math.sin(angle*1.7)*velocity*age-.7*age-1.6*age*age,Math.sin(angle)*velocity*age);
+   dummy.rotation.set(angle,angle*.7,angle+age*7);
+   dummy.scale.setScalar(fade*(.025+(i%4)*.009)*(Math.sin(time*38+i*5)>-.5?1:.18));
+   dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix);
+  }
+  ref.current.instanceMatrix.needsUpdate=true;
+ });
+ return <instancedMesh ref={ref} args={[undefined,undefined,CABLES_EFFECT_PARTICLE_BUDGET.sparks]} frustumCulled={false}><octahedronGeometry args={[1,0]}/><meshBasicMaterial color="#ffc84a" toneMapped={false}/></instancedMesh>;
+}
 /** Renders the Roadster and its vapor; in the parking scene the drop starts above the top edge of the current viewport framing. */
 function Actors({time,onReady,definition}:{time:number;onReady:()=>void;definition:SceneDefinition}){
  const {size}=useThree();
@@ -240,15 +373,15 @@ function Actors({time,onReady,definition}:{time:number;onReady:()=>void;definiti
  return <><Vehicle time={time} onReady={onReady} definition={actorDefinition}/><Vapor time={time} definition={actorDefinition}/></>;
 }
 export function Scene({time,cameraReset,playing,onReady,definition}:{time:number;cameraReset:number;playing:boolean;onReady:()=>void;definition:SceneDefinition}){
- const street=definition.environment!=='ramp',parking=definition.environment==='parking',sky=parking?'#d4c9b2':street?'#c2c5bd':'#090c13';
+ const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',warmCity=parking||cables,sky=warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
  return <Canvas style={{position:'absolute',inset:0,width:'100%',height:'100%'}} shadows dpr={[1,1.6]} camera={{fov:43,near:.1,far:180}} gl={{antialias:true,alpha:false,powerPreference:'high-performance'}}>
   <color attach="background" args={[sky]}/>
   <fog attach="fog" args={[sky,street?58:47,street?155:110]}/>
   <ambientLight intensity={street?1.05:.9}/><hemisphereLight args={street?['#fff1d7','#68725c',1.15]:['#b9d7ff','#202435',1.4]}/>
-  <directionalLight position={parking?[-16,15,11]:street?[-15,24,12]:[-8,20,12]} color={parking?'#ffd9a6':street?'#fff0d8':'#ffffff'} intensity={street?2.35:3.7} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-22} shadow-camera-right={22} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.04}/>
+  <directionalLight position={warmCity?[-16,15,11]:street?[-15,24,12]:[-8,20,12]} color={warmCity?'#ffd9a6':street?'#fff0d8':'#ffffff'} intensity={street?2.35:3.7} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-22} shadow-camera-right={22} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.04}/>
   {!street&&<><directionalLight position={[10,10,-10]} color="#6f9bcf" intensity={3}/><pointLight position={[-5,10,4]} color="#f4ac8e" intensity={45}/></>}
- {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:<Pothole/>}
+ {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:cables?<CablesStreet/>:<Pothole/>}
   {definition.environment==='ramp'&&<mesh rotation={[-Math.PI/2,0,0]} position={[-10,-.05,0]}><ringGeometry args={[3.2,3.23,80]}/><meshBasicMaterial color="#697481" transparent opacity={.55}/></mesh>}
-  {definition.environment==='ramp'&&<Ramp/>}<Suspense fallback={null}><Actors time={time} onReady={onReady} definition={definition}/></Suspense><Camera reset={cameraReset} definition={definition}/><Diagnostics playing={playing}/>
+  {definition.environment==='ramp'&&<Ramp/>}{cables&&<SparkShower time={time}/>}<Suspense fallback={null}><Actors time={time} onReady={onReady} definition={definition}/></Suspense><Camera reset={cameraReset} definition={definition}/><Diagnostics playing={playing}/>
  </Canvas>;
 }

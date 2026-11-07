@@ -1,7 +1,7 @@
-import { parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
+import { cablesTangle, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
 import type { Scenario } from './scenario';
 
-export type SourcePlatform = 'X' | 'TikTok';
+export type SourcePlatform = 'X' | 'TikTok' | 'YouTube';
 
 export interface SceneSource { author: string; platform: SourcePlatform; url: string }
 
@@ -10,7 +10,7 @@ export interface SceneDefinition {
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole' | 'parking';
+ environment: 'ramp' | 'pothole' | 'parking' | 'cables';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
@@ -87,6 +87,27 @@ export const sceneCatalog: SceneDefinition[] = [
    author: '@krishnak3212',
    platform: 'TikTok',
    url: 'https://www.tiktok.com/@krishnak3212/video/7697839711238311182',
+  },
+ },
+ {
+  key: 'cables',
+  hash: '#meme/cables',
+  mode: 'meme',
+  scenario: cablesTangle,
+  environment: 'cables',
+  camera: {
+   desktop: { position: [-18, 12, 30], target: [0, 5, 0] },
+   portrait: { position: [-6, 18, 38], target: [0, 6, 0] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'Cables.',
+   summary: 'El atasco no se mueve. El Roadster tampoco.',
+  },
+  source: {
+   author: 'MindBodyMillions',
+   platform: 'YouTube',
+   url: 'https://www.youtube.com/shorts/A3wyacegqCQ',
   },
  },
 ];
