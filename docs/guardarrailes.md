@@ -67,11 +67,12 @@ El ruleset de `main` exige la revisión de un code owner. `.github/CODEOWNERS` d
 
 | Rutas | Code owners |
 |---|---|
-| La web: regla por defecto `*`, código en `src/`, `model/` y `public/models/` | `@0GiS0` y `@returngis-demo` (basta la aprobación de uno) |
+| `model/` y `public/models/` | `@0GiS0` y `@returngis-demo` (basta la aprobación de uno) |
 | `AGENTS.md`, `.github/` y `.vscode/` | Solo `@0GiS0` |
-| `/docs/` y `/README.md` | Sin propietario (lights-out, ver [Lights-out](lights-out.md)) |
+| Todo lo demás (`src/`, `docs/`, `README.md`, `scripts/`…) | Sin propietario (lights-out, ver [Lights-out](lights-out.md)) |
 
-- Las reglas de gobernanza van después de `*` y no incluyen a `@returngis-demo`, para que no hereden su propiedad.
-- Una PR que mezcle la web con `.github/`, `.vscode/` o `AGENTS.md` sigue necesitando la aprobación de `@0GiS0`.
+- No hay regla `*`: las PR de Issues lights-out que tocan la web no quedan bloqueadas, porque Copilot no puede aprobar y la aprobación de quien lo lanzó no cuenta en sus PR.
+- Riesgo asumido: las PR humanas que tocan solo código de la web tampoco necesitan revisión de propietario. Las barreras son los checks obligatorios `🧪 validate` y `📚 docs`.
+- Una PR que mezcle la web con `.github/`, `.vscode/`, `AGENTS.md` o el modelo 3D sigue necesitando la aprobación de los propietarios de esas rutas.
 
 Más contexto: [Arquitectura de la web](arquitectura.md) y [Fábrica de software](fabrica-de-software.md).

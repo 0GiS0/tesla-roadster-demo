@@ -6,7 +6,7 @@
 
 - Los ficheros bajo `docs/`.
 - El `README.md` de la raíz, que también es lights-out y se actualiza tras cada despliegue a producción. Lleva arriba un banner que lo indica. El bloque entre `<!-- tour:start -->` y `<!-- tour:end -->` es el tour en vídeo (ver `docs/desarrollo.md`): por ahora se regenera a mano con la skill `record-tour` (`npm run tour`) y el flujo de docs-sync no debe tocarlo. Su regeneración automática llegará en #70.
-- `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (entradas `/docs/` y `/README.md` sin owners, después de `*`), así que el ruleset de `main` no exige revisión del propietario del código.
+- `docs/` y `README.md` no tienen propietario en `.github/CODEOWNERS` (no hay regla `*` ni entradas para ellos), así que el ruleset de `main` no exige revisión del propietario del código.
 - Los únicos requisitos son los checks obligatorios `🧪 validate` y `📚 docs`: si están en verde, la PR puede mergearse.
 
 ## Quién activa el auto-merge
@@ -72,4 +72,6 @@ El `.lock.yml` lo genera gh-aw y no se edita a mano, así que no puede cumplir a
 
 ## Qué sigue protegido
 
-Todo lo que está fuera de `docs/` sigue teniendo propietario y necesita su revisión: código, `model/`, `public/models/`, `.github/`, `.vscode/` y `AGENTS.md`. Una PR que mezcle `docs/` o `README.md` con cualquiera de esas rutas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
+Solo la gobernanza y el modelo 3D siguen teniendo propietario y necesitan su revisión: `.github/`, `.vscode/`, `AGENTS.md`, `model/` y `public/models/`. Una PR que mezcle cualquier otra ruta con esas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
+
+El código de la web (`src/` y demás) ya no tiene propietario, para que las PR de Issues lights-out que lo tocan no queden bloqueadas. Como consecuencia, las PR humanas que tocan solo código de la web tampoco necesitan revisión de propietario: las barreras son los checks obligatorios `🧪 validate` y `📚 docs`.
