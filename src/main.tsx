@@ -127,7 +127,7 @@ function App(){
      <span className="time"><strong>{clock(playback.time)}</strong><span>/</span>{clock(duration)}</span>
     </div>
     <input className="timeline" disabled={!ready} aria-label="Tiempo de la maniobra" aria-valuetext={`${Math.floor(playback.time)} segundos de ${duration}`} type="range" min="0" max={duration} step="0.01" value={playback.time} onChange={e=>setPlayback(p=>({...p,time:Number(e.target.value),playing:p.playing&&Number(e.target.value)<duration}))} style={{'--progress':`${playback.time/duration*100}%`} as React.CSSProperties}/>
-    <div className="timeline-labels"><span>{isMeme?'APROXIMACIÓN':'SUBIDA'}</span><span>VUELO</span><span>ATERRIZAJE</span></div>
+    <div className="timeline-labels"><span>{definition.timelineLabels?.[0]??(isMeme?'APROXIMACIÓN':'SUBIDA')}</span><span>{definition.timelineLabels?.[1]??'VUELO'}</span><span>{definition.timelineLabels?.[2]??'ATERRIZAJE'}</span></div>
    </div>
    <button className="camera-button" aria-label="Restablecer cámara" disabled={!ready} onClick={()=>setCameraReset(n=>n+1)}><Icon name="camera"/><span>Restablecer cámara</span></button>
   </footer>

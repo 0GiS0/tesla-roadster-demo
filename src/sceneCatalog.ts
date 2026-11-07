@@ -17,6 +17,7 @@ export interface SceneDefinition {
   fit?: { width: number; height: number; direction: [number, number, number]; target?: [number, number, number] };
  };
  copy: { label: string; title: string; summary: string };
+ timelineLabels?: [string, string, string];
  source?: SceneSource;
  // Key moment shown in the tour video: an instant or a range of the time slider, in seconds.
  tourMoment?: number | { from: number; to: number };
@@ -104,6 +105,7 @@ export const sceneCatalog: SceneDefinition[] = [
    title: 'Cables.',
    summary: 'El atasco no se mueve. El Roadster tampoco.',
   },
+  timelineLabels: ['ATASCO', 'ENREDADO', 'ATRAPADO'],
   source: {
    author: 'MindBodyMillions',
    platform: 'YouTube',
