@@ -128,11 +128,12 @@ try {
   const frames = Math.round(duration * fps) + 1;
   await page.evaluate(() => { window.__manualFrames = true; });
 
-  const seek = (time) => page.evaluate((t) => {
+  const seek = (time) => page.evaluate(async (t) => {
     const slider = document.querySelector('input.timeline');
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(slider, String(t));
     slider.dispatchEvent(new Event('input', { bubbles: true }));
-    // Run a few frames so the React update lands and the scene renders with the new time.
+    // Let React commit the new time before stepping, then run a few frames to render it.
+    await new Promise((done) => setTimeout(done, 0));
     window.__stepFrames(3);
   }, time);
   const capture = async (path) => {
