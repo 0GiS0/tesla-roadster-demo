@@ -13,7 +13,7 @@ Cada PR que añade o cambia una escena MEME **debe** llevar su vídeo en el cuer
 2. Graba (1280×720 por defecto):
    `node .github/skills/record-scene/scripts/record-scene.mjs --scene <slug> --out <slug>.mp4`
    Sin `--scene` graba la rampa original.
-   En un runner sin GPU (cloud agent, GitHub Actions) añade `--preset ci`; con `--still 0.55 --still-out <slug>-despues.png` guarda además una captura «después» del fotograma clave (usa `--still-only` si solo quieres la captura).
+   Sin GPU (CI, cloud agent): [ci](references/ci.md).
 3. Comprueba que pesa < 10 MB y revisa un fotograma (`ffmpeg -ss 5 -i <slug>.mp4 -frames:v 1 f.png`).
 4. Adjúntalo con `gh pr create --attach './<slug>.mp4'` o `gh pr edit <n> --attach …` y verifica en GitHub que se reproduce.
 
