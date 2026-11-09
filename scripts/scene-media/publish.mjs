@@ -65,7 +65,7 @@ export function renderComment({ meta, results, mediaBase, runUrl }) {
     return `${lines.join('\n')}\n`;
   }
   lines.push(
-    `Se graban solo las escenas MEME añadidas o editadas en el catálogo; si no cambia ninguna entrada, se graban las afectadas por código compartido o de entorno. Vídeo y captura «después» de cada escena para el commit \`${meta.headSha.slice(0, 7)}\`, grabados con \`record-scene --preset ci\`. Este comentario se actualiza en cada push ([ver ejecución](${runUrl})).`,
+    `Se graban solo las escenas MEME añadidas o editadas en el catálogo; si no hay ninguna, se graban las afectadas por código compartido o de entorno. Vídeo y captura «después» de cada escena para el commit \`${meta.headSha.slice(0, 7)}\`, grabados con \`record-scene --preset ci\`. Este comentario se actualiza en cada push ([ver ejecución](${runUrl})).`,
     '',
   );
   for (const slug of meta.scenes) {
