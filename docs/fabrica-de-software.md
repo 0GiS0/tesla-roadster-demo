@@ -33,9 +33,9 @@ El triaje es una skill: `.github/skills/triage-issue/`. Su `SKILL.md` describe e
 
 Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷 Validate skills`: `waza check`, el recuento de tokens y la comparación con `main` (`waza tokens compare`, umbral del 10 %). Así lo que aprende la fábrica queda medido por waza antes de que lo revise una persona. Resumen de las decisiones:
 
-- `✅ agent-ready`: meme con descripción y referencia, o fallo reproducible.
+- `✅ agent-ready`: meme con descripción, referencia y las dos «Confirmaciones obligatorias» marcadas, o fallo reproducible.
 - `📐 needs-spec`: algo nuevo que no es un meme o que toca varias partes de la web.
-- `💬 needs-info`: falta imagen o enlace, texto del meme, o no se sabe qué falla.
+- `💬 needs-info`: falta imagen o enlace, texto del meme, alguna confirmación obligatoria, o no se sabe qué falla.
 - `💡 lights-on`: cambia lo que ve el público.
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
 - Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
@@ -43,6 +43,8 @@ Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷
 - Área: como máximo una de `🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`. No se pone en issues `🖼️ meme` o `🏭 software-factory`, se respeta la que ya haya puesto una persona y se omite si ninguna encaja con claridad. Es lo que permite que actúe [`🌙 Lights-out assign`](lights-out.md).
 
 El detalle y los ejemplos están en `.github/skills/triage-issue/references/reglas.md`; esa es la fuente.
+
+Si falta alguna confirmación obligatoria del meme (derechos; geometría original y sin recursos externos), el comentario pide a la autora que marque ambas. No son las casillas de criterios de aceptación: ni el triaje ni el agente las marcan por ella. Si el issue ya tiene `✅ agent-ready`, `📐 needs-spec` o `💬 needs-info`, el triaje no lo toca, aunque después se desmarquen las confirmaciones.
 
 ## 3. Agente
 

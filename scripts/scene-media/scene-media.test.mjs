@@ -39,12 +39,27 @@ describe('detectChangedScenes', () => {
     expect(detect(head, ['src/sceneCatalog.ts'])).toEqual({ scenes: ['alpha', 'gamma'], truncated: false });
   });
 
+  it('records only a new meme when shared rendering code also changes', () => {
+    const head = catalog(entry('ramp', '', 'ramp'), entry('a', 'alpha', 'pothole'), entry('b', 'beta', 'parking'), entry('c', 'gamma', 'cables'));
+    expect(detect(head, ['src/sceneCatalog.ts', 'src/Scene.tsx', 'src/scenario.ts'])).toEqual({ scenes: ['gamma'], truncated: false });
+  });
+
+  it('records only an edited meme when shared rendering code also changes', () => {
+    const head = catalog(entry('ramp', '', 'ramp'), entry('a', 'alpha', 'pothole', '\n    tourMoment: 3,'), entry('b', 'beta', 'parking'));
+    expect(detect(head, ['src/sceneCatalog.ts', 'src/Scene.tsx', 'src/scenario.ts'])).toEqual({ scenes: ['alpha'], truncated: false });
+  });
+
+  it('records shared-code scenes when catalog entries are only removed', () => {
+    const head = catalog(entry('ramp', '', 'ramp'), entry('a', 'alpha', 'pothole'));
+    expect(detect(head, ['src/sceneCatalog.ts', 'src/Scene.tsx'])).toEqual({ scenes: ['alpha'], truncated: false });
+  });
+
   it('never records the original scene', () => {
     const head = catalog(entry('ramp', '', 'ramp', '\n    tourMoment: 1,'), entry('a', 'alpha', 'pothole'), entry('b', 'beta', 'parking'));
     expect(detect(head, ['src/sceneCatalog.ts']).scenes).toEqual([]);
   });
 
-  it('records every meme for shared rendering code and only matching ones for an environment file', () => {
+  it('records every meme for shared rendering code without catalog changes and only matching ones for an environment file', () => {
     const head = catalog(entry('ramp', '', 'ramp'), entry('a', 'alpha', 'pothole'), entry('b', 'beta', 'parking'));
     expect(detect(head, ['src/Scene.tsx']).scenes).toEqual(['alpha', 'beta']);
     expect(detect(head, ['src/ParkingLot.tsx']).scenes).toEqual(['beta']);
@@ -98,6 +113,7 @@ describe('publisher validation', () => {
     const meta = { pr: 7, headSha: sha, scenes: ['alpha', 'beta'], truncated: false };
     const body = renderComment({ meta, results: { alpha: true, beta: false }, mediaBase: 'https://example.test/raw/c0ffee/pr-7', runUrl: 'https://example.test/run/1' });
     expect(body.startsWith('<!-- scene-media -->')).toBe(true);
+    expect(body).toContain('Se graban solo las escenas MEME añadidas o editadas en el catálogo; si no hay ninguna,');
     expect(body).toContain('![Captura «después» de la escena alpha](https://example.test/raw/c0ffee/pr-7/alpha/alpha.png)');
     expect(body).toContain('alpha/alpha.mp4');
     expect(body).toContain('No se pudo grabar esta escena');

@@ -14,7 +14,7 @@ description: "Tria un issue nuevo de la fábrica de memes: elige estado (✅ age
 3. Elige UNA de estas etiquetas:
    - ✅ agent-ready: está claro qué hacer y se puede comprobar al terminar.
    - 📐 needs-spec: hay que pensarlo antes (sección nueva, diseño o varias partes).
-   - 💬 needs-info: falta la referencia, el texto del meme o qué falla.
+   - 💬 needs-info: falta referencia, texto, alguna confirmación obligatoria del meme o qué falla.
 4. Si es ✅ agent-ready, elige la luz: 💡 lights-on si cambia la web; 🌙 lights-out si solo toca documentación o inventario.
 5. Pon UNA complejidad: 🟢 complexity-low, 🟡 complexity-medium o 🔴 complexity-high.
 6. Pon como máximo UNA etiqueta de área (🎨 ux, ♿ accessibility, 🧊 3d, 🎬 animation, 🚀 deployment o 📝 documentation) según las reglas; ninguna si no encaja o ya hay una.
