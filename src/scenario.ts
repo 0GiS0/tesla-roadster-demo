@@ -43,6 +43,38 @@ export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',du
  const speed=t<3?10*u*(1-u):t<5||t<10&&t>=8?12*u*(1-u):t<8?28*u*(1-u):15*u*(1-u);
  return {position:[x,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle,vapor,phase,speed};
 }};
+export const CARRIER_PLATFORM_HEIGHT=3.55;
+export const CARRIER_ESCAPE_START_X=-9.5;
+const CARRIER_DURATION=13;
+export const carrierEscape:Scenario={id:'fuga-del-portacoches',title:'La fuga del portacoches',duration:CARRIER_DURATION,evaluate(time){
+ const t=clamp(time,0,CARRIER_DURATION),u=(start:number,end:number)=>smoothStep((t-start)/(end-start));
+ let x=CARRIER_ESCAPE_START_X,y=CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS,z=0,roll=0,phase:string,vapor=0,wheelAngle=-5.2*t/WHEEL_RADIUS;
+ if(t<3.2){phase='Llegada';}
+ else if(t<5){
+  const ignition=(t-3.2)/1.8;
+  y+=.08*Math.sin(Math.PI*ignition)**2;
+  phase='Arranque';vapor=smoothStep((t-3.2)/.8);
+ }else if(t<6.2){
+  y+=.5*u(5,6.2);phase='Despegue';vapor=1;wheelAngle=-5.2*5/WHEEL_RADIUS;
+ }else if(t<8){
+  const progress=u(6.2,8);
+  x-=2.6*progress;y+=.5+2.8*progress;z=-.25*progress;roll=.12*progress;
+  phase='Despegue';vapor=1;wheelAngle=-5.2*5/WHEEL_RADIUS;
+ }else if(t<12){
+  const progress=u(8,12);
+  x=CARRIER_ESCAPE_START_X-2.6+22*progress;
+  y+=3.3+6.5*progress;z=-.25-4.5*progress;roll=.12*(1-progress);
+  phase='Fuga';vapor=1-.45*progress;wheelAngle=-5.2*5/WHEEL_RADIUS;
+ }else{
+  const progress=u(12,13);
+  x=CARRIER_ESCAPE_START_X-2.6+22+2.2*progress;
+  y+=9.8+2.4*progress;z=-4.75-.4*progress;phase=t<13?'Fuga':'Maniobra completada';
+  vapor=.55*(1-progress);wheelAngle=-5.2*5/WHEEL_RADIUS;
+ }
+ const q=new Quaternion().setFromEuler(new Euler(0,0,roll));
+ const speed=t<=5?5.2:0;
+ return {position:[x,y,z],quaternion:q.toArray() as Pose['quaternion'],wheelAngle,vapor:clamp(vapor),phase,speed};
+}};
 export const CABLE_SUPPORT_HEIGHT=7.6;
 export const CABLE_SUPPORT_RADIUS=.055;
 export const CABLE_SUPPORT_CENTERLINE_HEIGHT=CABLE_SUPPORT_HEIGHT-CABLE_SUPPORT_RADIUS;

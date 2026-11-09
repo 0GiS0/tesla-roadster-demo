@@ -1,7 +1,7 @@
-import { cablesTangle, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
+import { cablesTangle, carrierEscape, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
 import type { Scenario } from './scenario';
 
-export type SourcePlatform = 'X' | 'TikTok' | 'YouTube';
+export type SourcePlatform = 'Instagram' | 'X' | 'TikTok' | 'YouTube';
 
 export interface SceneSource { author: string; platform: SourcePlatform; url: string }
 
@@ -10,7 +10,7 @@ export interface SceneDefinition {
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole' | 'parking' | 'cables';
+ environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
@@ -110,6 +110,30 @@ export const sceneCatalog: SceneDefinition[] = [
    author: 'MindBodyMillions',
    platform: 'YouTube',
    url: 'https://www.youtube.com/shorts/A3wyacegqCQ',
+  },
+ },
+ {
+  key: 'fuga-del-portacoches',
+  hash: '#meme/fuga-del-portacoches',
+  mode: 'meme',
+  tourMoment: { from: 5, to: 11 },
+  scenario: carrierEscape,
+  environment: 'carrier',
+  camera: {
+   desktop: { position: [-20, 17, 26], target: [-3, 4, 0] },
+   portrait: { position: [-26, 22, 34], target: [-3, 4, 0] },
+   fit: { width: 43, height: 23, direction: [-.55, .55, 1], target: [-2, 4.5, 0] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'La fuga del portacoches.',
+   summary: 'Cinco coches suben al remolque. Solo cuatro llegan a destino.',
+  },
+  timelineLabels: ['EN RUTA', 'DESPEGUE', 'FUGA'],
+  source: {
+   author: '@chaseluxuryai',
+   platform: 'Instagram',
+   url: 'https://www.instagram.com/reel/DelJf20o8HP',
   },
  },
 ];
