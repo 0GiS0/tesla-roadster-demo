@@ -43,3 +43,8 @@
 .share-control button{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
 .meme-mode .share-control .share-status{color:#625b4e}
 .meme-mode .scene-select button:focus-visible,.meme-mode .viewer-toolbar a:focus-visible,.meme-mode .viewer-toolbar button:focus-visible{outline-color:#343530}
+
+@media (prefers-reduced-motion: reduce){
+ .loader{animation:none}
+ .scene-select button{transition:none}
+}
