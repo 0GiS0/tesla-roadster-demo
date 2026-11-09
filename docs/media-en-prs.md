@@ -25,3 +25,4 @@ Si no puedes adjuntar archivos, confía en este workflow: no dejes casillas de e
 ## Limitación
 
 El disparador `workflow_run` solo funciona cuando el workflow de publicación está en la rama por defecto, así que el flujo completo no se puede probar antes de fusionar.
+
