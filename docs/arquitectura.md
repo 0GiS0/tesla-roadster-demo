@@ -21,6 +21,7 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 | `src/style.css` | Diseños de escritorio, vertical y horizontal baja, y foco de teclado. |
 | `src/scenario.test.ts` | Pruebas de contacto, continuidad, determinismo, límites, enlaces y apoyos de «Cables». |
 | `src/parkingScene.test.ts` | Pruebas de «Robo de plaza»: contacto, huellas, coche gris y encuadre. |
+| `src/accessibility.test.ts` | Prueba de contraste de las etiquetas secundarias de la línea de tiempo en los modos Original y MEME. |
 | `src/main.test.tsx` | Prueba del botón «Copiar enlace»: icono decorativo y etiqueta sin cambios. |
 | `model/create_roadster.py` | Geometría original procedural en Blender. |
 | `model/roadster.blend`, `public/models/roadster.glb` | Modelo editable y recurso desplegado. |
@@ -48,4 +49,4 @@ El GLB se genera desde Blender con `model/create_roadster.py` y se valida con `m
 
 ## Construcción y despliegue
 
-`.github/workflows/ci-pages.yml` ejecuta el job `validate` (lint, comprobación de tipos, pruebas, validación del GLB y build) en pull requests y en pushes a `main`. El job `deploy` solo se ejecuta fuera de pull requests y en `main`, y publica `dist/` en GitHub Pages.
+`.github/workflows/ci-pages.yml` ejecuta el job `validate` (lint, comprobación de tipos, pruebas, validación del GLB y build) en pull requests y en pushes a `main`. El job `deploy` solo se ejecuta fuera de pull requests y en `main`, y publica `dist/` en GitHub Pages. Una nueva ejecución en la misma pull request cancela la anterior; los pushes a `main` y las ejecuciones manuales nunca se cancelan y los despliegues se serializan con el grupo `pages`.
