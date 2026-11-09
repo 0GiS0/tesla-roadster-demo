@@ -93,6 +93,7 @@ export const sceneCatalog: SceneDefinition[] = [
  {
   key: 'cables',
   hash: '#meme/cables',
+  tourMoment: { from: 3, to: 7 },
   mode: 'meme',
   scenario: cablesTangle,
   environment: 'cables',
