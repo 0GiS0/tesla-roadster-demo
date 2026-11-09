@@ -9,7 +9,7 @@ Se abre un issue con la plantilla **🖼️ Propuesta de escena MEME** (`.github
 
 `scene_name`, `slug`, `source_link`, `author`, `video_segment`, `choreography`, `environment`, `framing`, `approx_duration`, `references`, una lista de criterios de aceptación y confirmaciones obligatorias (sin marcas ni personajes protegidos; geometría original y sin recursos externos).
 
-El triaje exige descripción y una imagen o enlace de referencia; si faltan, el issue pasa a `💬 needs-info` (ver [Fábrica de software](fabrica-de-software.md)).
+El triaje exige descripción, una imagen o enlace de referencia y las dos «Confirmaciones obligatorias» marcadas; si falta algo, el issue pasa a `💬 needs-info`. Si falta alguna confirmación, el comentario pide a la autora que marque ambas: ni el triaje ni el agente pueden hacerlo por ella (ver [Fábrica de software](fabrica-de-software.md)).
 
 ## 2. Imagen de concepto
 
