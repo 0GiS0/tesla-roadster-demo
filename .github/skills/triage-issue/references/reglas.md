@@ -9,11 +9,14 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 ## Reglas
 
-- ✅ agent-ready: un meme nuevo con descripción y imagen o enlace de referencia; o un
-  fallo reproducible. Se puede comprobar al terminar.
+- ✅ agent-ready: meme nuevo con descripción, imagen o enlace y ambas confirmaciones
+  obligatorias marcadas; o fallo reproducible. Comprobable al terminar.
 - 📐 needs-spec: algo nuevo que no es un meme (sección, diseño, votaciones, cuentas…)
   o que toca varias partes de la web.
 - 💬 needs-info: falta la imagen o el enlace, el texto del meme, o qué falla y dónde.
+  En memes, también si falta alguna de las dos «Confirmaciones obligatorias»
+  (derechos; originalidad y recursos locales), no los criterios de aceptación.
+  Pide marcarlas; ni el triaje ni el agente las marcan por la autora.
 - 💡 lights-on: cambia lo que ve el público.
 - 🌙 lights-out: solo cambia documentación o inventario (pie de foto, texto alternativo,
   lista de memes); tiene prioridad sobre 💡 lights-on aunque el pie sea visible.
@@ -35,7 +38,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### Según el tipo de issue
 
-- 🖼️ meme: ✅ agent-ready si trae descripción y referencia; si no, 💬 needs-info.
+- 🖼️ meme: ✅ agent-ready con descripción, referencia y ambas confirmaciones; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
 - ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
@@ -45,7 +48,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### El coche que vuela para no pisar un charco
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: meme nuevo con descripción y enlace a la imagen.
+- Por qué: descripción, referencia y ambas confirmaciones marcadas.
 
 ### Añadir votaciones para elegir el mejor meme
 - Decisión: 📐 needs-spec
@@ -53,7 +56,8 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### El autoservicio de McDonald's en el cielo
 - Decisión: 💬 needs-info
-- Por qué: sin imagen ni enlace; no se sabe qué escena recrear.
+- Por qué: trae descripción y referencia, pero queda una confirmación obligatoria sin marcar.
+- Siguiente paso: autora, marca ambas «Confirmaciones obligatorias».
 
 ### Corregir el texto alternativo del meme del charco
 - Decisión: ✅ agent-ready · 🌙 lights-out
