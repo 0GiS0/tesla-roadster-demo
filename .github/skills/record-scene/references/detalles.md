@@ -14,8 +14,10 @@
 
 ## Opciones
 
-`--scene`, `--out`, `--url`, `--fps` (30), `--width`/`--height` (1280×720, enteros pares), `--portrait` (720×1280), `--crf` (26).
+`--scene`, `--out`, `--url`, `--fps` (30), `--width`/`--height` (1280×720, enteros pares), `--portrait` (720×1280), `--crf` (26), `--preset ci`, `--frame-timeout`, `--still`. Runners sin GPU y captura «después»: [ci](ci.md).
 
 ## Adjuntar
+
+En PR, el workflow `scene-media` (ver `docs/media-en-prs.md`) lo hace solo para las escenas cambiadas.
 
 Los vídeos no admiten texto alternativo en `--attach`: añade un pie en el cuerpo. Si falla, revisa la PR antes de reintentar para no duplicar.

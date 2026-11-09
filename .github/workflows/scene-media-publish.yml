@@ -1,0 +1,49 @@
+name: 📣 Publish scene media
+
+# Publishes what scene-media.yml recorded. It runs from the default branch with write permissions, so it never
+# checks out or executes code from the pull request: artifacts, names and numbers are validated as untrusted data.
+on:
+  workflow_run:
+    workflows: ["📸 Scene media"]
+    types: [completed]
+
+permissions: {}
+
+# Serialize per pull request; a newer pending run of the same PR supersedes an older one. Pushes to the shared
+# media branch from different PRs are retried from a fresh clone in the script.
+concurrency:
+  group: scene-media-publish-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: 📣 publish scene media
+    if: ${{ github.event.workflow_run.event == 'pull_request' && (github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+    steps:
+      # Default branch only (the ref of a workflow_run event), and only the publisher script.
+      - name: 📥 Check out the publisher script
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          sparse-checkout: scripts/scene-media
+          persist-credentials: false
+
+      - name: 📥 Download scene media artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: scene-media-*
+          path: incoming
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: 📣 Publish media and update the comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: node scripts/scene-media/publish.mjs --incoming incoming

@@ -1,0 +1,122 @@
+name: 📸 Scene media
+
+# Records a video and a still of every MEME scene a pull request touches. It runs the code of the pull request,
+# so it only has a read-only token and no secrets. Publishing happens in scene-media-publish.yml.
+on:
+  pull_request:
+    paths:
+      - src/sceneCatalog.ts
+      - src/scenario.ts
+      - src/Scene.tsx
+      - src/ParkingLot.tsx
+      - src/framing.ts
+
+permissions:
+  contents: read
+
+# Newer pushes supersede older recordings of the same pull request.
+concurrency:
+  group: scene-media-${{ github.event.pull_request.number }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  detect:
+    name: 🔎 detect changed scenes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      scenes: ${{ steps.detect.outputs.scenes }}
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 🔎 Detect scenes changed by the pull request
+        id: detect
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/scene-media/changed-scenes.mjs --base "$BASE_SHA" --meta-out meta/meta.json
+
+      - name: 📤 Upload scene list
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scene-media-meta
+          path: meta/meta.json
+          if-no-files-found: error
+          retention-days: 7
+
+  record:
+    name: 🎬 record ${{ matrix.scene }}
+    needs: detect
+    if: needs.detect.outputs.scenes != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        scene: ${{ fromJSON(needs.detect.outputs.scenes) }}
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: 🟢 Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🌐 Install Chromium for Playwright
+        run: npx playwright-core install --with-deps chromium
+
+      - name: 🎞️ Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: 🏗️ Build the app
+        run: npm run build
+
+      - name: 🎬 Record video and still
+        env:
+          SCENE: ${{ matrix.scene }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          npx vite preview --host 127.0.0.1 --port 4173 > preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          for _ in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/tesla-roadster-demo/ > /dev/null && break
+            sleep 1
+          done
+          node .github/skills/record-scene/scripts/record-scene.mjs \
+            --scene "$SCENE" --preset ci \
+            --url http://127.0.0.1:4173/tesla-roadster-demo/ \
+            --out "out/$SCENE.mp4" \
+            --still 0.55 --still-out "out/$SCENE.png"
+
+      - name: 🖼️ Make an animated preview
+        env:
+          SCENE: ${{ matrix.scene }}
+        run: |
+          ffmpeg -hide_banner -loglevel error -y -i "out/$SCENE.mp4" \
+            -vf "fps=6,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse=dither=bayer:bayer_scale=5" \
+            -loop 0 "out/$SCENE.gif"
+          ls -l out
+
+      - name: 📤 Upload scene media
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: scene-media-${{ matrix.scene }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 14

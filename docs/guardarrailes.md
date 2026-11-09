@@ -51,6 +51,7 @@ Los checks obligatorios de `main` son `🧪 validate` y `📚 docs`. Una PR que 
 
 - Se usa `agentStop` y no `sessionEnd` porque este último no puede bloquear ni devolver nada al agente.
 - Los dos hooks no hacen nada si el cambio no toca ficheros de esos tipos. La comprobación de enlaces solo se ejecuta al final, porque a mitad de trabajo puede apuntar a páginas que aún no existen.
+- ⏳ Pendiente de verificar: que el agente en la nube cargue estos hooks y que `npx markdownlint-cli2` funcione dentro de su firewall. Requiere una sesión real del agente en la nube; `copilot-setup-steps.yml` ya instala las dependencias (`npm ci`) antes de que arranque.
 - Tras 8 bloqueos seguidos Copilot CLI ignora el hook y termina, para evitar bucles.
 - Copilot CLI carga `.github/hooks/*.json` del repositorio (hay que confiar en la carpeta) y, según su documentación, también el agente en la nube (allí `npx` depende de lo que permita su firewall). Los hooks de código necesitan `npm ci` previo; sin `node_modules` se omiten.
 
