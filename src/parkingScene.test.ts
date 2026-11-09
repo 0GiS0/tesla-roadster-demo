@@ -104,7 +104,7 @@ describe('Robo de plaza meme scene', () => {
  });
  it('is registered under its canonical route with a TikTok credit while the other credits stay unchanged', () => {
   const scene = sceneFromHash('#meme/robo-de-plaza');
-  expect(sceneCatalog).toHaveLength(5);
+  expect(sceneCatalog).toHaveLength(6);
   expect(scene.scenario.id).toBe('robo-de-plaza');
   expect(sceneHashFor(scene)).toBe('#meme/robo-de-plaza');
   expect(sourceLabel(scene.source!)).toBe('Visto en @krishnak3212 · Ver original en TikTok');

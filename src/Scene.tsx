@@ -7,6 +7,7 @@ import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_ENDP
 import type { SceneDefinition } from './sceneCatalog';
 import { ParkingLot } from './ParkingLot';
 import { CarrierEscape } from './CarrierEscape';
+import { SongSkipCity } from './SongSkipCity';
 import { fitCameraPlacement, parkingDropHeight } from './framing';
 
 const CABLE_CAR_COLORS=['#777b72','#b6a98e','#59675e','#a34f39','#858b8c','#70665b'];
@@ -374,14 +375,14 @@ function Actors({time,onReady,definition}:{time:number;onReady:()=>void;definiti
  return <><Vehicle time={time} onReady={onReady} definition={actorDefinition}/><Vapor time={time} definition={actorDefinition}/></>;
 }
 export function Scene({time,cameraReset,playing,onReady,definition}:{time:number;cameraReset:number;playing:boolean;onReady:()=>void;definition:SceneDefinition}){
- const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',warmCity=parking||cables,sky=carrier?'#e4c69c':warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
+ const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',songSkip=definition.environment==='song-skip',warmCity=parking||cables||songSkip,sky=carrier?'#e4c69c':warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
  return <Canvas style={{position:'absolute',inset:0,width:'100%',height:'100%'}} shadows dpr={[1,1.6]} camera={{fov:43,near:.1,far:180}} gl={{antialias:true,alpha:false,powerPreference:'high-performance'}}>
   <color attach="background" args={[sky]}/>
   <fog attach="fog" args={[sky,street?58:47,street?155:110]}/>
   <ambientLight intensity={street?1.05:.9}/><hemisphereLight args={street?['#fff1d7','#68725c',1.15]:['#b9d7ff','#202435',1.4]}/>
   <directionalLight position={warmCity?[-16,15,11]:street?[-15,24,12]:[-8,20,12]} color={warmCity?'#ffd9a6':street?'#fff0d8':'#ffffff'} intensity={street?2.35:3.7} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-22} shadow-camera-right={22} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.04}/>
   {!street&&<><directionalLight position={[10,10,-10]} color="#6f9bcf" intensity={3}/><pointLight position={[-5,10,4]} color="#f4ac8e" intensity={45}/></>}
- {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:cables?<CablesStreet/>:carrier?<CarrierEscape time={time}/>:<Pothole/>}
+ {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:cables?<CablesStreet/>:carrier?<CarrierEscape time={time}/>:songSkip?<SongSkipCity time={time}/>:<Pothole/>}
   {definition.environment==='ramp'&&<mesh rotation={[-Math.PI/2,0,0]} position={[-10,-.05,0]}><ringGeometry args={[3.2,3.23,80]}/><meshBasicMaterial color="#697481" transparent opacity={.55}/></mesh>}
   {definition.environment==='ramp'&&<Ramp/>}{cables&&<SparkShower time={time}/>}<Suspense fallback={null}><Actors time={time} onReady={onReady} definition={definition}/></Suspense><Camera reset={cameraReset} definition={definition}/><Diagnostics playing={playing}/>
  </Canvas>;

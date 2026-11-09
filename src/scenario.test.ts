@@ -1,8 +1,9 @@
 import { describe,it,expect } from 'vitest';
 import { Euler,Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X } from './scenario';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X,songSkip,SONG_SKIP_DURATION,SONG_SKIP_TRAFFIC,SONG_SKIP_BUS,songNotesAt } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
+import { fitCameraPlacement } from './framing';
 describe('Rigid vehicle follows the ramp',()=>{
  it('keeps axle spacing and every wheel center on the surface through the floor transition',()=>{
   for(let s=-9;s<22;s+=.13){const p=contactPose(s);expect(Math.hypot(p.front[0]-p.rear[0],p.front[1]-p.rear[1])).toBeCloseTo(2*HALF_WHEELBASE,5);
@@ -58,7 +59,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(5);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(6);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -113,7 +114,7 @@ describe('Cables meme scene',()=>{
  expect(scene.hash).toBe('#meme/cables');
  expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
  expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
  });
 });
 describe('La fuga del portacoches meme scene',()=>{
@@ -157,8 +158,72 @@ it('registers the Instagram credit on the canonical shareable route',()=>{
  expect(scene.scenario).toBe(carrierEscape);
  expect(scene.hash).toBe('#meme/fuga-del-portacoches');
  expect(sourceLabel(scene.source!)).toBe('Visto en @chaseluxuryai · Ver original en Instagram');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
 });
+});
+describe('Saltar canción meme scene',()=>{
+ it('keeps desktop, portrait, and fitted cameras inside the street corridor and frames the car closely',()=>{
+  const scene=sceneFromHash('#meme/saltar-cancion'),framing=scene.camera.fit!;
+  expect(Math.abs(scene.camera.desktop.position[2])).toBeLessThan(9);
+  expect(Math.abs(scene.camera.portrait.position[2])).toBeLessThan(9);
+  for(const aspect of [16/9,390/844]){
+   const {position,target}=fitCameraPlacement(framing,aspect);
+   expect(Math.abs(position.z)).toBeLessThan(9);
+   expect(position.distanceTo(target)).toBeLessThan(55);
+  }
+ });
+ it('starts and ends in ground contact in the same stalled lane',()=>{
+  const start=songSkip.evaluate(0),end=songSkip.evaluate(SONG_SKIP_DURATION);
+  expect(start.position).toEqual([0,WHEEL_RADIUS,0]);
+  expect(end.position).toEqual(start.position);
+  expect(end.quaternion).toEqual(start.quaternion);
+  expect(start.wheelAngle).toBe(0);
+ });
+ it('launches vertically and clears every parked vehicle and both building rows during the flips',()=>{
+  expect(SONG_SKIP_TRAFFIC.every(car=>car.position[2]!==0||Math.abs(car.position[0])>=8)).toBe(true);
+  for(let time=0;time<=SONG_SKIP_DURATION;time+=.025){
+   const pose=songSkip.evaluate(time);
+   expect(pose.position[0]).toBe(0);
+   expect(pose.position[2]).toBe(0);
+   expect(pose.position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS);
+   if(time>=6.5&&time<=9){
+    for(const car of [...SONG_SKIP_TRAFFIC,SONG_SKIP_BUS]){
+     const gapX=Math.abs(pose.position[0]-car.position[0])-(5.1+car.length)/2;
+     const gapZ=Math.abs(pose.position[2]-car.position[2])-(2.1+car.width)/2;
+     expect(gapX>0||gapZ>0).toBe(true);
+    }
+    expect(pose.position[1]-Math.hypot(5.1/2,2.1/2)).toBeGreaterThan(0);
+    expect(Math.abs(pose.position[2])+2.1/2).toBeLessThan(11.5);
+   }
+  }
+  expect(songSkip.evaluate(6.5).position[1]).toBeGreaterThan(9);
+  expect(songSkip.evaluate(9).position[1]).toBeGreaterThan(WHEEL_RADIUS);
+ });
+ it('is deterministic, continuous at each choreography boundary, and clamps playback',()=>{
+  for(const time of [3,4,6.5,8.5,9,SONG_SKIP_DURATION]){
+   const before=songSkip.evaluate(time-.001),after=songSkip.evaluate(time+.001);
+   expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.03);
+   expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.03);
+   expect(Math.abs(before.vapor-after.vapor)).toBeLessThan(.03);
+   expect(songSkip.evaluate(time)).toEqual(songSkip.evaluate(time));
+  }
+  expect(songSkip.evaluate(-5)).toEqual(songSkip.evaluate(0));
+  expect(songSkip.evaluate(20)).toEqual(songSkip.evaluate(SONG_SKIP_DURATION));
+  expect(songSkip.evaluate(SONG_SKIP_DURATION).phase).toBe('Maniobra completada');
+  expect(advance(10,2,true,SONG_SKIP_DURATION)).toEqual({time:SONG_SKIP_DURATION,playing:false});
+ });
+ it('animates the musical notes from time alone and registers the TikTok credit',()=>{
+  expect(songNotesAt(1)).toEqual(songNotesAt(1));
+  expect(songNotesAt(1).every(note=>note.color==='first'&&note.opacity===1)).toBe(true);
+  expect(songNotesAt(3).map(note=>note.position)).toEqual(songNotesAt(3.8).map(note=>note.position));
+  expect(songNotesAt(3.5).every(note=>note.opacity<.3)).toBe(true);
+  expect(songNotesAt(10.8).every(note=>note.color==='next'&&note.opacity>0)).toBe(true);
+  const scene=sceneFromHash('#meme/saltar-cancion');
+  expect(scene.scenario).toBe(songSkip);
+  expect(scene.hash).toBe('#meme/saltar-cancion');
+  expect(sourceLabel(scene.source!)).toBe('Visto en @2hndsum · Ver original en TikTok');
+  expect(sceneCatalog).toHaveLength(6);
+ });
 });
 describe('share-link clipboard fallback',()=>{
  it('reports clipboard success, rejection and unavailable clipboard distinctly',async()=>{
