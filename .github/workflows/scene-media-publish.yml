@@ -9,9 +9,10 @@ on:
 
 permissions: {}
 
-# One publisher at a time: it pushes to the shared media branch.
+# Serialize per pull request; a newer pending run of the same PR supersedes an older one. Pushes to the shared
+# media branch from different PRs are retried from a fresh clone in the script.
 concurrency:
-  group: scene-media-publish
+  group: scene-media-publish-${{ github.event.workflow_run.pull_requests[0].number || github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 jobs:
