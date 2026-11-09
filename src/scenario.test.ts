@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import { Euler,Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt } from './scenario';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
 describe('Rigid vehicle follows the ramp',()=>{
@@ -58,7 +58,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(4);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(5);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -113,8 +113,51 @@ describe('Cables meme scene',()=>{
  expect(scene.hash).toBe('#meme/cables');
  expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
  expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
- expect(sceneCatalog).toHaveLength(4);
+ expect(sceneCatalog).toHaveLength(5);
  });
+});
+describe('La fuga del portacoches meme scene',()=>{
+it('starts in wheel contact and travels with the carrier until takeoff',()=>{
+ const start=carrierEscape.evaluate(0),platformContact=CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS;
+ expect(start.position).toEqual([CARRIER_ESCAPE_START_X,platformContact,0]);
+ expect(start.speed).toBeGreaterThan(0);
+ for(let time=0;time<=5;time+=.025){
+  const pose=carrierEscape.evaluate(time);
+  expect(pose.position[0]).toBe(CARRIER_ESCAPE_START_X);
+  expect(pose.position[1]).toBeGreaterThanOrEqual(platformContact);
+  expect(pose.position[1]).toBeLessThanOrEqual(platformContact+.080001);
+  expect(pose.wheelAngle).toBeCloseTo(-5.2*time/WHEEL_RADIUS,8);
+ }
+});
+it('clears the platform and upper sedan before crossing their positions',()=>{
+ for(let time=5;time<=13;time+=.025){
+  const pose=carrierEscape.evaluate(time);
+  expect(pose.position[1]).toBeGreaterThanOrEqual(CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS-.000001);
+  const upperSedanDelta=Math.abs(pose.position[0]+2.5);
+  if(upperSedanDelta<3.3)expect(pose.position[1]).toBeGreaterThan(CARRIER_PLATFORM_HEIGHT+1.9);
+ }
+ expect(carrierEscape.evaluate(6.2).position[1]).toBeCloseTo(CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS+.5);
+ expect(carrierEscape.evaluate(12).position[0]).toBeGreaterThan(8);
+});
+it('is deterministic, continuous at each choreography boundary, and clamps playback',()=>{
+ for(const time of [3.2,5,6.2,8,12,13]){
+  const before=carrierEscape.evaluate(time-.001),after=carrierEscape.evaluate(time+.001);
+  expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.03);
+  expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.02);
+  expect(carrierEscape.evaluate(time)).toEqual(carrierEscape.evaluate(time));
+ }
+ expect(carrierEscape.evaluate(-5)).toEqual(carrierEscape.evaluate(0));
+ expect(carrierEscape.evaluate(20)).toEqual(carrierEscape.evaluate(13));
+ expect(carrierEscape.evaluate(13).phase).toBe('Maniobra completada');
+ expect(advance(12,2,true,carrierEscape.duration)).toEqual({time:13,playing:false});
+});
+it('registers the Instagram credit on the canonical shareable route',()=>{
+ const scene=sceneFromHash('#meme/fuga-del-portacoches');
+ expect(scene.scenario).toBe(carrierEscape);
+ expect(scene.hash).toBe('#meme/fuga-del-portacoches');
+ expect(sourceLabel(scene.source!)).toBe('Visto en @chaseluxuryai · Ver original en Instagram');
+ expect(sceneCatalog).toHaveLength(5);
+});
 });
 describe('share-link clipboard fallback',()=>{
  it('reports clipboard success, rejection and unavailable clipboard distinctly',async()=>{
