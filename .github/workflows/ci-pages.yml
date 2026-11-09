@@ -7,6 +7,12 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# Pull requests cancel superseded runs. Pushes and manual runs get a unique
+# group (run_id), so they are never cancelled; deploys stay serialized by the
+# job-level "pages" group below.
+concurrency:
+  group: ci-pages-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   changes:
     name: 🔍 changes
