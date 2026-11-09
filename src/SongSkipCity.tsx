@@ -22,7 +22,8 @@ function Buildings() {
   const dummy = new Object3D();
   let windowIndex = 0;
   buildings.forEach(({ x, z, height, color }, index) => {
-   dummy.position.set(x, height / 2, z); dummy.updateMatrix(); walls.current?.setMatrixAt(index, dummy.matrix); walls.current?.setColorAt(index, new Color(color));
+   dummy.position.set(x, height / 2, z); dummy.scale.set(1, height, 1); dummy.updateMatrix(); walls.current?.setMatrixAt(index, dummy.matrix); walls.current?.setColorAt(index, new Color(color));
+   dummy.scale.set(1, 1, 1);
    dummy.position.set(x, height + .16, z); dummy.updateMatrix(); roofs.current?.setMatrixAt(index, dummy.matrix);
    for (let y = 1.65; y < height - .35; y += 2.4) for (const offset of [-2.6, 0, 2.6]) {
     dummy.position.set(x + offset, y, z - Math.sign(z) * 4.04); dummy.updateMatrix();

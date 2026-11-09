@@ -3,6 +3,7 @@ import { Euler,Vector3,Quaternion } from 'three';
 import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X,songSkip,SONG_SKIP_DURATION,SONG_SKIP_TRAFFIC,SONG_SKIP_BUS,songNotesAt } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
+import { fitCameraPlacement } from './framing';
 describe('Rigid vehicle follows the ramp',()=>{
  it('keeps axle spacing and every wheel center on the surface through the floor transition',()=>{
   for(let s=-9;s<22;s+=.13){const p=contactPose(s);expect(Math.hypot(p.front[0]-p.rear[0],p.front[1]-p.rear[1])).toBeCloseTo(2*HALF_WHEELBASE,5);
@@ -161,6 +162,16 @@ it('registers the Instagram credit on the canonical shareable route',()=>{
 });
 });
 describe('Saltar canción meme scene',()=>{
+ it('keeps desktop, portrait, and fitted cameras inside the street corridor and frames the car closely',()=>{
+  const scene=sceneFromHash('#meme/saltar-cancion'),framing=scene.camera.fit!;
+  expect(Math.abs(scene.camera.desktop.position[2])).toBeLessThan(9);
+  expect(Math.abs(scene.camera.portrait.position[2])).toBeLessThan(9);
+  for(const aspect of [16/9,390/844]){
+   const {position,target}=fitCameraPlacement(framing,aspect);
+   expect(Math.abs(position.z)).toBeLessThan(9);
+   expect(position.distanceTo(target)).toBeLessThan(55);
+  }
+ });
  it('starts and ends in ground contact in the same stalled lane',()=>{
   const start=songSkip.evaluate(0),end=songSkip.evaluate(SONG_SKIP_DURATION);
   expect(start.position).toEqual([0,WHEEL_RADIUS,0]);

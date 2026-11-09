@@ -144,9 +144,9 @@ export const sceneCatalog: SceneDefinition[] = [
   scenario: songSkip,
   environment: 'song-skip',
   camera: {
-   desktop: { position: [-20, 17, 26], target: [0, 5, 0] },
-   portrait: { position: [-17, 19, 25], target: [0, 5, 0] },
-   fit: { width: 30, height: 20, direction: [-.58, .62, 1], target: [0, 5, 0] },
+   desktop: { position: [-10, 23, 3], target: [0, 5, 0] },
+   portrait: { position: [-25, 50, 8], target: [0, 5, 0] },
+   fit: { width: 18, height: 15, direction: [-.48, .86, .16], target: [0, 5, 0] },
   },
   copy: {
    label: 'MODO MEME',
