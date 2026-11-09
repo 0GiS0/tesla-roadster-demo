@@ -48,8 +48,8 @@ export function parseCatalog(source) {
 
 /**
  * Returns the sorted slugs of the MEME scenes to record.
- * A scene counts as changed when its catalog entry is new or edited, when shared rendering code changes,
- * or when a file bound to its environment changes.
+ * When MEME catalog entries are new or edited, only those scenes are recorded.
+ * Otherwise, shared rendering code records every MEME and environment files record matching scenes.
  */
 export function detectChangedScenes({ baseCatalog, headCatalog, changedFiles }) {
   const memes = headCatalog.filter((e) => e.mode === 'meme' && SLUG_PATTERN.test(e.slug) && e.slug.length <= 64);
@@ -57,9 +57,11 @@ export function detectChangedScenes({ baseCatalog, headCatalog, changedFiles }) 
   const files = new Set(changedFiles);
   const all = SHARED_SCENE_FILES.some((f) => files.has(f));
   const environments = new Set(Object.entries(ENVIRONMENT_FILES).filter(([f]) => files.has(f)).map(([, env]) => env));
-  const slugs = memes
-    .filter((e) => all || environments.has(e.environment) || baseByKey.get(e.key) !== e.text.trim())
-    .map((e) => e.slug);
+  const changedMemes = memes.filter((e) => baseByKey.get(e.key) !== e.text.trim());
+  const affectedMemes = changedMemes.length
+    ? changedMemes
+    : memes.filter((e) => all || environments.has(e.environment));
+  const slugs = affectedMemes.map((e) => e.slug);
   const unique = [...new Set(slugs)].sort();
   return { scenes: unique.slice(0, MAX_SCENES), truncated: unique.length > MAX_SCENES };
 }
