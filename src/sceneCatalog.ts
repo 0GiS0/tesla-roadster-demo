@@ -1,4 +1,4 @@
-import { cablesTangle, carrierEscape, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
+import { cablesTangle, carrierEscape, parkingSpaceTheft, potholeFlight, rampFlight, songSkip } from './scenario';
 import type { Scenario } from './scenario';
 
 export type SourcePlatform = 'Instagram' | 'X' | 'TikTok' | 'YouTube';
@@ -10,7 +10,7 @@ export interface SceneDefinition {
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier';
+ environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier' | 'song-skip';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
@@ -134,6 +134,30 @@ export const sceneCatalog: SceneDefinition[] = [
    author: '@chaseluxuryai',
    platform: 'Instagram',
    url: 'https://www.instagram.com/reel/DelJf20o8HP',
+  },
+ },
+ {
+  key: 'saltar-cancion',
+  hash: '#meme/saltar-cancion',
+  mode: 'meme',
+  tourMoment: { from: 4, to: 9.5 },
+  scenario: songSkip,
+  environment: 'song-skip',
+  camera: {
+   desktop: { position: [-20, 17, 26], target: [0, 5, 0] },
+   portrait: { position: [-17, 19, 25], target: [0, 5, 0] },
+   fit: { width: 30, height: 20, direction: [-.58, .62, 1], target: [0, 5, 0] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'Saltar canción.',
+   summary: 'Un toque, un despegue inesperado y el atasco sigue igual.',
+  },
+  timelineLabels: ['ATASCO', 'DESPEGUE', 'VUELTA AL HUECO'],
+  source: {
+   author: '@2hndsum',
+   platform: 'TikTok',
+   url: 'https://www.tiktok.com/@2hndsum/video/7697151742386900254',
   },
  },
 ];

@@ -101,6 +101,43 @@ export const cablesTangle:Scenario={id:'cables',title:'Cables',duration:CABLES_D
  const riseProgress=clamp((t-.8)/(impactTime-.8)),speed=t<.8||t>=impactTime?0:(CABLE_CONTACT_HEIGHT-WHEEL_RADIUS)/(impactTime-.8)*6*riseProgress*(1-riseProgress);
  return {position:[0,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:clamp(vapor),phase,speed};
 }};
+export const SONG_SKIP_TRAFFIC=[
+ ...[-22,-14,14,22].map(x=>({position:[x,0,0] as [number,number,number],length:4.2,width:1.8})),
+ ...[-22,-15,-8,8,15,22].flatMap(x=>[-5.2,5.2].map(z=>({position:[x,0,z] as [number,number,number],length:4.2,width:1.8}))),
+] as const;
+export const SONG_SKIP_BUS={position:[0,0,-5.2] as [number,number,number],length:9.2,width:2.45} as const;
+export const SONG_SKIP_DURATION=11;
+export type SongNotePose={position:[number,number,number];color:'first'|'next';opacity:number};
+const SONG_NOTE_ANCHORS=[[-1.6,2.4,-.8],[-.7,2.9,.45],[.2,2.5,-.35],[1,3,.8],[1.7,2.65,-.65],[.65,3.35,-1.05]] as const;
+export function songNotesAt(time:number):SongNotePose[]{
+ const t=clamp(time,0,SONG_SKIP_DURATION),launch=smooth((t-4)/1.4),returning=smooth((t-10.15)/.45);
+ const blink=Math.exp(-(((t-3.5)/.12)**2));
+ return SONG_NOTE_ANCHORS.map(([x,y,z],index)=>{
+  const firstOpacity=t<3?1:t<4?1-.82*blink:t<6?1-smooth((t-4)/2):0;
+  const nextOpacity=t<10.15?0:returning;
+  const scatter=(.75+index%3*.18)*launch,floatY=Math.min(t,3)*.17;
+  const firstPosition:[number,number,number]=[
+   x+Math.sign(x||1)*scatter*1.6,
+   y+floatY+scatter*2.1,
+   z+Math.sign(z||1)*scatter*1.2,
+  ];
+  const nextPosition:[number,number,number]=[x,y,z];
+  const useNext=nextOpacity>firstOpacity;
+  return {position:useNext?nextPosition:firstPosition,color:useNext?'next':'first',opacity:Math.max(firstOpacity,nextOpacity)};
+ });
+}
+export const songSkip:Scenario={id:'saltar-cancion',title:'Saltar canción',duration:SONG_SKIP_DURATION,evaluate(time){
+ const t=clamp(time,0,SONG_SKIP_DURATION),vibration=t>=3&&t<4?Math.sin((t-3)*Math.PI*24)*Math.sin((t-3)*Math.PI)*.035:0;
+ const rise=smooth((t-4)/2.5),returning=smooth((t-9)/2);
+ const y=t<4?WHEEL_RADIUS+.018*Math.sin((t-3)*Math.PI)**2:t<6.5?WHEEL_RADIUS+10.2*rise:t<9?WHEEL_RADIUS+10.2:WHEEL_RADIUS+10.2*(1-returning);
+ const roll=t<6.5?0:t<8.5?3*Math.PI*smooth((t-6.5)/2):t<9?3*Math.PI+Math.PI*smooth((t-8.5)/.5):0;
+ const q=new Quaternion().setFromEuler(new Euler(0,0,roll+vibration));
+ const vapor=t<4?0:t<6.5?smooth((t-4)/.35):t<8.5?.22:t<9.5?.42*(1-smooth((t-8.5)/1)):0;
+ const sample=(sampleTime:number)=>sampleTime<4?WHEEL_RADIUS:sampleTime<6.5?WHEEL_RADIUS+10.2*smooth((sampleTime-4)/2.5):sampleTime<9?WHEEL_RADIUS+10.2:WHEEL_RADIUS+10.2*(1-smooth((sampleTime-9)/2));
+ const speed=Math.abs(sample(Math.min(SONG_SKIP_DURATION,t+.01))-sample(Math.max(0,t-.01)))/.02;
+ const phase=t<3?'Atasco':t<4?'Siguiente':t<6.5?'Despegue':t<8.5?'Voltereta':t<SONG_SKIP_DURATION?'Vuelta al hueco':'Maniobra completada';
+ return {position:[0,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:clamp(vapor),phase,speed};
+}};
 /** Parking-lot layout shared by the scenario, the environment and the tests. Bays run along Z, the aisle along X. */
 export const PARKING = {
  groundY: 0,
