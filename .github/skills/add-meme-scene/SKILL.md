@@ -15,7 +15,7 @@ Describe el procedimiento **actual**, sin refactorizar. Detalle y rutas en [proc
 4. Si el entorno es nuevo, amplía la unión cerrada `environment` (`SceneDefinition`) y su rama de render en `src/Scene.tsx`.
 5. Añade tests en `src/scenario.test.ts`: contacto, continuidad, determinismo y límites.
 6. Valida: `npm run typecheck`, `npm test`, `python3 model/validate_glb.py`, `npm run build`.
-7. Captura escritorio, vertical y horizontal baja (Playwright MCP si existe) y mide con `?debug=1`.
+7. Captura escritorio, vertical y horizontal baja (Playwright MCP; la captura «después» es obligatoria) y mide con `?debug=1`.
 8. Pide revisión independiente del diff y **para antes de abrir la PR**: hace falta aprobación explícita.
 
 Reglas: código y comentarios en inglés, interfaz en español, geometría procedural original, sin marcas ni recursos externos.

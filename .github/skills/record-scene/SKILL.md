@@ -17,4 +17,4 @@ Cada PR que añade o cambia una escena MEME **debe** llevar su vídeo en el cuer
 3. Comprueba que pesa < 10 MB y revisa un fotograma (`ffmpeg -ss 5 -i <slug>.mp4 -frames:v 1 f.png`).
 4. Adjúntalo con `gh pr create --attach './<slug>.mp4'` o `gh pr edit <n> --attach …` y verifica en GitHub que se reproduce.
 
-No hagas commit del vídeo.
+Si no puedes adjuntar, lo publica el workflow `scene-media`. No hagas commit del vídeo.
