@@ -130,11 +130,12 @@ it('starts in wheel contact and travels with the carrier until takeoff',()=>{
  }
 });
 it('clears the platform and upper sedan before crossing their positions',()=>{
+ expect(Math.abs(CARRIER_ESCAPE_START_X+4)).toBeGreaterThan((5.1+4.35)/2);
  for(let time=5;time<=13;time+=.025){
   const pose=carrierEscape.evaluate(time);
   expect(pose.position[1]).toBeGreaterThanOrEqual(CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS-.000001);
-  const upperSedanDelta=Math.abs(pose.position[0]+2.5);
-  if(upperSedanDelta<3.3)expect(pose.position[1]).toBeGreaterThan(CARRIER_PLATFORM_HEIGHT+1.9);
+  const upperSedanDeltas=[Math.abs(pose.position[0]+4),Math.abs(pose.position[0]-2.3)];
+  for(const distance of upperSedanDeltas)if(distance<3.3)expect(pose.position[1]).toBeGreaterThan(CARRIER_PLATFORM_HEIGHT+1.9);
  }
  expect(carrierEscape.evaluate(6.2).position[1]).toBeCloseTo(CARRIER_PLATFORM_HEIGHT+WHEEL_RADIUS+.5);
  expect(carrierEscape.evaluate(12).position[0]).toBeGreaterThan(8);

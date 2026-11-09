@@ -2,8 +2,9 @@ import { Quaternion, Vector3 } from 'three';
 import { CARRIER_ESCAPE_START_X, CARRIER_PLATFORM_HEIGHT, carrierEscape } from './scenario';
 
 const ROADSTER_SLOT_Z=0;
-const CARRIER_LENGTH=15;
+const CARRIER_LENGTH=17;
 const CARRIER_WIDTH=4;
+const CARRIER_CENTER_X=-3.8;
 const POLE_SPACING=16;
 const POLE_SPAN=64;
 const DESERT_BUSHES=[
@@ -38,9 +39,10 @@ function CarrierSedan({x,deckY,color,rock=0}:{x:number;deckY:number;color:string
  </group>;
 }
 
-function CarrierTruck(){
+function CarrierTruck({time}:{time:number}){
  const lowerDeck=1.25,upperDeck=CARRIER_PLATFORM_HEIGHT;
- const uprights=[-11.7,4.4];
+ const uprights=[-12.1,4.5];
+ const sedanRock=time<12?0:.035*Math.sin((time-12)*Math.PI*2)*Math.exp(-(time-12)*1.5);
  return <group>
   <group>
    <mesh position={[7.4,1.75,0]} castShadow receiveShadow><boxGeometry args={[4.7,2.9,3.55]}/><meshStandardMaterial color="#e9dfc9" roughness={.78}/></mesh>
@@ -55,14 +57,15 @@ function CarrierTruck(){
   {[...uprights.flatMap(x=>[-1,1].map(side=>[x,side] as const))].map(([x,side])=><group key={`frame-${x}-${side}`}>
    <mesh position={[x,2.48,side*1.96]} castShadow><boxGeometry args={[.22,4.55,.22]}/><meshStandardMaterial color="#b95d32" metalness={.26} roughness={.65}/></mesh>
   </group>)}
-  <mesh position={[-3.65,lowerDeck,0]} castShadow receiveShadow><boxGeometry args={[CARRIER_LENGTH,.24,CARRIER_WIDTH]}/><meshStandardMaterial color="#55534d" metalness={.42} roughness={.7}/></mesh>
-  <mesh position={[-3.65,upperDeck,0]} castShadow receiveShadow><boxGeometry args={[CARRIER_LENGTH,.2,CARRIER_WIDTH]}/><meshStandardMaterial color="#b95d32" metalness={.35} roughness={.68}/></mesh>
-  {[-11.15,3.85].flatMap(x=>[-1,1].map(side=><mesh key={`post-${x}-${side}`} position={[x,2.42,side*1.8]} castShadow><boxGeometry args={[.22,2.2,.22]}/><meshStandardMaterial color="#b95d32" metalness={.3} roughness={.64}/></mesh>))}
-  {[-11.15,3.85].flatMap(x=>[-1,1].map(side=><Beam key={`brace-${x}-${side}`} start={[x,1.42,side*1.8]} end={[x+1.5,3.48,side*1.8]} thickness={.16} color="#a9512d"/>))}
+  <mesh position={[CARRIER_CENTER_X,lowerDeck,0]} castShadow receiveShadow><boxGeometry args={[CARRIER_LENGTH,.24,CARRIER_WIDTH]}/><meshStandardMaterial color="#55534d" metalness={.42} roughness={.7}/></mesh>
+  <mesh position={[CARRIER_CENTER_X,upperDeck,0]} castShadow receiveShadow><boxGeometry args={[CARRIER_LENGTH,.2,CARRIER_WIDTH]}/><meshStandardMaterial color="#b95d32" metalness={.35} roughness={.68}/></mesh>
+  {[-12.1,4.5].flatMap(x=>[-1,1].map(side=><mesh key={`post-${x}-${side}`} position={[x,2.42,side*1.8]} castShadow><boxGeometry args={[.22,2.2,.22]}/><meshStandardMaterial color="#b95d32" metalness={.3} roughness={.64}/></mesh>))}
+  {[-12.1,4.5].flatMap(x=>[-1,1].map(side=><Beam key={`brace-${x}-${side}`} start={[x,1.42,side*1.8]} end={[x+1.5,3.48,side*1.8]} thickness={.16} color="#a9512d"/>))}
   {[-1.8,1.45].flatMap(x=>[-1,1].map(side=><Wheel key={`trailer-${x}-${side}`} position={[x,.72,side*2.08]}/>))}
-  <CarrierSedan x={-2.7} deckY={lowerDeck} color="#737777"/>
-  <CarrierSedan x={-2.7} deckY={upperDeck} color="#aaa79d"/>
-  <CarrierSedan x={-9.2} deckY={lowerDeck} color="#928f87"/>
+  <CarrierSedan x={-4} deckY={lowerDeck} color="#737777"/>
+  <CarrierSedan x={2.3} deckY={lowerDeck} color="#928f87"/>
+  <CarrierSedan x={-4} deckY={upperDeck} color="#aaa79d"/>
+  <CarrierSedan x={2.3} deckY={upperDeck} color="#8c8d88" rock={sedanRock}/>
  </group>;
 }
 
@@ -105,8 +108,7 @@ export function CarrierEscape({time}:{time:number}){
    </group>;
   })}
   <Roadside time={time}/>
-  <CarrierTruck/>
-  <CarrierSedan x={-9.2} deckY={CARRIER_PLATFORM_HEIGHT} color="#aaa79d" rock={time<12?0:.035*Math.sin((time-12)*Math.PI*2)*Math.exp(-(time-12)*1.5)}/>
+  <CarrierTruck time={time}/>
   {[1,-1].map(side=><mesh key={`tail-${side}`} position={[roadster.position[0]-2.35,roadster.position[1]+.17,roadster.position[2]+side*.58]}><boxGeometry args={[.16,.13,.12]}/><meshStandardMaterial color={time>=3.2?'#fa3e2e':'#8c3129'} emissive={time>=3.2?'#e02c1f':'#33110d'} emissiveIntensity={time>=3.2?2.2:.3}/></mesh>)}
   <group position={[CARRIER_ESCAPE_START_X,CARRIER_PLATFORM_HEIGHT+.16,0]}>
    {[[-1,-1],[-1,1],[1,-1],[1,1]].map(([x,z])=><mesh key={`${x}-${z}`} position={[x*.62,0,z*.58]} visible={padVapor>.01}><cylinderGeometry args={[.12,.18,.2,8]}/><meshStandardMaterial color="#34332f" metalness={.55} roughness={.5}/></mesh>)}
