@@ -23,6 +23,7 @@ Además, el repositorio funciona como una *fábrica de software*: las ideas entr
 | [Fábrica de software](fabrica-de-software.md) | Recorrido de un issue: plantillas, triaje, agente, revisión y merge. |
 | [Skills y MCP](skills-y-mcp.md) | Skills del repositorio, servidor MCP configurado y cómo se validan. |
 | [Desarrollo](desarrollo.md) | Detalles técnicos y de operación, como la generación del tour en vídeo. |
+| [Media en PRs](media-en-prs.md) | Cómo las PR que cambian una escena reciben vídeo y captura automáticos y por qué se publican así. |
 | [Guardarraíles](guardarrailes.md) | Reglas que no se deben romper: alcance, rendimiento, accesibilidad y modelo. |
 | [Lights-out](lights-out.md) | Qué cambios (`docs/` y `README.md`) se mergean sin revisión humana, por qué y cómo los mantiene el workflow `📚 Docs sync`. |
 | [Revisión del Modo MEME](meme-review.md) | Evidencia de revisión de la issue #5 (histórica, en inglés). |

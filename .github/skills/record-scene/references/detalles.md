@@ -18,4 +18,6 @@
 
 ## Adjuntar
 
+En PR, el workflow `scene-media` (ver `docs/media-en-prs.md`) lo hace solo para las escenas cambiadas.
+
 Los vídeos no admiten texto alternativo en `--attach`: añade un pie en el cuerpo. Si falla, revisa la PR antes de reintentar para no duplicar.
