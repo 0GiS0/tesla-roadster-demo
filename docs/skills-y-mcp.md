@@ -27,7 +27,7 @@ Genera una imagen de concepto en el estilo low-poly de la web para cada propuest
 
 Graba una escena (original o MEME) de principio a fin como MP4 H.264 para adjuntarlo al cuerpo de la PR. Toda PR que añade o cambia una escena MEME lleva su vídeo.
 
-- **Procedimiento:** con la web en marcha (`npm run dev`), `node .github/skills/record-scene/scripts/record-scene.mjs --scene <slug> --out <slug>.mp4` (1280×720 por defecto; sin `--scene` graba la rampa original). Debe pesar < 10 MB y se adjunta con `gh pr create --attach` o `gh pr edit --attach`.
+- **Procedimiento:** con la web en marcha (`npm run dev`), `node .github/skills/record-scene/scripts/record-scene.mjs --scene <slug> --out <slug>.mp4` (1280×720 por defecto; sin `--scene` graba la rampa original; `--preset ci` para runners sin GPU y `--still`/`--still-out` para la captura «después»). Debe pesar < 10 MB y se adjunta con `gh pr create --attach` o `gh pr edit --attach`.
 - **Límites:** el vídeo no se versiona ni va a `public/`; el tour del README usa `record-tour`.
 - **Contenido:** `SKILL.md`, `references/detalles.md` y `scripts/`.
 

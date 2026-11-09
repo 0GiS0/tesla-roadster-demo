@@ -14,7 +14,7 @@
 
 ## Opciones
 
-`--scene`, `--out`, `--url`, `--fps` (30), `--width`/`--height` (1280×720, enteros pares), `--portrait` (720×1280), `--crf` (26).
+`--scene`, `--out`, `--url`, `--fps` (30), `--width`/`--height` (1280×720, enteros pares), `--portrait` (720×1280), `--crf` (26), `--preset ci`, `--frame-timeout`, `--still`. Runners sin GPU y captura «después»: [ci](ci.md).
 
 ## Adjuntar
 
