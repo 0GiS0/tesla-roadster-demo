@@ -81,9 +81,8 @@ function StreetFurniture() {
 
 function MusicalNotes({ time }: { time: number }) {
  const groups = useRef<Array<Group | null>>([]);
- const firstMaterial = useMemo(() => new MeshStandardMaterial({ color: '#f0dfbb', roughness: .48, transparent: true }), []);
- const nextMaterial = useMemo(() => new MeshStandardMaterial({ color: '#a8d7ce', roughness: .48, transparent: true }), []);
- useEffect(() => () => { firstMaterial.dispose(); nextMaterial.dispose(); }, [firstMaterial, nextMaterial]);
+ const material = useMemo(() => new MeshStandardMaterial({ color: '#f0dfbb', roughness: .48, transparent: true }), []);
+ useEffect(() => () => material.dispose(), [material]);
  useFrame(() => {
   songNotesAt(time).forEach((note, index) => {
    const group = groups.current[index];
@@ -91,18 +90,15 @@ function MusicalNotes({ time }: { time: number }) {
    group.position.set(...note.position);
    group.rotation.z = index % 2 ? -.08 : .08;
    group.visible = note.opacity > .01;
-   firstMaterial.opacity = note.color === 'first' ? note.opacity : 0;
-   nextMaterial.opacity = note.color === 'next' ? note.opacity : 0;
+   material.color.set(note.color === 'first' ? '#f0dfbb' : '#a8d7ce');
+   material.opacity = note.opacity;
   });
  });
  return <>
   {Array.from({ length: 6 }, (_, index) => <group key={index} ref={group => { groups.current[index] = group; }}>
-   <mesh position={[0, 0, 0]} scale={[.2, .14, .12]} material={firstMaterial}><sphereGeometry args={[1, 8, 6]}/></mesh>
-   <mesh position={[.19, .39, 0]} material={firstMaterial}><boxGeometry args={[.08, .78, .08]}/></mesh>
-   <mesh position={[.31, .75, 0]} rotation={[0, 0, .28]} material={firstMaterial}><boxGeometry args={[.3, .1, .08]}/></mesh>
-   <mesh position={[0, 0, 0]} scale={[.2, .14, .12]} material={nextMaterial}><sphereGeometry args={[1, 8, 6]}/></mesh>
-   <mesh position={[.19, .39, 0]} material={nextMaterial}><boxGeometry args={[.08, .78, .08]}/></mesh>
-   <mesh position={[.31, .75, 0]} rotation={[0, 0, .28]} material={nextMaterial}><boxGeometry args={[.3, .1, .08]}/></mesh>
+   <mesh position={[0, 0, 0]} scale={[.2, .14, .12]} material={material}><sphereGeometry args={[1, 8, 6]}/></mesh>
+   <mesh position={[.19, .39, 0]} material={material}><boxGeometry args={[.08, .78, .08]}/></mesh>
+   <mesh position={[.31, .75, 0]} rotation={[0, 0, .28]} material={material}><boxGeometry args={[.3, .1, .08]}/></mesh>
   </group>)}
  </>;
 }

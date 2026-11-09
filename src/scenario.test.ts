@@ -193,6 +193,7 @@ describe('Saltar canción meme scene',()=>{
    const before=songSkip.evaluate(time-.001),after=songSkip.evaluate(time+.001);
    expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.03);
    expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.03);
+   expect(Math.abs(before.vapor-after.vapor)).toBeLessThan(.03);
    expect(songSkip.evaluate(time)).toEqual(songSkip.evaluate(time));
   }
   expect(songSkip.evaluate(-5)).toEqual(songSkip.evaluate(0));
@@ -203,6 +204,7 @@ describe('Saltar canción meme scene',()=>{
  it('animates the musical notes from time alone and registers the TikTok credit',()=>{
   expect(songNotesAt(1)).toEqual(songNotesAt(1));
   expect(songNotesAt(1).every(note=>note.color==='first'&&note.opacity===1)).toBe(true);
+  expect(songNotesAt(3).map(note=>note.position)).toEqual(songNotesAt(3.8).map(note=>note.position));
   expect(songNotesAt(3.5).every(note=>note.opacity<.3)).toBe(true);
   expect(songNotesAt(10.8).every(note=>note.color==='next'&&note.opacity>0)).toBe(true);
   const scene=sceneFromHash('#meme/saltar-cancion');

@@ -132,7 +132,9 @@ export const songSkip:Scenario={id:'saltar-cancion',title:'Saltar canción',dura
  const y=t<4?WHEEL_RADIUS+.018*Math.sin((t-3)*Math.PI)**2:t<6.5?WHEEL_RADIUS+10.2*rise:t<9?WHEEL_RADIUS+10.2:WHEEL_RADIUS+10.2*(1-returning);
  const roll=t<6.5?0:t<8.5?3*Math.PI*smooth((t-6.5)/2):t<9?3*Math.PI+Math.PI*smooth((t-8.5)/.5):0;
  const q=new Quaternion().setFromEuler(new Euler(0,0,roll+vibration));
- const vapor=t<4?0:t<6.5?smooth((t-4)/.35):t<8.5?.22:t<9.5?.42*(1-smooth((t-8.5)/1)):0;
+ const ascentVapor=smooth((t-4)/.3)*(1-smooth((t-6.2)/.3));
+ const brakeVapor=.42*smooth((t-7.8)/.25)*(1-smooth((t-8.9)/.3));
+ const vapor=Math.max(ascentVapor,brakeVapor);
  const sample=(sampleTime:number)=>sampleTime<4?WHEEL_RADIUS:sampleTime<6.5?WHEEL_RADIUS+10.2*smooth((sampleTime-4)/2.5):sampleTime<9?WHEEL_RADIUS+10.2:WHEEL_RADIUS+10.2*(1-smooth((sampleTime-9)/2));
  const speed=Math.abs(sample(Math.min(SONG_SKIP_DURATION,t+.01))-sample(Math.max(0,t-.01)))/.02;
  const phase=t<3?'Atasco':t<4?'Siguiente':t<6.5?'Despegue':t<8.5?'Voltereta':t<SONG_SKIP_DURATION?'Vuelta al hueco':'Maniobra completada';
