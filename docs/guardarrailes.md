@@ -31,6 +31,7 @@ DPR máximo 1,6, sombras de 1024 px y 256 partículas fijas, salvo que una medic
 - Controles en español, accesibles con ratón, táctil y teclado: flechas orbitan, +/− acercan o alejan, Tab sale del lienzo.
 - El restablecimiento de cámara vacía el amortiguado de OrbitControls antes de colocar la vista inicial.
 - Mantener los estados de carga, error y ausencia de WebGL; los controles quedan desactivados hasta que el modelo carga.
+- Con «Reducir movimiento» activado (`prefers-reduced-motion: reduce` en `src/style.css`), el indicador de carga no se anima y el selector de escenas no usa transiciones.
 - Los recursos se resuelven con `import.meta.env.BASE_URL` y se mantiene el prefijo de Pages.
 
 ## Proceso
