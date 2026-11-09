@@ -149,6 +149,26 @@ Limitaciones:
 </details>
 
 <details>
+<summary><strong>🧰 Entorno del agente en la nube</strong></summary>
+
+<br>
+
+`.github/workflows/copilot-setup-steps.yml` prepara el entorno del agente en la nube de Copilot antes de que empiece a trabajar. Los pasos corren en Actions, fuera del firewall del agente, así que pueden descargar lo que el agente no podría:
+
+- 🟢 Node.js 22 y `npm ci` (con caché de npm).
+- 🌐 Chromium de Playwright con sus dependencias del sistema: `npx playwright-core install --with-deps chromium`, que usa la versión de `playwright-core` del lockfile.
+- 🎞️ ffmpeg desde apt.
+- ✅ Una comprobación final de que `node`, `npm` y `ffmpeg` están en el `PATH` y de que el ejecutable de Chromium existe.
+
+Notas:
+
+- El job se llama `copilot-setup-steps`, como exige GitHub. No lleva `name:` propio (y por tanto sin emoji) para que el nombre del check coincida con ese identificador.
+- GitHub solo usa el fichero desde la rama por defecto. También se ejecuta en las PR y los push que lo modifican, y a mano desde la pestaña Actions (`workflow_dispatch`).
+- Si un paso falla, el agente empieza igualmente con el entorno que haya.
+
+</details>
+
+<details>
 <summary><strong>🌍 GitHub Pages</strong></summary>
 
 <br>
