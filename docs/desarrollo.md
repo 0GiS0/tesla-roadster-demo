@@ -157,7 +157,8 @@ Limitaciones:
 
 - 🟢 Node.js 22 y `npm ci` (con caché de npm).
 - 🌐 Chromium de Playwright con sus dependencias del sistema: `npx playwright-core install --with-deps chromium`, que usa la versión de `playwright-core` del lockfile.
-- 🎞️ ffmpeg desde apt.
+- 🎞️ ffmpeg estático fijado (`eugeneware/ffmpeg-static` b6.1.1, ffmpeg 7.0.2 con libx264), descargado de GitHub Releases con verificación sha256 y cacheado con `actions/cache`. No usa apt, así que no depende de la velocidad del mirror. Las ramas `copilot/*` solo leen cachés creadas en `main`: tras fusionar, lanza el workflow una vez a mano en `main` para poblarla. Al cambiar de versión hay que actualizar la URL, el sha256 y la clave de caché juntos.
+- ⏱️ Antes de instalar Chromium, apt se configura con `Acquire::http::Timeout` de 10 s y 3 reintentos para que un mirror lento falle rápido. `scene-media.yml` usa el mismo ffmpeg y la misma configuración.
 - ✅ Una comprobación final de que `node`, `npm` y `ffmpeg` están en el `PATH` y de que el ejecutable de Chromium existe.
 
 Notas:
@@ -165,6 +166,7 @@ Notas:
 - El job se llama `copilot-setup-steps`, como exige GitHub. No lleva `name:` propio (y por tanto sin emoji) para que el nombre del check coincida con ese identificador.
 - GitHub solo usa el fichero desde la rama por defecto. También se ejecuta en las PR y los push que lo modifican, y a mano desde la pestaña Actions (`workflow_dispatch`).
 - Si un paso falla, el agente empieza igualmente con el entorno que haya.
+- `timeout-minutes` está en 59, el máximo que admite GitHub para este job. Ese límite cubre toda la sesión del agente (preparación más trabajo), no solo los pasos de preparación: con 30 minutos una sesión se canceló cuando el mirror de apt iba lento.
 
 </details>
 

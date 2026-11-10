@@ -74,13 +74,33 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
+      - name: ⏱️ Make apt fail fast on a slow mirror
+        run: |
+          printf 'Acquire::http::Timeout "10";\nAcquire::Retries "3";\n' | sudo tee /etc/apt/apt.conf.d/99-fail-fast
+
       - name: 🌐 Install Chromium for Playwright
         run: npx playwright-core install --with-deps chromium
 
-      - name: 🎞️ Install ffmpeg
+      - name: 🗃️ Restore ffmpeg cache
+        id: ffmpeg-cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ~/.cache/ffmpeg-static/ffmpeg
+          key: ffmpeg-static-b6.1.1-linux-x64
+
+      - name: 🎞️ Download ffmpeg
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        # Pinned static build (ffmpeg 7.0.2 with libx264 and libwebp); no apt involved.
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends ffmpeg
+          set -euo pipefail
+          curl -fsSL --retry 3 -o ffmpeg.gz https://github.com/eugeneware/ffmpeg-static/releases/download/b6.1.1/ffmpeg-linux-x64.gz
+          echo "bfe8a8fc511530457b528c48d77b5737527b504a3797a9bc4866aeca69c2dffa  ffmpeg.gz" | sha256sum -c -
+          mkdir -p ~/.cache/ffmpeg-static
+          gunzip -c ffmpeg.gz > ~/.cache/ffmpeg-static/ffmpeg
+          rm ffmpeg.gz
+
+      - name: 🎞️ Install ffmpeg
+        run: sudo install -m 0755 ~/.cache/ffmpeg-static/ffmpeg /usr/local/bin/ffmpeg
 
       - name: 🏗️ Build the app
         run: npm run build
