@@ -14,6 +14,9 @@ on:
   workflow_dispatch:
   permissions:
     actions: read
+    # Required by the skip-if-match search: on a private repository, /search/issues
+    # needs read access to pull requests.
+    pull-requests: read
   # Skip when a previous docs sync PR is still open, so runs never stack.
   skip-if-match: 'is:pr is:open label:"🌙 lights-out" in:title "docs:"'
   steps:
