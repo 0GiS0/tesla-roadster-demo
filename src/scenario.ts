@@ -31,6 +31,18 @@ export const rampFlight:Scenario={id:'ramp-flight',title:'Rampa · Vuelo · Ater
  return {position,quaternion:q.toArray() as Pose['quaternion'],wheelAngle:-st.s/WHEEL_RADIUS,vapor:clamp(st.vapor),phase:st.phase,speed:t<13?Math.abs(after-before)/(2*dt):0};
 }};
 const smoothStep=(n:number)=>{const t=clamp(n);return t*t*(3-2*t)};
+export const BUSINESS_WING_TOP=1.5;
+const BUSINESS_DURATION=10;
+export const businessClass:Scenario={id:'clase-business',title:'Clase business',duration:BUSINESS_DURATION,evaluate(time){
+ const t=clamp(time,0,BUSINESS_DURATION);
+ const approach=smoothStep(t/4),overtake=smoothStep((t-4)/6);
+ const phase=t<4?'Vuelo en paralelo':t<7?'Junto a la ventanilla':t<BUSINESS_DURATION?'Adelantamiento':'Maniobra completada';
+ return {position:[-4+3*approach+6*overtake,5,-4+2*approach],quaternion:[0,0,0,1],wheelAngle:0,vapor:1,phase,speed:0};
+}};
+export function businessVaporPosition(time:number,age:number,index:number):[number,number,number]{
+ const pose=businessClass.evaluate(time),spread=.12+age*.42;
+ return [pose.position[0]-2.7-age*14,pose.position[1]-.12+Math.sin(index*9.3)*spread,pose.position[2]+Math.cos(index*4.7)*spread];
+}
 export const potholeFlight:Scenario={id:'bache-volador',title:'Bache volador',duration:12,evaluate(time){
  const t=clamp(time,0,12);let x:number,y=WHEEL_RADIUS,phase='Aproximación',wheelAngle:number,vapor=0;
  if(t<3){x=-12+5*smoothStep(t/3);wheelAngle=-(x+12)/WHEEL_RADIUS;}

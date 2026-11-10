@@ -3,10 +3,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { BufferGeometry, CanvasTexture, CatmullRomCurve3, Color, DoubleSide, Float32BufferAttribute, Group, InstancedMesh, Object3D, Path, Quaternion, RepeatWrapping, Spherical, Shape, ShapeGeometry, SRGBColorSpace, TubeGeometry, Vector3 } from 'three';
 import type { OrbitControls as OrbitControlsType } from 'three-stdlib';
-import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_ENDPOINT_HEIGHT, CABLE_SUPPORT_FLAT_HALF_LENGTH, CABLE_SUPPORT_RADIUS, CABLE_SUPPORT_SPAN_HALF_LENGTH, CABLE_SUPPORT_WHEEL_Z, CABLE_SUPPORT_X, CARRIER_ESCAPE_START_X, CARRIER_PLATFORM_HEIGHT, RADIUS, cableSupportHeightAt, createParkingSpaceTheft } from './scenario';
+import { CABLES_EFFECT_PARTICLE_BUDGET, CABLE_CONTACT_HEIGHT, CABLE_SUPPORT_ENDPOINT_HEIGHT, CABLE_SUPPORT_FLAT_HALF_LENGTH, CABLE_SUPPORT_RADIUS, CABLE_SUPPORT_SPAN_HALF_LENGTH, CABLE_SUPPORT_WHEEL_Z, CABLE_SUPPORT_X, CARRIER_ESCAPE_START_X, CARRIER_PLATFORM_HEIGHT, RADIUS, businessVaporPosition, cableSupportHeightAt, createParkingSpaceTheft } from './scenario';
 import type { SceneDefinition } from './sceneCatalog';
 import { ParkingLot } from './ParkingLot';
 import { CarrierEscape } from './CarrierEscape';
+import { BusinessClass } from './BusinessClass';
 import { fitCameraPlacement, parkingDropHeight } from './framing';
 
 const CABLE_CAR_COLORS=['#777b72','#b6a98e','#59675e','#a34f39','#858b8c','#70665b'];
@@ -56,8 +57,8 @@ function Rails(){
 }
 // Fixed seeds and analytic particle ages: scrubbing and pausing never mutate the plume.
 function Vapor({time,definition}:{time:number;definition:SceneDefinition}){
- const ref=useRef<InstancedMesh>(null);const dummy=useMemo(()=>new Object3D(),[]);const parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',count=cables?CABLES_EFFECT_PARTICLE_BUDGET.vapor:256;
- useFrame(()=>{if(!ref.current)return;const p=definition.scenario.evaluate(time);for(let i=0;i<count;i++){const seed=(Math.sin(i*127.1+31.7)*43758.5453)%1;const age=((time*.55+i*.61803398875)%1+1)%1;const lane=i%4,atCarrierPad=carrier&&i<96&&time>=5;const spread=.035+age*(parking?1.5:.85);const lateral=(lane<2?-1.1:1.1)+Math.sin(i*9.3)*spread,depth=(lane%2?-.65:.65)+Math.cos(i*4.7)*spread,fall=age*(2+Math.min(8,p.position[1]));const carrierEngineOffset=lane<2?-1.25:1.25;const carrierPadVapor=Math.max(0,Math.min(1,(time-5)/.4))*(1-Math.max(0,Math.min(1,(time-7)/.8)));const vapor=atCarrierPad?carrierPadVapor:p.vapor;const x=atCarrierPad?CARRIER_ESCAPE_START_X:carrier?p.position[0]+carrierEngineOffset:lateral+p.position[0],y=atCarrierPad?CARRIER_PLATFORM_HEIGHT+.15+age*2:carrier?p.position[1]-.65+age*2.5:p.position[1]-.3-fall,z=atCarrierPad?depth:carrier?p.position[2]+(lane%2?-.65:.65)+Math.cos(i*4.7)*spread:parking?p.position[2]+lateral:p.position[2]+depth;dummy.position.set(x,parking?Math.max(.12,y):carrier?Math.max(.18,y):y,z);dummy.scale.setScalar(vapor*(.13+age*.8)*(1-age*.65)*(1+Math.abs(seed)*.4));dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix)}ref.current.instanceMatrix.needsUpdate=true;ref.current.visible=p.vapor>.001});
+ const ref=useRef<InstancedMesh>(null);const dummy=useMemo(()=>new Object3D(),[]);const parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',business=definition.environment==='business',count=cables?CABLES_EFFECT_PARTICLE_BUDGET.vapor:256;
+ useFrame(()=>{if(!ref.current)return;const p=definition.scenario.evaluate(time);for(let i=0;i<count;i++){const seed=(Math.sin(i*127.1+31.7)*43758.5453)%1;const age=((time*.55+i*.61803398875)%1+1)%1;const lane=i%4,atCarrierPad=carrier&&i<96&&time>=5;const spread=.035+age*(parking?1.5:.85);const lateral=(lane<2?-1.1:1.1)+Math.sin(i*9.3)*spread,depth=(lane%2?-.65:.65)+Math.cos(i*4.7)*spread,fall=age*(2+Math.min(8,p.position[1]));const carrierEngineOffset=lane<2?-1.25:1.25;const carrierPadVapor=Math.max(0,Math.min(1,(time-5)/.4))*(1-Math.max(0,Math.min(1,(time-7)/.8)));const vapor=atCarrierPad?carrierPadVapor:p.vapor;const x=atCarrierPad?CARRIER_ESCAPE_START_X:carrier?p.position[0]+carrierEngineOffset:lateral+p.position[0],y=atCarrierPad?CARRIER_PLATFORM_HEIGHT+.15+age*2:carrier?p.position[1]-.65+age*2.5:p.position[1]-.3-fall,z=atCarrierPad?depth:carrier?p.position[2]+(lane%2?-.65:.65)+Math.cos(i*4.7)*spread:parking?p.position[2]+lateral:p.position[2]+depth;if(business)dummy.position.set(...businessVaporPosition(time,age,i));else dummy.position.set(x,parking?Math.max(.12,y):carrier?Math.max(.18,y):y,z);dummy.scale.setScalar(vapor*(.13+age*.8)*(1-age*.65)*(1+Math.abs(seed)*.4));dummy.updateMatrix();ref.current.setMatrixAt(i,dummy.matrix)}ref.current.instanceMatrix.needsUpdate=true;ref.current.visible=p.vapor>.001});
  return <instancedMesh ref={ref} args={[undefined,undefined,count]} frustumCulled={false}><planeGeometry args={[2,2]}/><shaderMaterial transparent depthWrite={false} toneMapped={false}
  vertexShader={`varying vec2 vUv; void main(){vUv=uv;vec4 center=modelViewMatrix*instanceMatrix*vec4(0.0,0.0,0.0,1.0);float size=length(instanceMatrix[0].xyz);center.xy+=position.xy*size;gl_Position=projectionMatrix*center;}`}
  fragmentShader={`varying vec2 vUv; void main(){float r=length(vUv*2.0-1.0);float alpha=pow(max(0.0,1.0-r*r),3.0)*0.48;gl_FragColor=vec4(0.94,0.97,1.0,alpha);}`}/>
@@ -99,14 +100,17 @@ function Camera({reset,definition}:{reset:number;definition:SceneDefinition}){
    if(event.key==='ArrowDown')spherical.phi+=.08;
    if(event.key==='+'||event.key==='=')spherical.radius*=.9;
    if(event.key==='-'||event.key==='_')spherical.radius*=1.1;
-   spherical.radius=Math.min(definition.camera.fit?110:65,Math.max(12,spherical.radius));
-   spherical.phi=Math.min(Math.PI*.49,Math.max(.05,spherical.phi));
+   const business=definition.environment==='business';
+   spherical.radius=Math.min(business?38:definition.camera.fit?110:65,Math.max(business?16:12,spherical.radius));
+   spherical.phi=Math.min(Math.PI*.49,Math.max(business?1.35:.05,spherical.phi));
+   if(business)spherical.theta=Math.min(.25,Math.max(-.25,spherical.theta));
    camera.position.setFromSpherical(spherical).add(orbit.target);orbit.update();
   };
   canvas.addEventListener('keydown',onKeyDown);
   return()=>canvas.removeEventListener('keydown',onKeyDown);
  },[camera,gl,definition]);
- return <OrbitControls ref={controls} makeDefault target={[-2,6,0]} minDistance={12} maxDistance={definition.camera.fit?110:65} maxPolarAngle={Math.PI*.49} enableDamping dampingFactor={.08}/>;
+ const business=definition.environment==='business';
+ return <OrbitControls ref={controls} makeDefault target={[-2,6,0]} minDistance={business?16:12} maxDistance={business?38:definition.camera.fit?110:65} minPolarAngle={business?1.35:0} maxPolarAngle={Math.PI*.49} minAzimuthAngle={business?-.25:-Infinity} maxAzimuthAngle={business?.25:Infinity} enablePan={!business} enableDamping dampingFactor={.08}/>;
 }
 function Diagnostics({playing}:{playing:boolean}){
  const samples=useRef<number[]>([]),done=useRef(false);
@@ -374,14 +378,14 @@ function Actors({time,onReady,definition}:{time:number;onReady:()=>void;definiti
  return <><Vehicle time={time} onReady={onReady} definition={actorDefinition}/><Vapor time={time} definition={actorDefinition}/></>;
 }
 export function Scene({time,cameraReset,playing,onReady,definition}:{time:number;cameraReset:number;playing:boolean;onReady:()=>void;definition:SceneDefinition}){
- const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',warmCity=parking||cables,sky=carrier?'#e4c69c':warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
+ const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',business=definition.environment==='business',warmCity=parking||cables||business,sky=business?'#9caec2':carrier?'#e4c69c':warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
  return <Canvas style={{position:'absolute',inset:0,width:'100%',height:'100%'}} shadows dpr={[1,1.6]} camera={{fov:43,near:.1,far:180}} gl={{antialias:true,alpha:false,powerPreference:'high-performance'}}>
   <color attach="background" args={[sky]}/>
   <fog attach="fog" args={[sky,street?58:47,street?155:110]}/>
   <ambientLight intensity={street?1.05:.9}/><hemisphereLight args={street?['#fff1d7','#68725c',1.15]:['#b9d7ff','#202435',1.4]}/>
   <directionalLight position={warmCity?[-16,15,11]:street?[-15,24,12]:[-8,20,12]} color={warmCity?'#ffd9a6':street?'#fff0d8':'#ffffff'} intensity={street?2.35:3.7} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-22} shadow-camera-right={22} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.04}/>
   {!street&&<><directionalLight position={[10,10,-10]} color="#6f9bcf" intensity={3}/><pointLight position={[-5,10,4]} color="#f4ac8e" intensity={45}/></>}
- {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:cables?<CablesStreet/>:carrier?<CarrierEscape time={time}/>:<Pothole/>}
+ {definition.environment==='ramp'?<><mesh rotation={[-Math.PI/2,0,0]} position={[0,-.065,0]} receiveShadow><planeGeometry args={[180,180]}/><meshStandardMaterial color="#111722" metalness={.45} roughness={.48}/></mesh><gridHelper args={[100,50,'#283343','#1a2431']} position={[0,-.055,0]}/></>:parking?<ParkingLot time={time}/>:cables?<CablesStreet/>:carrier?<CarrierEscape time={time}/>:business?<BusinessClass time={time}/>:<Pothole/>}
   {definition.environment==='ramp'&&<mesh rotation={[-Math.PI/2,0,0]} position={[-10,-.05,0]}><ringGeometry args={[3.2,3.23,80]}/><meshBasicMaterial color="#697481" transparent opacity={.55}/></mesh>}
   {definition.environment==='ramp'&&<Ramp/>}{cables&&<SparkShower time={time}/>}<Suspense fallback={null}><Actors time={time} onReady={onReady} definition={definition}/></Suspense><Camera reset={cameraReset} definition={definition}/><Diagnostics playing={playing}/>
  </Canvas>;

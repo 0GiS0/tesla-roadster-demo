@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import { Euler,Vector3,Quaternion } from 'three';
-import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X } from './scenario';
+import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X,businessClass,businessVaporPosition,BUSINESS_WING_TOP } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
 describe('Rigid vehicle follows the ramp',()=>{
@@ -58,7 +58,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(5);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(6);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -113,7 +113,7 @@ describe('Cables meme scene',()=>{
  expect(scene.hash).toBe('#meme/cables');
  expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
  expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
  });
 });
 describe('La fuga del portacoches meme scene',()=>{
@@ -157,8 +157,49 @@ it('registers the Instagram credit on the canonical shareable route',()=>{
  expect(scene.scenario).toBe(carrierEscape);
  expect(scene.hash).toBe('#meme/fuga-del-portacoches');
  expect(sourceLabel(scene.source!)).toBe('Visto en @chaseluxuryai · Ver original en Instagram');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
 });
+});
+describe('Clase business meme scene',()=>{
+ it('flies level above the wing, approaches the window and overtakes',()=>{
+  const start=businessClass.evaluate(0),near=businessClass.evaluate(4),end=businessClass.evaluate(10);
+  expect(near.position[2]).toBeGreaterThan(start.position[2]);
+  expect(near.position[0]).toBeGreaterThan(start.position[0]);
+  expect(end.position[0]).toBeGreaterThan(near.position[0]);
+  for(let time=0;time<=10;time+=.025){
+   const pose=businessClass.evaluate(time);
+   expect(pose.position[1]-WHEEL_RADIUS).toBeGreaterThan(BUSINESS_WING_TOP);
+   expect(pose.quaternion).toEqual([0,0,0,1]);
+  }
+ });
+ it('keeps its trail horizontal and behind the car at every sampled time',()=>{
+  for(let time=0;time<=10;time+=.25)for(const age of [0,.25,.5,1]){
+   const pose=businessClass.evaluate(time),particle=businessVaporPosition(time,age,7);
+   expect(particle[0]).toBeLessThan(pose.position[0]-2.6);
+   expect(Math.abs(particle[1]-pose.position[1])).toBeLessThan(.7);
+   expect(businessVaporPosition(time,age,7)).toEqual(particle);
+  }
+ });
+ it('is deterministic and continuous across phases and clamps playback',()=>{
+  for(const time of [0,4,7,10]){
+   const before=businessClass.evaluate(time-.001),after=businessClass.evaluate(time+.001);
+   expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.02);
+   expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.01);
+   expect(businessClass.evaluate(time)).toEqual(businessClass.evaluate(time));
+  }
+  expect(businessClass.evaluate(-1)).toEqual(businessClass.evaluate(0));
+  expect(businessClass.evaluate(20)).toEqual(businessClass.evaluate(10));
+  expect(advance(9,2,true,businessClass.duration)).toEqual({time:10,playing:false});
+  expect(advance(4,2,false,businessClass.duration)).toEqual({time:4,playing:false});
+ });
+ it('registers the shareable route, credit and Spanish timeline labels',()=>{
+  const scene=sceneFromHash('#meme/clase-business');
+  expect(scene.scenario).toBe(businessClass);
+  expect(scene.timelineLabels).toEqual(['EN PARALELO','VENTANILLA','ADELANTAMIENTO']);
+  expect(sourceLabel(scene.source!)).toBe('Visto en @YapayZekaSerisi · Ver original en X');
+  expect(scene.source?.url).toBe('https://x.com/YapayZekaSerisi/status/2111104253817155607');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',scene)).toBe('https://example.test/tesla-roadster-demo/#meme/clase-business');
+ });
 });
 describe('share-link clipboard fallback',()=>{
  it('reports clipboard success, rejection and unavailable clipboard distinctly',async()=>{

@@ -10,7 +10,7 @@ Una recreación artística independiente de una presentación del Roadster con r
 La web tiene dos modos:
 
 - **Original:** una maniobra de 28 segundos (subida, giro, vuelo y aterrizaje) sobre una rampa.
-- **Modo MEME:** un catálogo de escenas inspiradas en memes. Hoy contiene «Bache volador» (12 segundos), «Robo de plaza» (10 segundos), «Cables» (12 segundos) y «La fuga del portacoches» (13 segundos).
+- **Modo MEME:** un catálogo de escenas inspiradas en memes. Hoy contiene «Bache volador» (12 segundos), «Robo de plaza» (10 segundos), «Cables» (12 segundos), «Clase business» (10 segundos) y «La fuga del portacoches» (13 segundos).
 
 Además, el repositorio funciona como una *fábrica de software*: las ideas entran como issues, se clasifican con reglas escritas, un agente las implementa y una persona las revisa antes de integrarlas.
 

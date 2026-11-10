@@ -1,4 +1,4 @@
-import { cablesTangle, carrierEscape, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
+import { businessClass, cablesTangle, carrierEscape, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
 import type { Scenario } from './scenario';
 
 export type SourcePlatform = 'Instagram' | 'X' | 'TikTok' | 'YouTube';
@@ -10,7 +10,7 @@ export interface SceneDefinition {
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier';
+ environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier' | 'business';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
@@ -110,6 +110,29 @@ export const sceneCatalog: SceneDefinition[] = [
    author: 'MindBodyMillions',
    platform: 'YouTube',
    url: 'https://www.youtube.com/shorts/A3wyacegqCQ',
+  },
+ },
+ {
+  key: 'clase-business',
+  hash: '#meme/clase-business',
+  mode: 'meme',
+  scenario: businessClass,
+  environment: 'business',
+  tourMoment: { from: 4, to: 7 },
+  camera: {
+   desktop: { position: [0, 5, 20], target: [0, 4, -2] },
+   portrait: { position: [0, 5, 32], target: [0, 4, -2] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'Clase business.',
+   summary: 'Un vuelo en paralelo, una ventanilla y una estela hacia el horizonte.',
+  },
+  timelineLabels: ['EN PARALELO', 'VENTANILLA', 'ADELANTAMIENTO'],
+  source: {
+   author: '@YapayZekaSerisi',
+   platform: 'X',
+   url: 'https://x.com/YapayZekaSerisi/status/2111104253817155607',
   },
  },
  {

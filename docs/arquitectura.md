@@ -12,7 +12,8 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 | Archivo | Responsabilidad |
 |---|---|
 | `src/main.tsx` | Estado de reproducción, controles en español, carga, errores y selección de escena por fragmento de URL. |
-| `src/Scene.tsx` | `Canvas`, vehículo, rampa, entornos «bache», «aparcamiento», «Cables» y «portacoches», vapor y chispas, cámara orbital y diagnóstico de rendimiento. |
+| `src/Scene.tsx` | `Canvas`, vehículo, rampa, entornos MEME, vapor y chispas, cámara orbital y diagnóstico de rendimiento. |
+| `src/BusinessClass.tsx` | Avión, ventanilla y cielo procedural de «Clase business». |
 | `src/CarrierEscape.tsx` | Carretera del desierto y portacoches procedural de «La fuga del portacoches». |
 | `src/scenario.ts` | Contrato `Scenario`, trayectorias, constantes de contacto y `advance` (límites de reproducción). |
 | `src/sceneCatalog.ts` | Registro de escenas (`sceneCatalog`), resolución por hash y construcción de enlaces. |
@@ -33,17 +34,18 @@ Vite, React 19, TypeScript, Three.js, React Three Fiber y Drei. Es una página e
 
 Cada escena implementa `{ id, title, duration, evaluate(time) }`. `evaluate` devuelve una pose (posición, cuaternión, giro de ruedas, vapor, fase y velocidad) que depende solo del tiempo absoluto de reproducción. Por eso pausar, saltar y repetir son deterministas.
 
-Hay cinco escenarios:
+Hay seis escenarios:
 
 - `rampFlight` (`ramp-flight`): 28 s. 0–13 s subida; 13–18 s giro; 18–19 s vuelo nivelado; 19–27 s descenso; 28 s terminado.
 - `potholeFlight` (`bache-volador`): 12 s.
 - `parkingSpaceTheft` (`robo-de-plaza`): 10 s. Se crea con `createParkingSpaceTheft(dropHeight)`; `parkingDropHeight()` de `src/framing.ts` calcula la altura inicial según el encuadre.
 - `cablesTangle` (`cables`): 12 s. Sube hasta quedar apoyado en los cables y balanceándose cada vez menos.
+- `businessClass` (`clase-business`): 10 s. Vuela junto a un avión, se acerca a la ventanilla y adelanta.
 - `carrierEscape` (`fuga-del-portacoches`): 13 s. Despega del portacoches y acelera en diagonal sobre la carretera.
 
 ## Catálogo y rutas
 
-`sceneCatalog` define, por escena: `key`, `hash`, `mode` (`original` o `meme`), `scenario`, `environment` (`ramp`, `pothole`, `parking`, `cables` o `carrier`), cámaras de escritorio y vertical, textos (`copy`) y, en los memes, el crédito (`source`). La escena original usa el hash vacío; «Bache volador» usa `#meme/bache-volador`, «Robo de plaza» usa `#meme/robo-de-plaza`, «Cables» usa `#meme/cables` y «La fuga del portacoches» usa `#meme/fuga-del-portacoches`. Un hash desconocido vuelve a la escena original.
+`sceneCatalog` define, por escena: `key`, `hash`, `mode` (`original` o `meme`), `scenario`, `environment` (`ramp`, `pothole`, `parking`, `cables`, `business` o `carrier`), cámaras de escritorio y vertical, textos (`copy`) y, en los memes, el crédito (`source`). La escena original usa el hash vacío; «Bache volador» usa `#meme/bache-volador`, «Robo de plaza» usa `#meme/robo-de-plaza`, «Cables» usa `#meme/cables`, «Clase business» usa `#meme/clase-business` y «La fuga del portacoches» usa `#meme/fuga-del-portacoches`. Un hash desconocido vuelve a la escena original.
 
 ## Modelo 3D
 
