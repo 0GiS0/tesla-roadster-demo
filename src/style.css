@@ -48,3 +48,5 @@
  .loader{animation:none}
  .scene-select button{transition:none}
 }
+
+.meme-mode .scene-select button small{color:#65665f}
