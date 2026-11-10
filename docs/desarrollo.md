@@ -157,7 +157,8 @@ Limitaciones:
 
 - 🟢 Node.js 22 y `npm ci` (con caché de npm).
 - 🌐 Chromium de Playwright con sus dependencias del sistema: `npx playwright-core install --with-deps chromium`, que usa la versión de `playwright-core` del lockfile.
-- 🎞️ ffmpeg desde apt.
+- 🎞️ ffmpeg estático fijado (`eugeneware/ffmpeg-static` b6.1.1, ffmpeg 7.0.2 con libx264), descargado de GitHub Releases con verificación sha256 y cacheado con `actions/cache`. No usa apt, así que no depende de la velocidad del mirror. Las ramas `copilot/*` solo leen cachés creadas en `main`: tras fusionar, lanza el workflow una vez a mano en `main` para poblarla. Al cambiar de versión hay que actualizar la URL, el sha256 y la clave de caché juntos.
+- ⏱️ Antes de instalar Chromium, apt se configura con `Acquire::http::Timeout` de 10 s y 3 reintentos para que un mirror lento falle rápido. `scene-media.yml` usa el mismo ffmpeg y la misma configuración.
 - ✅ Una comprobación final de que `node`, `npm` y `ffmpeg` están en el `PATH` y de que el ejecutable de Chromium existe.
 
 Notas:
