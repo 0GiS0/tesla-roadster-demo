@@ -144,10 +144,10 @@ function WindowFrame() {
  });
  return <group ref={root}>
   <mesh position={[0, 0, -1]} renderOrder={1000} frustumCulled={false}>
-   <shapeGeometry args={[frame]} /><meshBasicMaterial color="#776d70" depthTest={false} depthWrite={false} toneMapped={false} />
+   <shapeGeometry args={[frame]} /><meshBasicMaterial color="#776d70" transparent depthTest={false} depthWrite={false} toneMapped={false} />
   </mesh>
   <mesh position={[0, 0, -.99]} renderOrder={1001} frustumCulled={false}>
-   <shapeGeometry args={[trim]} /><meshBasicMaterial color="#d4c1b6" depthTest={false} depthWrite={false} toneMapped={false} />
+   <shapeGeometry args={[trim]} /><meshBasicMaterial color="#d4c1b6" transparent depthTest={false} depthWrite={false} toneMapped={false} />
   </mesh>
  </group>;
 }
