@@ -3,13 +3,21 @@ import { describe,expect,it } from 'vitest';
 // @ts-expect-error Vitest runs in Node, but @types/node is not a direct dependency.
 import { readFileSync } from 'node:fs';
 
-const stylesheet=readFileSync(new URL('./style.css',import.meta.url),'utf8');
+const stylesheet=readFileSync(new URL('./style.css',import.meta.url),'utf8') as string;
 
-function colorFor(selector:string){
- const rule=selector.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
- const declarations=stylesheet.match(new RegExp(`${rule}\\s*\\{([^}]*)\\}`))?.[1];
- const color=declarations?.match(/(?:^|;)\s*color:\s*(#[\da-f]{6})(?:\s*;|\s*$)/i)?.[1];
- if(!color)throw new Error(`Missing text color for ${selector}`);
+function colorFor(selector:string,property='color'){
+ let color:string|undefined;
+ const propertyPattern=property.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ const declarationPattern=new RegExp(`(?:^|;)\\s*${propertyPattern}:\\s*(#[\\da-f]{6})(?:\\s*;|\\s*$)`,'i');
+ for(const rule of stylesheet.split('}')){
+  const openingBrace=rule.lastIndexOf('{');
+  if(openingBrace<0)continue;
+  const selectors=rule.slice(0,openingBrace).slice(rule.lastIndexOf('}')+1);
+  if(selectors.split(',').some(candidate=>candidate.trim()===selector)){
+   color=rule.slice(openingBrace+1).match(declarationPattern)?.[1]??color;
+  }
+ }
+ if(!color)throw new Error(`Missing ${property} for ${selector}`);
  return color;
 }
 
@@ -31,5 +39,15 @@ describe('secondary text contrast',()=>{
 
  it('keeps the independence notice accessible',()=>{
   expect(contrastRatio(colorFor('.disclaimer>span:first-child'),'#090c13')).toBeGreaterThanOrEqual(4.5);
+ });
+
+ it('keeps meme card summaries accessible when selected or hovered',()=>{
+  const foreground=colorFor('.meme-mode .scene-select button small');
+  for(const selector of [
+   '.meme-mode .scene-select button.selected',
+   '.meme-mode .scene-select button:hover',
+  ]){
+   expect(contrastRatio(foreground,colorFor(selector,'background'))).toBeGreaterThanOrEqual(4.5);
+  }
  });
 });
