@@ -157,4 +157,31 @@ export function createParkingSpaceTheft(dropHeight:number):Scenario{
  }};
 }
 export const parkingSpaceTheft=createParkingSpaceTheft(PARKING_DEFAULT_DROP_HEIGHT);
+export const DRIVE_THROUGH = { facadeZ: -2.2, hoverHeight: 5.04, liftStart: 2.5, deliveryStart: 5, deliveryEnd: 8, landingEnd: 10, duration: 12 } as const;
+export const driveThrough:Scenario={id:'autoservicio',title:'Autoservicio en el 2º piso',duration:DRIVE_THROUGH.duration,evaluate(time){
+ const t=clamp(time,0,DRIVE_THROUGH.duration);
+ let x=0,y=WHEEL_RADIUS,wheelAngle=-9/WHEEL_RADIUS,vapor=0,speed=0,phase='Aproximación';
+ if(t<DRIVE_THROUGH.liftStart){
+  const u=t/DRIVE_THROUGH.liftStart;
+  x=-9+9*smooth(u);wheelAngle=-(x+9)/WHEEL_RADIUS;speed=9/2.5*6*u*(1-u);
+ }else if(t<DRIVE_THROUGH.deliveryStart){
+  const u=(t-DRIVE_THROUGH.liftStart)/2.5;
+  y=WHEEL_RADIUS+(DRIVE_THROUGH.hoverHeight-WHEEL_RADIUS)*smooth(u);vapor=smooth((t-2.5)/.6);speed=(DRIVE_THROUGH.hoverHeight-WHEEL_RADIUS)/2.5*6*u*(1-u);phase='Elevación';
+ }else if(t<DRIVE_THROUGH.deliveryEnd){
+  y=DRIVE_THROUGH.hoverHeight;vapor=1;phase='Entrega del pedido';
+ }else if(t<DRIVE_THROUGH.landingEnd){
+  const u=(t-8)/2;
+  y=DRIVE_THROUGH.hoverHeight-(DRIVE_THROUGH.hoverHeight-WHEEL_RADIUS)*smooth(u);vapor=1-smooth((t-9.2)/.8);speed=(DRIVE_THROUGH.hoverHeight-WHEEL_RADIUS)/2*6*u*(1-u);phase='Descenso';
+ }else{
+  const u=(t-10)/2;
+  x=9*smooth(u);wheelAngle=-(9+x)/WHEEL_RADIUS;speed=9/2*6*u*(1-u);phase=t<12?'Salida con el pedido':'Maniobra completada';
+ }
+ return {position:[x,y,0],quaternion:[0,0,0,1],wheelAngle,vapor,phase,speed};
+}};
+/** The order travels from the open serving window to the car, then follows it home. */
+export function driveThroughBagPose(time:number):{position:[number,number,number];rotation:number}{
+ const t=clamp(time,0,DRIVE_THROUGH.duration),u=smooth((t-5.4)/1.8),car=driveThrough.evaluate(t);
+ if(t>=7.2)return {position:[car.position[0]-.35,car.position[1]+1.35,-1.3],rotation:0};
+ return {position:[-.35*u,6.9+(DRIVE_THROUGH.hoverHeight+1.35-6.9)*u+.45*Math.sin(Math.PI*u),-2.05+.75*u],rotation:.12*Math.sin(Math.PI*u)};
+}
 export function advance(time:number,delta:number,playing:boolean,duration=DURATION){const next=playing?Math.min(duration,time+Math.max(0,delta)):time;return {time:next,playing:playing&&next<duration};}

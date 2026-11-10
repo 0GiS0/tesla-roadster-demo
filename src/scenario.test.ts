@@ -1,5 +1,7 @@
 import { describe,it,expect } from 'vitest';
-import { Euler,Vector3,Quaternion } from 'three';
+import { Euler,Vector3,Quaternion,PerspectiveCamera } from 'three';
+import { driveThrough,driveThroughBagPose,DRIVE_THROUGH,ROADSTER_FOOTPRINT } from './scenario';
+import { CAMERA_FOV,fitCameraPlacement } from './framing';
 import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
@@ -58,7 +60,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(5);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(6);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -113,7 +115,7 @@ describe('Cables meme scene',()=>{
  expect(scene.hash).toBe('#meme/cables');
  expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
  expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
  });
 });
 describe('La fuga del portacoches meme scene',()=>{
@@ -157,8 +159,107 @@ it('registers the Instagram credit on the canonical shareable route',()=>{
  expect(scene.scenario).toBe(carrierEscape);
  expect(scene.hash).toBe('#meme/fuga-del-portacoches');
  expect(sourceLabel(scene.source!)).toBe('Visto en @chaseluxuryai · Ver original en Instagram');
- expect(sceneCatalog).toHaveLength(5);
+ expect(sceneCatalog).toHaveLength(6);
 });
+});
+describe('Autoservicio en el 2º piso meme scene',()=>{
+ it('rises vertically, holds still throughout delivery, lands once and drives away',()=>{
+  const arrival=driveThrough.evaluate(2.5),hover=driveThrough.evaluate(5),landing=driveThrough.evaluate(10);
+  expect(arrival.position).toEqual([0,WHEEL_RADIUS,0]);
+  expect(hover.position).toEqual([0,5.04,0]);
+  expect(hover.phase).toBe('Entrega del pedido');
+  let previousHeight=WHEEL_RADIUS;
+  for(let time=0;time<=12;time+=.025){
+   const pose=driveThrough.evaluate(time);
+   expect(pose.position[1]).toBeGreaterThanOrEqual(WHEEL_RADIUS-1e-8);
+   expect(pose.position[2]-ROADSTER_FOOTPRINT.width/2).toBeGreaterThan(DRIVE_THROUGH.facadeZ+.65);
+   expect(pose.quaternion).toEqual([0,0,0,1]);
+   expect(pose.vapor).toBeGreaterThanOrEqual(0);expect(pose.vapor).toBeLessThanOrEqual(1);
+   if(time<2.5||time>=10)expect(pose.position[1]).toBeCloseTo(WHEEL_RADIUS,8);
+   else{
+    expect(pose.position[0]).toBe(0);
+    expect(pose.wheelAngle).toBe(arrival.wheelAngle);
+   }
+   if(time>=2.5&&time<5)expect(pose.position[1]).toBeGreaterThanOrEqual(previousHeight);
+   if(time>=5&&time<=8){expect(pose.position).toEqual(hover.position);expect(pose.speed).toBe(0);expect(pose.vapor).toBe(1);}
+   if(time>8)expect(pose.position[1]).toBeLessThanOrEqual(previousHeight+1e-8);
+   previousHeight=pose.position[1];
+  }
+  expect(landing.position[1]).toBeCloseTo(WHEEL_RADIUS);
+  expect(driveThrough.evaluate(12).position[0]).toBe(9);
+  expect(driveThrough.evaluate(12).wheelAngle).toBeCloseTo(-18/WHEEL_RADIUS);
+  expect(driveThrough.evaluate(12).vapor).toBe(0);
+ });
+ it('hands the bag through the open window and carries the order away with the car',()=>{
+  const start=driveThroughBagPose(5.4),delivered=driveThroughBagPose(7.2);
+  expect(new Vector3(...start.position).distanceTo(new Vector3(0,6.9,-2.05))).toBeLessThan(1e-8);
+  expect(delivered.position[2]).toBeGreaterThan(start.position[2]+.7);
+  expect(delivered.position[1]).toBeGreaterThan(driveThrough.evaluate(7.2).position[1]+1.2);
+  for(let time=5.4;time<=7.2;time+=.02){
+   const bag=driveThroughBagPose(time);
+   expect(Math.abs(bag.position[0])+.35).toBeLessThan(1.69);
+   expect(bag.position[1]-.425).toBeGreaterThan(5.67);
+   expect(bag.position[1]+.69).toBeLessThan(8.13);
+  }
+  for(const time of [7.2,8,9,10,11,12]){
+   const car=driveThrough.evaluate(time),bag=driveThroughBagPose(time);
+   expect(bag.position[0]-car.position[0]).toBeCloseTo(-.35,8);
+   expect(bag.position[1]-car.position[1]).toBeCloseTo(1.35,8);
+   expect(bag.position[2]+.21).toBeLessThan(-ROADSTER_FOOTPRINT.width/2);
+  }
+ });
+ it('is continuous at every boundary and deterministic after seeking, reset and replay',()=>{
+  for(const time of [0,2.5,3.1,5,5.4,7.2,8,9.2,10,12]){
+   const before=driveThrough.evaluate(time-.001),after=driveThrough.evaluate(time+.001);
+   expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.02);
+   expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.001);
+   expect(Math.abs(before.wheelAngle-after.wheelAngle)).toBeLessThan(.03);
+   expect(Math.abs(before.vapor-after.vapor)).toBeLessThan(.01);
+   expect(Math.abs(before.speed-after.speed)).toBeLessThan(.03);
+   expect(new Vector3(...driveThroughBagPose(time-.001).position).distanceTo(new Vector3(...driveThroughBagPose(time+.001).position))).toBeLessThan(.02);
+  }
+  const times=[0,3.8,6.3,7.5,9,11.4,12],poses=times.map(time=>driveThrough.evaluate(time)),bags=times.map(driveThroughBagPose);
+  for(const index of [6,2,4,0,5,3,1]){
+   expect(driveThrough.evaluate(times[index])).toEqual(poses[index]);
+   expect(driveThroughBagPose(times[index])).toEqual(bags[index]);
+  }
+  for(const evaluate of [driveThrough.evaluate,driveThroughBagPose]){
+   expect(evaluate(-5)).toEqual(evaluate(0));expect(evaluate(Infinity)).toEqual(evaluate(12));
+  }
+  expect(advance(6,5,false,12)).toEqual({time:6,playing:false});
+  expect(advance(11,2,true,12)).toEqual({time:12,playing:false});
+  expect(driveThrough.evaluate(12).phase).toBe('Maniobra completada');
+ });
+ it('registers its Spanish labels, share link, source and key delivery moment',()=>{
+  const scene=sceneFromHash('#meme/autoservicio');
+  expect(scene.scenario).toBe(driveThrough);
+  expect(scene.environment).toBe('autoservicio');
+  expect(scene.timelineLabels).toEqual(['APROXIMACIÓN','PEDIDO EN EL AIRE','SALIDA']);
+  expect(scene.source?.url).toBe('https://x.com/YapayZekaSerisi/status/2111104253817155607');
+  expect(sourceLabel(scene.source!)).toBe('Visto en @YapayZekaSerisi · Ver original en X');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',scene,true)).toBe('https://example.test/tesla-roadster-demo/?debug=1#meme/autoservicio');
+  expect(scene.tourMoment).toEqual({from:5.4,to:7.8});
+ });
+ it('fits the whole trajectory, window and bag on desktop, portrait and short landscape',()=>{
+  const framing=sceneFromHash('#meme/autoservicio').camera.fit!;
+  for(const aspect of [1440/900,390/844,844/172,.35,2.8]){
+   const placement=fitCameraPlacement(framing,aspect),camera=new PerspectiveCamera(CAMERA_FOV,aspect,.1,180);
+   camera.position.copy(placement.position);camera.lookAt(placement.target);camera.updateMatrixWorld(true);
+   const points:Vector3[]=[new Vector3(-8,9,-2.2),new Vector3(8,9,-2.2),new Vector3(0,0,2.15)];
+   for(const time of [0,2.5,5,6.3,7.2,8,10,12]){
+    const pose=driveThrough.evaluate(time);
+    for(const x of [-ROADSTER_FOOTPRINT.length/2,ROADSTER_FOOTPRINT.length/2])
+     for(const y of [-WHEEL_RADIUS,1.5])for(const z of [-1.05,1.05])
+      points.push(new Vector3(...pose.position).add(new Vector3(x,y,z)));
+    points.push(new Vector3(...driveThroughBagPose(time).position).add(new Vector3(0,.69,.21)));
+   }
+   for(const point of points){
+    const projected=point.project(camera);
+    expect(Math.abs(projected.x)).toBeLessThan(.95);expect(Math.abs(projected.y)).toBeLessThan(.95);
+    expect(projected.z).toBeGreaterThan(-1);expect(projected.z).toBeLessThan(1);
+   }
+  }
+ });
 });
 describe('share-link clipboard fallback',()=>{
  it('reports clipboard success, rejection and unavailable clipboard distinctly',async()=>{
