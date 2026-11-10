@@ -101,7 +101,7 @@ function Camera({reset,definition}:{reset:number;definition:SceneDefinition}){
    if(event.key==='+'||event.key==='=')spherical.radius*=.9;
    if(event.key==='-'||event.key==='_')spherical.radius*=1.1;
    const business=definition.environment==='business';
-   spherical.radius=Math.min(business?38:definition.camera.fit?110:65,Math.max(business?16:12,spherical.radius));
+   spherical.radius=Math.min(definition.camera.fit?110:65,Math.max(business?16:12,spherical.radius));
    spherical.phi=Math.min(Math.PI*.49,Math.max(business?1.35:.05,spherical.phi));
    if(business)spherical.theta=Math.min(.25,Math.max(-.25,spherical.theta));
    camera.position.setFromSpherical(spherical).add(orbit.target);orbit.update();
@@ -110,7 +110,7 @@ function Camera({reset,definition}:{reset:number;definition:SceneDefinition}){
   return()=>canvas.removeEventListener('keydown',onKeyDown);
  },[camera,gl,definition]);
  const business=definition.environment==='business';
- return <OrbitControls ref={controls} makeDefault target={[-2,6,0]} minDistance={business?16:12} maxDistance={business?38:definition.camera.fit?110:65} minPolarAngle={business?1.35:0} maxPolarAngle={Math.PI*.49} minAzimuthAngle={business?-.25:-Infinity} maxAzimuthAngle={business?.25:Infinity} enablePan={!business} enableDamping dampingFactor={.08}/>;
+ return <OrbitControls ref={controls} makeDefault target={[-2,6,0]} minDistance={business?16:12} maxDistance={definition.camera.fit?110:65} minPolarAngle={business?1.35:0} maxPolarAngle={Math.PI*.49} minAzimuthAngle={business?-.25:-Infinity} maxAzimuthAngle={business?.25:Infinity} enablePan={!business} enableDamping dampingFactor={.08}/>;
 }
 function Diagnostics({playing}:{playing:boolean}){
  const samples=useRef<number[]>([]),done=useRef(false);
@@ -381,7 +381,7 @@ export function Scene({time,cameraReset,playing,onReady,definition}:{time:number
  const street=definition.environment!=='ramp',parking=definition.environment==='parking',cables=definition.environment==='cables',carrier=definition.environment==='carrier',business=definition.environment==='business',warmCity=parking||cables||business,sky=business?'#9caec2':carrier?'#e4c69c':warmCity?'#d4c9b2':street?'#c2c5bd':'#090c13';
  return <Canvas style={{position:'absolute',inset:0,width:'100%',height:'100%'}} shadows dpr={[1,1.6]} camera={{fov:43,near:.1,far:180}} gl={{antialias:true,alpha:false,powerPreference:'high-performance'}}>
   <color attach="background" args={[sky]}/>
-  <fog attach="fog" args={[sky,street?58:47,street?155:110]}/>
+  <fog attach="fog" args={[sky,business?100:street?58:47,street?155:110]}/>
   <ambientLight intensity={street?1.05:.9}/><hemisphereLight args={street?['#fff1d7','#68725c',1.15]:['#b9d7ff','#202435',1.4]}/>
   <directionalLight position={warmCity?[-16,15,11]:street?[-15,24,12]:[-8,20,12]} color={warmCity?'#ffd9a6':street?'#fff0d8':'#ffffff'} intensity={street?2.35:3.7} castShadow shadow-mapSize={[1024,1024]} shadow-camera-left={-22} shadow-camera-right={22} shadow-camera-top={20} shadow-camera-bottom={-20} shadow-normalBias={.04}/>
   {!street&&<><directionalLight position={[10,10,-10]} color="#6f9bcf" intensity={3}/><pointLight position={[-5,10,4]} color="#f4ac8e" intensity={45}/></>}

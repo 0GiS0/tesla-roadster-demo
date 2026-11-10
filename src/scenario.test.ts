@@ -1,8 +1,9 @@
 import { describe,it,expect } from 'vitest';
-import { Euler,Vector3,Quaternion } from 'three';
+import { Euler,Vector3,Quaternion,PerspectiveCamera } from 'three';
 import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X,businessClass,businessVaporPosition,BUSINESS_WING_TOP } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
 import { copyShareLink } from './share';
+import { CAMERA_FOV,fitCameraPlacement } from './framing';
 describe('Rigid vehicle follows the ramp',()=>{
  it('keeps axle spacing and every wheel center on the surface through the floor transition',()=>{
   for(let s=-9;s<22;s+=.13){const p=contactPose(s);expect(Math.hypot(p.front[0]-p.rear[0],p.front[1]-p.rear[1])).toBeCloseTo(2*HALF_WHEELBASE,5);
@@ -199,6 +200,22 @@ describe('Clase business meme scene',()=>{
   expect(sourceLabel(scene.source!)).toBe('Visto en @YapayZekaSerisi · Ver original en X');
   expect(scene.source?.url).toBe('https://x.com/YapayZekaSerisi/status/2111104253817155607');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',scene)).toBe('https://example.test/tesla-roadster-demo/#meme/clase-business');
+ });
+ it('keeps the whole vehicle inside the window opening at narrow and wide aspect ratios',()=>{
+  const framing=sceneFromHash('#meme/clase-business').camera.fit!;
+  for(const aspect of [.35,.5,.97,2,4.9]){
+   const placement=fitCameraPlacement(framing,aspect);
+   const camera=new PerspectiveCamera(CAMERA_FOV,aspect,.1,180);
+   camera.position.copy(placement.position);camera.lookAt(placement.target);camera.updateMatrixWorld(true);
+   for(let time=0;time<=10;time+=.5){
+    const [x,y,z]=businessClass.evaluate(time).position;
+    for(const dx of [-2.55,2.55])for(const dy of [-.44,1.3])for(const dz of [-1.05,1.05]){
+     const point=new Vector3(x+dx,y+dy,z+dz).project(camera);
+     expect(Math.abs(point.x)).toBeLessThan(.85);
+     expect(Math.abs(point.y)).toBeLessThan(.85);
+    }
+   }
+  }
  });
 });
 describe('share-link clipboard fallback',()=>{

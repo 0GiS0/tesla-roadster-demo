@@ -122,6 +122,7 @@ export const sceneCatalog: SceneDefinition[] = [
   camera: {
    desktop: { position: [0, 5, 20], target: [0, 4, -2] },
    portrait: { position: [0, 5, 32], target: [0, 4, -2] },
+   fit: { width: 22, height: 10, direction: [0, 1, 22], target: [0, 4, -2] },
   },
   copy: {
    label: 'MODO MEME',
