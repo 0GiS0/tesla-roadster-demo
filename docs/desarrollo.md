@@ -165,6 +165,7 @@ Notas:
 - El job se llama `copilot-setup-steps`, como exige GitHub. No lleva `name:` propio (y por tanto sin emoji) para que el nombre del check coincida con ese identificador.
 - GitHub solo usa el fichero desde la rama por defecto. También se ejecuta en las PR y los push que lo modifican, y a mano desde la pestaña Actions (`workflow_dispatch`).
 - Si un paso falla, el agente empieza igualmente con el entorno que haya.
+- `timeout-minutes` está en 59, el máximo que admite GitHub para este job. Ese límite cubre toda la sesión del agente (preparación más trabajo), no solo los pasos de preparación: con 30 minutos una sesión se canceló cuando el mirror de apt iba lento.
 
 </details>
 
