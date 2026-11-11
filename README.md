@@ -18,6 +18,14 @@
 
 </div>
 
+<!-- video:start — vídeo de YouTube del proyecto: Docs sync no debe modificarlo. -->
+¡Hola developer 👋🏻! En este vídeo te cuento cómo monté una fábrica de software con GitHub Copilot sobre este proyecto: las ideas llegan como Issues, se clasifican con reglas escritas y los agentes las implementan con guardarraíles, con las luces encendidas 💡 o apagadas 🌙 según lo que necesite revisión humana. Todo ello con esta recreación 3D de la rampa del Roadster y su galería MEME como ejemplo.
+
+<a href="https://youtu.be/AtB588q1j2g">
+ <img src="https://img.youtube.com/vi/AtB588q1j2g/maxresdefault.jpg" alt="Así monté una Software Factory con GitHub Copilot" width="100%" />
+</a>
+<!-- video:end -->
+
 ## ✨ ¿Qué es?
 
 Una experiencia WebGL 2 silenciosa y autocontenida, en español, construida con React, TypeScript, Three.js y React Three Fiber. Una rampa, un impulso… y el coche sube, gira en el aire y aterriza. Todo en 28 segundos que puedes reproducir, pausar, recorrer con el control de tiempo y mirar desde cualquier ángulo.
