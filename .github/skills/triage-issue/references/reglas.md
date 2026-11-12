@@ -41,6 +41,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 - 🖼️ meme: ✅ agent-ready con descripción, referencia y ambas confirmaciones; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
 - ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
+- Si la propuesta concreta todas las interacciones y criterios necesarios, puede ser ✅ agent-ready aunque abarque varias áreas.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
   y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
 
@@ -74,3 +75,13 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
 - Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
+
+### 📣 Invitar a descubrir el Modo MEME (#78)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: Aunque coordina varias áreas, la propuesta y sus criterios describen el comportamiento necesario para implementarla.
+
+### 🚴 Añadir escena MEME: Pelotón ciclista (#168)
+- Decisión: 💬 needs-info · 🔴 complexity-high
+- Por qué: Faltan las confirmaciones obligatorias y la escena añade varios personajes animados con interacciones físicas.
+
+Un 🖼️ meme también es 🔴 complexity-high si añade varios personajes o vehículos animados con física o colisiones entre ellos.
