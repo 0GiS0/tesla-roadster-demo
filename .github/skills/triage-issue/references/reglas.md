@@ -25,7 +25,8 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 - 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
 - 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o varios
+  personajes/vehículos nuevos con animación y física o colisiones entre ellos.
 
 ### Área
 
@@ -74,3 +75,11 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
 - Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
+
+### Invitar a descubrir el Modo MEME (#78)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: Es un cambio acotado de la web con propuesta y criterios concretos, implementable sin más especificación.
+
+### Añadir escena MEME: Pelotón ciclista (#168)
+- Decisión: 💬 needs-info · 🔴 complexity-high
+- Por qué: Faltan las confirmaciones obligatorias; cinco ciclistas animados que caen con interacciones físicas hacen la escena de complejidad alta.
