@@ -75,6 +75,8 @@ npm run build
 
 La salida de producción es `dist/`, configurada para `/tesla-roadster-demo/`. Sírvela bajo ese prefijo al probar una compilación estática. `npm exec vite preview -- --host 127.0.0.1` la sirve en http://127.0.0.1:4173/tesla-roadster-demo/.
 
+Los iconos y el manifest viven en `public/`; sus enlaces usan el prefijo de Vite y el manifest resuelve sus iconos y su inicio relativamente. `public/social-preview.png` es un recorte de `docs/assets/tour-poster.png` a 1200 × 630. Los metadatos sociales de `index.html` usan la URL absoluta de Pages: actualízalos si cambia la dirección del sitio. El favicon se sirve en `/tesla-roadster-demo/favicon.ico`; la raíz `/favicon.ico` del dominio pertenece al sitio de usuario de GitHub Pages, no a este proyecto.
+
 </details>
 
 <details>
