@@ -24,7 +24,7 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 ### Complejidad
 
 - 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
-- 🟡 complexity-medium: funcionalidad acotada o recursos; memes salvo varios personajes o vehículos animados con física entre sí.
+- 🟡 complexity-medium: funcionalidad acotada o recursos; memes salvo interacciones físicas entre varios personajes o vehículos.
 - 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o esos memes.
 
 ### Área
@@ -77,8 +77,8 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### Invitar a descubrir el Modo MEME (#78)
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: Propuesta y criterios concretan un cambio implementable y comprobable.
+- Por qué: Alcance definido y criterios verificables.
 
 ### Pelotón ciclista (#168)
 - Decisión: 💬 needs-info · 🔴 complexity-high
-- Por qué: Faltan confirmaciones; varios ciclistas animados interactúan con física.
+- Por qué: Faltan confirmaciones; varios ciclistas animados caen en cadena.
