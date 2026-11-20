@@ -24,8 +24,8 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 ### Complejidad
 
 - 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
-- 🟡 complexity-medium: funcionalidad acotada o recursos; memes salvo que animen varios personajes o vehículos con interacción física.
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o esos memes con interacción física.
+- 🟡 complexity-medium: funcionalidad acotada o recursos; memes salvo varios personajes o vehículos nuevos con física entre sí.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o esos memes.
 
 ### Área
 
@@ -40,7 +40,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 - 🖼️ meme: ✅ agent-ready con descripción, referencia y ambas confirmaciones; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
-- ✨ enhancement: 📐 needs-spec si falta concretar cómo hacerlo; ✅ agent-ready si ya se puede implementar y comprobar, aunque abarque varias partes.
+- ✨ enhancement: 📐 needs-spec si falta concretar; ✅ agent-ready si es implementable y comprobable, aunque abarque varias partes.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
   y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
 
@@ -77,7 +77,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### Invitar a descubrir el Modo MEME (#78)
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: La propuesta y criterios bastan para implementarlo y comprobarlo.
+- Por qué: Los criterios hacen el cambio implementable y comprobable.
 
 ### Pelotón ciclista (#168)
 - Decisión: 💬 needs-info · 🔴 complexity-high
