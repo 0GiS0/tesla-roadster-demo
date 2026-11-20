@@ -77,8 +77,8 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### Invitar a descubrir el Modo MEME (#78)
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: Alcance definido y criterios verificables.
+- Por qué: Alcance concreto y criterios verificables.
 
 ### Pelotón ciclista (#168)
 - Decisión: 💬 needs-info · 🔴 complexity-high
-- Por qué: Faltan confirmaciones; varios ciclistas animados caen en cadena.
+- Por qué: Faltan confirmaciones; caen varios ciclistas en cadena.
