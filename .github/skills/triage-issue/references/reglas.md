@@ -24,8 +24,8 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 ### Complejidad
 
 - 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
-- 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
+- 🟡 complexity-medium: funcionalidad acotada o recursos que generar; 🖼️ meme salvo que añada varios personajes o vehículos nuevos animados que interactúen físicamente.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto; también esos memes con interacciones físicas entre varias entidades.
 
 ### Área
 
@@ -40,7 +40,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 - 🖼️ meme: ✅ agent-ready con descripción, referencia y ambas confirmaciones; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
-- ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
+- ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable; también ✅ agent-ready si la propuesta y sus criterios concretan cómo implementar y verificar el cambio, aunque abarque varias partes.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
   y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
 
@@ -74,3 +74,11 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
 - Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
+
+### Invitar a descubrir el Modo MEME (#78)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: La propuesta y sus criterios permiten implementar y comprobar el cambio, aunque abarque varias partes de la web.
+
+### Pelotón ciclista (#168)
+- Decisión: 💬 needs-info · 🔴 complexity-high
+- Por qué: Faltan las confirmaciones obligatorias y la caída animada de varios ciclistas requiere interacciones físicas entre personajes.
