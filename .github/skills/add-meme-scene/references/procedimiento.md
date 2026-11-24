@@ -17,9 +17,8 @@ IDs de `.github/ISSUE_TEMPLATE/meme-proposal.yml`:
 | `approx_duration` | `Scenario.duration` (opcional) |
 | `references` | solo consulta; no se distribuyen (opcional) |
 | `acceptance_checklist` | lo que debe cumplir la escena |
-| `mandatory_checks` | sin marcas, logotipos ni recursos externos |
 
-El slug va en minúsculas, sin espacios ni acentos. Los Issues antiguos #8–#11 no usan estos IDs: extrae los mismos datos del texto libre.
+La escena no usa marcas, logotipos ni recursos externos, aunque el issue no lo diga. El slug va en minúsculas, sin espacios ni acentos. Los Issues antiguos #8–#11 no usan estos IDs: extrae los mismos datos del texto libre.
 
 ## 2. `src/scenario.ts`
 
