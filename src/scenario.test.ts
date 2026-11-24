@@ -1,6 +1,6 @@
 import { describe,it,expect } from 'vitest';
 import { Euler,Vector3,Quaternion,PerspectiveCamera } from 'three';
-import { driveThrough,driveThroughBagPose,DRIVE_THROUGH,ROADSTER_FOOTPRINT } from './scenario';
+import { airTicket,airTicketProps,AIR_TICKET,driveThrough,driveThroughBagPose,DRIVE_THROUGH,ROADSTER_FOOTPRINT } from './scenario';
 import { CAMERA_FOV,fitCameraPlacement } from './framing';
 import { rampFlight,contactPose,WHEEL_RADIUS,RADIUS,HALF_WHEELBASE,DURATION,advance,potholeFlight,cablesTangle,CABLE_CONTACT_HEIGHT,CABLE_SUPPORT_HEIGHT,CABLE_SUPPORT_CENTERLINE_HEIGHT,CABLE_SUPPORT_RADIUS,CABLE_SUPPORT_SPAN_HALF_LENGTH,CABLE_SUPPORT_WHEEL_Z,CABLE_SUPPORT_X,CABLES_EFFECT_PARTICLE_BUDGET,cableSupportHeightAt,carrierEscape,CARRIER_PLATFORM_HEIGHT,CARRIER_ESCAPE_START_X } from './scenario';
 import { buildSceneUrl,defaultScene,sceneCatalog,sceneFromHash,sceneHashFor,sourceLabel } from './sceneCatalog';
@@ -60,7 +60,7 @@ describe('Bache volador meme scene',()=>{
  });
  it('selects only known canonical hash routes and uses registry metadata for links',()=>{
   const meme=sceneFromHash('#meme/bache-volador'),original=sceneFromHash('');
-  expect(sceneCatalog).toHaveLength(6);expect(meme.scenario.id).toBe('bache-volador');
+  expect(sceneCatalog).toHaveLength(7);expect(meme.scenario.id).toBe('bache-volador');
   expect(sceneFromHash('#unknown')).toBe(defaultScene);expect(sceneFromHash('bache-volador')).toBe(defaultScene);
   expect(sceneHashFor(meme)).toBe('#meme/bache-volador');expect(sceneHashFor(original)).toBe('');
   expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',meme)).toBe('https://example.test/tesla-roadster-demo/#meme/bache-volador');
@@ -115,7 +115,7 @@ describe('Cables meme scene',()=>{
  expect(scene.hash).toBe('#meme/cables');
  expect(scene.source?.url).toBe('https://www.youtube.com/shorts/A3wyacegqCQ');
  expect(sourceLabel(scene.source!)).toBe('Visto en MindBodyMillions · Ver original en YouTube');
- expect(sceneCatalog).toHaveLength(6);
+ expect(sceneCatalog).toHaveLength(7);
  });
 });
 describe('La fuga del portacoches meme scene',()=>{
@@ -159,7 +159,7 @@ it('registers the Instagram credit on the canonical shareable route',()=>{
  expect(scene.scenario).toBe(carrierEscape);
  expect(scene.hash).toBe('#meme/fuga-del-portacoches');
  expect(sourceLabel(scene.source!)).toBe('Visto en @chaseluxuryai · Ver original en Instagram');
- expect(sceneCatalog).toHaveLength(6);
+ expect(sceneCatalog).toHaveLength(7);
 });
 });
 describe('Autoservicio en el 2º piso meme scene',()=>{
@@ -258,6 +258,80 @@ describe('Autoservicio en el 2º piso meme scene',()=>{
     expect(Math.abs(projected.x)).toBeLessThan(.95);expect(Math.abs(projected.y)).toBeLessThan(.95);
     expect(projected.z).toBeGreaterThan(-1);expect(projected.z).toBeLessThan(1);
    }
+  }
+ });
+});
+describe('Multa en el aire meme scene',()=>{
+ it('keeps grounded props clear of the Roadster and flies along the street above cables and lamps',()=>{
+  expect(AIR_TICKET.patrolZ).toBeGreaterThan(0);
+  expect(AIR_TICKET.ladderZ).toBeGreaterThan(ROADSTER_FOOTPRINT.width/2+.5);
+  expect(Math.abs(AIR_TICKET.patrolX)-4.2/2).toBeGreaterThan(ROADSTER_FOOTPRINT.length/2);
+  expect(AIR_TICKET.ladderZ-.82).toBeGreaterThan(ROADSTER_FOOTPRINT.width/2);
+  expect(AIR_TICKET.curbZ).toBeGreaterThan(AIR_TICKET.patrolZ+1);
+  for(let time=0;time<=13;time+=.025){
+   const pose=airTicket.evaluate(time);
+   expect(pose.position[1]-WHEEL_RADIUS).toBeGreaterThan(2.8);
+   expect(Math.abs(pose.position[2])+ROADSTER_FOOTPRINT.width/2).toBeLessThan(AIR_TICKET.ladderZ-.82);
+   expect(Math.abs(pose.position[2])+ROADSTER_FOOTPRINT.width/2).toBeLessThan(Math.abs(AIR_TICKET.poleZ)-.27);
+   expect(pose.position[1]).toBeLessThan(14);
+   expect(pose.vapor).toBeGreaterThanOrEqual(0);expect(pose.vapor).toBeLessThanOrEqual(1);
+  }
+  expect(airTicket.evaluate(0).position).toEqual([0,AIR_TICKET.hoverHeight,0]);
+  expect(airTicket.evaluate(13).position[0]).toBeGreaterThan(20);
+  expect(new Vector3(1,0,0).applyQuaternion(new Quaternion(...airTicket.evaluate(10).quaternion)).x).toBeGreaterThan(.98);
+ });
+ it('climbs, reaches, leaves the ladder and patrol parked and drops the ticket onto asphalt',()=>{
+  expect(airTicketProps(0).officerHeight).toBe(0);
+  expect(airTicketProps(3).officerHeight).toBe(0);
+  expect(airTicketProps(6).officerHeight).toBeCloseTo(2.55);
+  expect(airTicketProps(9).reach).toBe(1);
+  expect(airTicketProps(9).paperPosition[1]).toBeGreaterThan(3);
+  expect(airTicketProps(13).paperPosition[1]).toBeCloseTo(.07);
+  expect(airTicketProps(0).policeFlash).not.toBe(airTicketProps(.25).policeFlash);
+  for(let time=0;time<=13;time+=.1)expect(airTicketProps(time).paperPosition[1]).toBeGreaterThanOrEqual(.07);
+ });
+ it('is deterministic and continuous through choreography and playback boundaries',()=>{
+  for(const time of [0,3,6,9,10,11,11.3,12.8,13]){
+   const before=airTicket.evaluate(time-.001),after=airTicket.evaluate(time+.001);
+   expect(new Vector3(...before.position).distanceTo(new Vector3(...after.position))).toBeLessThan(.04);
+   expect(new Quaternion(...before.quaternion).angleTo(new Quaternion(...after.quaternion))).toBeLessThan(.02);
+   expect(new Vector3(...airTicketProps(time-.001).paperPosition).distanceTo(new Vector3(...airTicketProps(time+.001).paperPosition))).toBeLessThan(.03);
+  }
+  for(const time of [0,2.4,4.2,6.8,9.3,10.7,12.5,13]){
+   expect(airTicket.evaluate(time)).toEqual(airTicket.evaluate(time));
+   expect(airTicketProps(time)).toEqual(airTicketProps(time));
+  }
+  expect(airTicket.evaluate(-5)).toEqual(airTicket.evaluate(0));
+  expect(airTicket.evaluate(20)).toEqual(airTicket.evaluate(13));
+  expect(airTicketProps(20)).toEqual(airTicketProps(13));
+  expect(advance(12,2,true,13)).toEqual({time:13,playing:false});
+  expect(advance(9,2,false,13)).toEqual({time:9,playing:false});
+  expect(airTicket.evaluate(13).phase).toBe('Maniobra completada');
+ });
+ it('registers the original X credit and canonical scene hash',()=>{
+  const scene=sceneFromHash('#meme/multa-en-el-aire');
+  expect(scene.scenario).toBe(airTicket);
+  expect(scene.environment).toBe('air-ticket');
+  expect(sourceLabel(scene.source!)).toBe('Visto en @Mc_Gareth_911 · Ver original en X');
+  expect(scene.source?.url).toBe('https://x.com/Mc_Gareth_911/status/2111157722179641481');
+  expect(buildSceneUrl('https://example.test','/tesla-roadster-demo/',scene)).toBe('https://example.test/tesla-roadster-demo/#meme/multa-en-el-aire');
+ });
+ it('frames the car, patrol and ladder on desktop, portrait and short landscape while the car exits',()=>{
+  const framing=sceneFromHash('#meme/multa-en-el-aire').camera.fit!;
+  for(const aspect of [1440/900,390/844,844/390]){
+   const placement=fitCameraPlacement(framing,aspect),camera=new PerspectiveCamera(CAMERA_FOV,aspect,.1,180);
+   camera.position.copy(placement.position);camera.lookAt(placement.target);camera.updateMatrixWorld(true);
+   const props=[
+    new Vector3(AIR_TICKET.patrolX,0,AIR_TICKET.patrolZ),
+    new Vector3(AIR_TICKET.ladderX,2.85,AIR_TICKET.ladderZ),
+    new Vector3(...airTicket.evaluate(8).position),
+   ];
+   for(const point of props){
+    const projected=point.project(camera);
+    expect(Math.abs(projected.x)).toBeLessThan(.95);
+    expect(Math.abs(projected.y)).toBeLessThan(.95);
+   }
+   expect(new Vector3(...airTicket.evaluate(13).position).project(camera).x).toBeGreaterThan(1);
   }
  });
 });

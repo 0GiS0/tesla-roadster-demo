@@ -1,4 +1,4 @@
-import { cablesTangle, carrierEscape, driveThrough, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
+import { airTicket, cablesTangle, carrierEscape, driveThrough, parkingSpaceTheft, potholeFlight, rampFlight } from './scenario';
 import type { Scenario } from './scenario';
 
 export type SourcePlatform = 'Instagram' | 'X' | 'TikTok' | 'YouTube';
@@ -10,7 +10,7 @@ export interface SceneDefinition {
  hash: string;
  mode: 'original' | 'meme';
  scenario: Scenario;
- environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier' | 'autoservicio';
+ environment: 'ramp' | 'pothole' | 'parking' | 'cables' | 'carrier' | 'autoservicio' | 'air-ticket';
  camera: {
   desktop: { position: [number, number, number]; target: [number, number, number] };
   portrait: { position: [number, number, number]; target: [number, number, number] };
@@ -158,6 +158,30 @@ export const sceneCatalog: SceneDefinition[] = [
    author: '@YapayZekaSerisi',
    platform: 'X',
    url: 'https://x.com/YapayZekaSerisi/status/2111104253817155607',
+  },
+ },
+ {
+  key: 'multa-en-el-aire',
+  hash: '#meme/multa-en-el-aire',
+  mode: 'meme',
+  scenario: airTicket,
+  environment: 'air-ticket',
+  tourMoment: { from: 6.5, to: 10.5 },
+  camera: {
+   desktop: { position: [-14, 14, 28], target: [-1, 3, 1] },
+   portrait: { position: [-16, 18, 38], target: [-1, 3, 1] },
+   fit: { width: 15, height: 11, direction: [-.43, .38, 1], target: [-1, 2.5, 1] },
+  },
+  copy: {
+   label: 'MODO MEME',
+   title: 'Multa en el aire.',
+   summary: 'Ni a tres metros del suelo te libras de una multa.',
+  },
+  timelineLabels: ['EN EL AIRE', 'LA MULTA', 'HUIDA'],
+  source: {
+   author: '@Mc_Gareth_911',
+   platform: 'X',
+   url: 'https://x.com/Mc_Gareth_911/status/2111157722179641481',
   },
  },
 ];
