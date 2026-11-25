@@ -76,19 +76,48 @@ jobs:
                 repository(owner: $owner, name: $repo) {
                   pullRequest(number: $number) {
                     closingIssuesReferences(first: 20) {
-                      nodes { number state labels(first: 100) { nodes { name } } }
+                      nodes {
+                        id
+                        number
+                        state
+                        labels(first: 100) { nodes { name } }
+                        assignees(first: 20) { nodes { login } }
+                      }
+                    }
+                    # Read from the PR side: the events are about this PR by
+                    # construction, so a same-numbered PR elsewhere cannot match.
+                    timelineItems(last: 100, itemTypes: [CONNECTED_EVENT]) {
+                      nodes {
+                        ... on ConnectedEvent {
+                          actor { login __typename }
+                          subject { ... on Issue { id } }
+                        }
+                      }
                     }
                   }
                 }
               }' \
-            --jq '.data.repository.pullRequest.closingIssuesReferences.nodes // error("no closingIssuesReferences in the response")' \
+            --jq '.data.repository.pullRequest
+              | (.timelineItems.nodes // error("no timelineItems in the response")) as $events
+              | (.closingIssuesReferences.nodes // error("no closingIssuesReferences in the response"))
+              | map(. + { connections: $events })' \
             > "$RUNNER_TEMP/issues.json" || {
               echo "::error::Could not read the Issues linked to PR #$PR_NUMBER. Check that the job has 'issues: read'."
               exit 1
             }
 
           echo "head_sha=$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
-          echo "is_copilot=$(jq -r '(.user.login == "Copilot")' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
+          # Same identity criterion as the guard. A copilot/ branch of this repository
+          # also counts, so an edit that removes the linked Issue (and with it the
+          # identity signals) still cancels a previously enabled auto-merge.
+          is_copilot="$(bash .github/scripts/lights-out-guard.sh --is-copilot \
+            "$RUNNER_TEMP/pr.json" "$RUNNER_TEMP/issues.json")"
+          if jq -e --arg repo "$GH_REPO" \
+            '(.head.repo.full_name // "") == $repo and ((.head.ref // "") | startswith("copilot/"))' \
+            "$RUNNER_TEMP/pr.json" > /dev/null; then
+            is_copilot=true
+          fi
+          echo "is_copilot=$is_copilot" >> "$GITHUB_OUTPUT"
 
           if reasons="$(bash .github/scripts/lights-out-guard.sh \
             "$RUNNER_TEMP/pr.json" "$RUNNER_TEMP/files.json" "$RUNNER_TEMP/issues.json")"; then
