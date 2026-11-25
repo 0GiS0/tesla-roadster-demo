@@ -20,8 +20,10 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 ### Complejidad
 
-- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D (favicon, textos).
-- 🟡 complexity-medium: funcionalidad acotada o recursos que generar; todo 🖼️ meme.
+- 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D ni recursos que generar
+  (cambiar solo el favicon, retocar textos).
+- 🟡 complexity-medium: funcionalidad acotada o recursos que generar (iconos, imágenes,
+  manifest); todo 🖼️ meme.
 - 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
 
 ### Área
