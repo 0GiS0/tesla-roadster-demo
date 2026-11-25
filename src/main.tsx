@@ -63,7 +63,7 @@ function App(){
   <header>
    <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="Roadster, inicio">ROADSTER<span className="wordmark-line"/></a>
    <div className="header-meta"><span className="status-dot"/> PRESENTACIÓN · 2026</div>
-   <button className="mode-toggle" aria-pressed={isMeme} onClick={()=>selectScene(isMeme?defaultScene:memeScenes[0])}>Modo MEME</button>
+   <button className="mode-toggle" title="Ver los memes del anuncio" aria-pressed={isMeme} onClick={()=>selectScene(isMeme?defaultScene:memeScenes[0])}>Modo MEME</button>
    <span className="edition">ESTUDIO DE MOVIMIENTO <span>01 / 02</span></span>
   </header>
   <section className={`workspace ${isMeme?'meme-workspace':''}`} aria-label="Escena 3D interactiva de la maniobra del Roadster">
