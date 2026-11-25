@@ -129,7 +129,7 @@ function App(){
     <input className="timeline" disabled={!ready} aria-label="Tiempo de la maniobra" aria-valuetext={`${Math.floor(playback.time)} segundos de ${duration}`} type="range" min="0" max={duration} step="0.01" value={playback.time} onChange={e=>setPlayback(p=>({...p,time:Number(e.target.value),playing:p.playing&&Number(e.target.value)<duration}))} style={{'--progress':`${playback.time/duration*100}%`} as React.CSSProperties}/>
     <div className="timeline-labels"><span>{definition.timelineLabels?.[0]??(isMeme?'APROXIMACIÓN':'SUBIDA')}</span><span>{definition.timelineLabels?.[1]??'VUELO'}</span><span>{definition.timelineLabels?.[2]??'ATERRIZAJE'}</span></div>
    </div>
-   <button className="camera-button" aria-label="Restablecer cámara" disabled={!ready} onClick={()=>setCameraReset(n=>n+1)}><Icon name="camera"/><span>Restablecer cámara</span></button>
+   <button className="camera-button" aria-label="Restablecer cámara" title="Restablecer cámara" disabled={!ready} onClick={()=>setCameraReset(n=>n+1)}><Icon name="camera"/><span>Restablecer cámara</span></button>
   </footer>
   <div className="disclaimer"><span>Recreación artística independiente. Sin afiliación con Tesla.</span><span>EXPLORA LO IMPOSIBLE <span className="red">↗</span></span></div>
  </main>;
