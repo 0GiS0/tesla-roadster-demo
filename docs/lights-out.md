@@ -116,10 +116,17 @@ El workflow `🔀 Lights-out auto-merge` (`.github/workflows/lights-out-automerg
 
 Se dispara con `pull_request_target` (`review_requested`, `ready_for_review`, `synchronize` y `edited`, este último para cambios en los Issues enlazados) y con `workflow_dispatch`. Lee el estado actual de la PR y solo continúa si se cumple **todo** (lógica en `.github/scripts/lights-out-guard.sh`):
 
-- La PR está abierta, la firma Copilot, la rama sale de este repositorio y apunta a `main`.
+- La PR está abierta, es de Copilot (ver más abajo), la rama sale de este repositorio y apunta a `main`.
 - Tiene al menos un Issue enlazado (palabras clave de cierre) y todos están abiertos y con `🌙 lights-out`.
 - El diff es pequeño: hasta 150 líneas cambiadas (`MAX_CHANGED_LINES`) y 10 ficheros (`MAX_CHANGED_FILES`), variables al principio del workflow.
 - Ningún fichero, incluidos los nombres anteriores en renombrados, está en `.github/`, `.vscode/`, `model/` o `public/models/`, ni es `AGENTS.md`, `package.json` o `package-lock.json` de la raíz.
+
+**Cómo se reconoce una PR de Copilot.** GitHub abre ahora las PRs del cloud agent con la persona que asigna la tarea como autora (`user.type` es `User`, y Copilot solo aparece como `Co-authored-by`), así que el autor no sirve como señal. Se acepta si se cumple una de estas dos opciones:
+
+- Autor antiguo: `Copilot` de tipo `Bot` (compatibilidad con PRs anteriores).
+- **Todas** estas señales: la PR no viene de un fork, la rama empieza por `copilot/`, un Issue `🌙 lights-out` enlazado tiene a Copilot asignado y, en el timeline de la propia PR, un actor `Bot` de Copilot generó un evento `connected` cuyo sujeto es ese Issue. El workflow lo lee con GraphQL (`ConnectedEvent` con `actor` y `subject`, comparando el id del Issue) usando `GITHUB_TOKEN`, porque el evento REST no dice qué PR conecta. Lo genera el servidor, así que quien abre la PR no puede falsificarlo.
+
+El paso `🛑 Cancel a stale auto-merge` usa este mismo criterio (`lights-out-guard.sh --is-copilot`) y además considera de Copilot cualquier rama `copilot/` de este repositorio, para cancelar el auto-merge aunque una edición quite el Issue enlazado.
 
 Si se cumple, saca la PR de borrador y ejecuta `gh pr merge --auto --squash --match-head-commit <SHA evaluado>`. Si no se cumple, no hace nada y la PR queda para revisión humana (el motivo aparece en el resumen de la ejecución). Si una PR de Copilot deja de ser elegible tras un nuevo push o una edición, el workflow cancela su auto-merge. Los checks obligatorios `🧪 validate` y `📚 docs` siguen siendo la barrera final.
 
@@ -141,7 +148,7 @@ Límites conocidos, aceptados porque el auto-merge de GitHub es persistente: el 
 bash .github/scripts/lights-out-guard.test.sh
 ```
 
-Cubre casos sintéticos: PR válida, rutas protegidas (incluido un renombrado desde una ruta protegida), límites de líneas y ficheros, Issue sin `🌙 lights-out` o cerrado, sin Issue, autor distinto de Copilot, rama de fork y destino distinto de `main`.
+Cubre casos sintéticos: PR válida, rutas protegidas (incluido un renombrado desde una ruta protegida), límites de líneas y ficheros, Issue sin `🌙 lights-out` o cerrado, sin Issue, autor distinto de Copilot, PR con autor humano reconocida por las señales de Copilot (como #212) y rechazada si es manual, de fork, sin Copilot asignado o sin evento `connected` de Copilot para esa PR, rama de fork y destino distinto de `main`.
 
 ## Qué sigue protegido
 

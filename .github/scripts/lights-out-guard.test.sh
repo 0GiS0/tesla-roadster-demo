@@ -12,6 +12,14 @@ good_pr='{"state":"open","draft":true,"user":{"login":"Copilot","type":"Bot"},"h
 good_files='[{"filename":"src/main.tsx","additions":20,"deletions":3},{"filename":"src/style.css","additions":5,"deletions":0}]'
 good_issues='[{"number":111,"state":"OPEN","labels":{"nodes":[{"name":"🌙 lights-out"},{"name":"🎨 ux"}]}}]'
 
+# Current GitHub behaviour: the PR is authored by the human (as in #212).
+human_pr='{"number":212,"state":"open","draft":true,"user":{"login":"0GiS0","type":"User"},"head":{"ref":"copilot/fix-tooltip","repo":{"full_name":"0GiS0/tesla-roadster-demo"}},"base":{"ref":"main"}}'
+# shellcheck disable=SC2016 # jq program, not a shell expansion
+human_issues() { # CONNECTED_ISSUE_ID ASSIGNEE EVENT_ACTOR EVENT_TYPE
+  jq -nc --arg id "$1" --arg a "$2" --arg l "$3" --arg t "$4" \
+    '[{id:"I_211",number:211,state:"OPEN",labels:{nodes:[{name:"🌙 lights-out"}]},assignees:{nodes:[{login:"0GiS0"},{login:$a}]},connections:[{actor:{login:$l,__typename:$t},subject:{id:$id}}]}]'
+}
+
 failures=0
 # run NAME EXPECTED_EXIT PR FILES ISSUES [EXPECTED_REASON]
 run() {
@@ -41,10 +49,26 @@ run "too many files" 1 "$good_pr" "$(jq -nc '[range(11) | {filename: "src/f\(.).
 run "Issue not lights-out" 1 "$good_pr" "$good_files" '[{"number":5,"state":"OPEN","labels":{"nodes":[{"name":"💡 lights-on"}]}}]' "Issue #5 is not 🌙 lights-out"
 run "Issue closed" 1 "$good_pr" "$good_files" '[{"number":5,"state":"CLOSED","labels":{"nodes":[{"name":"🌙 lights-out"}]}}]' "Issue #5 is not open"
 run "no linked Issue" 1 "$good_pr" "$good_files" '[]' "no linked Issue"
-run "author is not Copilot" 1 "${good_pr/Copilot/someone}" "$good_files" "$good_issues" "author"
+run "author is not Copilot" 1 "${good_pr/Copilot/someone}" "$good_files" "$good_issues" "not recognised"
+run "human author with Copilot signals (like #212)" 0 "$human_pr" "$good_files" "$(human_issues I_211 Copilot copilot-swe-agent Bot)"
+run "human author, manual branch" 1 "${human_pr/copilot\/fix-tooltip/me\/fix}" "$good_files" "$(human_issues I_211 Copilot copilot-swe-agent Bot)" "not recognised"
+run "human author, fork" 1 "${human_pr//0GiS0\/tesla-roadster-demo/evil\/tesla-roadster-demo}" "$good_files" "$(human_issues I_211 Copilot copilot-swe-agent Bot)" "not recognised"
+run "human author, Copilot not assigned" 1 "$human_pr" "$good_files" "$(human_issues I_211 someone copilot-swe-agent Bot)" "not recognised"
+run "human author, no connected event" 1 "$human_pr" "$good_files" "${good_issues}" "not recognised"
+run "human author, connected by a human" 1 "$human_pr" "$good_files" "$(human_issues I_211 Copilot 0GiS0 User)" "not recognised"
+run "human author, connection is for another Issue" 1 "$human_pr" "$good_files" "$(human_issues I_other Copilot copilot-swe-agent Bot)" "not recognised"
 run "fork branch" 1 "${good_pr//0GiS0\/tesla-roadster-demo/evil\/tesla-roadster-demo}" "$good_files" "$good_issues" "branch does not come"
 run "targets another branch" 1 "${good_pr/\"main\"/\"develop\"}" "$good_files" "$good_issues" "does not target main"
 run "closed pull request" 1 "${good_pr/\"open\"/\"closed\"}" "$good_files" "$good_issues" "not open"
+
+printf '%s' "$human_pr" > "$tmp/pr.json"
+human_issues I_211 Copilot copilot-swe-agent Bot > "$tmp/issues.json"
+if [ "$("$guard" --is-copilot "$tmp/pr.json" "$tmp/issues.json")" != "true" ]; then
+  echo "FAIL: --is-copilot on a #212-like PR"
+  failures=$((failures + 1))
+else
+  echo "ok:   --is-copilot on a #212-like PR"
+fi
 
 if [ "$failures" -ne 0 ]; then
   echo "$failures case(s) failed"
