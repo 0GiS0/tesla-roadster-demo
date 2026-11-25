@@ -177,3 +177,8 @@ Los runs lanzados por Dependabot solo ven los secretos de Dependabot, así que `
 *Actions → 🤖 Dependabot lights-out → Run workflow* con el número del PR (`pr_number`) aplica las mismas reglas a un PR ya abierto. Desde la CLI: `gh workflow run dependabot-lights-out.yml -f pr_number=186`. En ejecuciones manuales no hay payload del evento, así que el ecosistema se deduce del nombre de la rama y el grupo y el tipo de actualización del bloque de metadatos de los commits verificados.
 
 Si un PR deja de ser elegible, el workflow desactiva el auto-merge y descarta la aprobación que él mismo dio.
+
+### Robustez
+
+- Si el PR ya está fusionado o cerrado (por ejemplo, al reprocesarlo a mano), el workflow termina con éxito y una nota en el resumen, sin aprobar ni tocar el auto-merge.
+- Si al activar el auto-merge GitHub responde "Base branch was modified" (otro PR acaba de fusionarse), reintenta hasta 3 veces con una pausa corta. Cualquier otro error mantiene el comportamiento seguro: se descarta la aprobación y el job falla.

@@ -93,12 +93,17 @@ jobs:
             echo "⏭️ PR #$PR_NUMBER is not authored by dependabot[bot]; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
+          # Already merged or closed: nothing to approve, label or disable.
+          if [ "$state" != "open" ]; then
+            echo "dependabot=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ PR #$PR_NUMBER is already $state (merged: $(jq -r '.merged' "$RUNNER_TEMP/pr.json")); nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           echo "dependabot=true" >> "$GITHUB_OUTPUT"
           echo "head_sha=$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
 
           reasons=()
 
-          [ "$state" = "open" ] || reasons+=("The PR is not open.")
           [ "$same_repo" = "true" ] || reasons+=("The head branch is not in this repository.")
           [ "$(jq -r '.base.ref' "$RUNNER_TEMP/pr.json")" = "main" ] || reasons+=("The base branch is not main.")
 
@@ -199,6 +204,16 @@ jobs:
             gh api -X DELETE "repos/$GH_REPO/issues/$PR_NUMBER/labels/$(jq -rn --arg l "$remove" '$l|@uri')" --silent 2>/dev/null || true
           }
 
+          # The PR may have been merged or closed while this job was running.
+          skip_if_done() {
+            local state
+            state="$(gh pr view "$PR_NUMBER" --json state --jq .state)" || state="UNKNOWN"
+            if [ "$state" = "MERGED" ] || [ "$state" = "CLOSED" ]; then
+              echo "⏭️ PR #$PR_NUMBER is already $state; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          }
+
           # Dismisses every approval given by the token owner; failures are fatal.
           dismiss_approvals() {
             local me ids id
@@ -210,6 +225,8 @@ jobs:
                 -f message="Dismissed: the PR is not eligible for lights-out (anymore)." --silent || return 1
             done
           }
+
+          skip_if_done
 
           if [ "$ELIGIBLE" != "true" ]; then
             swap_labels "💡 lights-on" "🌙 lights-out"
@@ -236,7 +253,27 @@ jobs:
             -f body="🤖 Approved by the Dependabot lights-out workflow: eligible update, required checks still gate the merge." --silent
           # Pin the commit evaluated when auto-merge is enabled; if that fails
           # (for example a push in between), revoke the approval just given.
-          if ! gh pr merge "$PR_NUMBER" --auto --squash --match-head-commit "$HEAD_SHA"; then
+          # "Base branch was modified" is transient (another PR just merged), so
+          # retry it; any other error fails closed.
+          merged_ok=0
+          for attempt in 1 2 3; do
+            if out="$(gh pr merge "$PR_NUMBER" --auto --squash --match-head-commit "$HEAD_SHA" 2>&1)"; then
+              merged_ok=1
+              break
+            fi
+            echo "$out"
+            case "$out" in
+              *"Base branch was modified"*) [ "$attempt" -lt 3 ] && sleep $((attempt * 5)) ;;
+              *) break ;;
+            esac
+          done
+          if [ "$merged_ok" != "1" ]; then
+            # Merged meanwhile: the approval no longer matters. Closed or any
+            # other state still fails closed and revokes the approval.
+            if [ "$(gh pr view "$PR_NUMBER" --json state --jq .state || true)" = "MERGED" ]; then
+              echo "⏭️ PR #$PR_NUMBER was merged meanwhile." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
             dismiss_approvals
             echo "::error::Could not enable auto-merge on PR #$PR_NUMBER; approval revoked."
             exit 1
