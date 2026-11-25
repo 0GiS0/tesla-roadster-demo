@@ -30,6 +30,19 @@ describe('Share button',()=>{
  });
 });
 
+describe('Meme mode button',()=>{
+ it.each([
+  ['',false],
+  ['#meme/bache-volador',true],
+ ])('renders a descriptive tooltip without changing the label or pressed state for %s',async(hash,pressed)=>{
+  const markup=await renderAtHash(hash);
+  const button=markup.match(/<button[^>]*class="mode-toggle"[^>]*>Modo MEME<\/button>/)?.[0];
+  expect(button).toBeDefined();
+  expect(button).toContain('title="Ver los memes del anuncio"');
+  expect(button).toContain(`aria-pressed="${pressed}"`);
+ });
+});
+
 describe('Camera reset button',()=>{
  it('renders a tooltip matching its accessible label',async()=>{
   const markup=await renderAtHash('');
