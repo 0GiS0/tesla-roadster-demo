@@ -30,6 +30,16 @@ describe('Share button',()=>{
  });
 });
 
+describe('Camera reset button',()=>{
+ it('renders a tooltip matching its accessible label',async()=>{
+  const markup=await renderAtHash('');
+  const button=markup.match(/<button[^>]*class="camera-button"[^>]*>/)?.[0];
+  expect(button).toBeDefined();
+  expect(button).toContain('aria-label="Restablecer cámara"');
+  expect(button).toContain('title="Restablecer cámara"');
+ });
+});
+
 describe('timeline labels',()=>{
  it('shows Cables-specific labels for its direct link',async()=>{
   const markup=await renderAtHash('#meme/cables');
