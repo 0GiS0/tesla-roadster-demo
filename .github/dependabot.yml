@@ -19,7 +19,8 @@ updates:
     exclude-paths:
       - ".github/workflows/docs-sync.lock.yml"
 
-    # 🏷️ Existing repository labels only.
+    # 🏷️ Existing repository labels only. The "🤖 Dependabot lights-out"
+    # workflow adds 🌙 lights-out to the eligible PRs (docs/lights-out.md).
     labels:
       - "🚀 deployment"
       - "🏭 software-factory"
@@ -48,7 +49,10 @@ updates:
           - "minor"
           - "patch"
 
-    # 🏷️ Existing repository label only: dependency bumps need human review.
+    # 🏷️ Existing repository label only: dependency bumps need human review by
+    # default. Labels here are per ecosystem, not per group, so the
+    # "🤖 Dependabot lights-out" workflow swaps it for 🌙 lights-out on the
+    # npm-minor-patch group (majors keep 💡 lights-on).
     labels:
       - "💡 lights-on"
 

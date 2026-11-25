@@ -148,3 +148,32 @@ Cubre casos sintéticos: PR válida, rutas protegidas (incluido un renombrado de
 Solo la gobernanza y el modelo 3D siguen teniendo propietario y necesitan su revisión: `.github/`, `.vscode/`, `AGENTS.md`, `model/` y `public/models/`. Una PR que mezcle cualquier otra ruta con esas requiere revisión humana, porque CODEOWNERS se evalúa por fichero.
 
 El código de la web (`src/` y demás) ya no tiene propietario, para que las PR de Issues lights-out que lo tocan no queden bloqueadas. Como consecuencia, las PR humanas que tocan solo código de la web tampoco necesitan revisión de propietario: las barreras son los checks obligatorios `🧪 validate` y `📚 docs`.
+
+## PRs de Dependabot con las luces apagadas
+
+El workflow `🤖 Dependabot lights-out` (`.github/workflows/dependabot-lights-out.yml`) aprueba y activa el auto-merge de los PRs de Dependabot que no necesitan revisión humana. Es la excepción a la regla de que `🏭 software-factory` nunca es `🌙 lights-out`: estos PRs no son Issues ni pasan por el triaje.
+
+| PR de Dependabot | Resultado |
+| --- | --- |
+| GitHub Actions, cualquier bump (patch, minor o major) | `🌙 lights-out`, aprobado y con auto-merge |
+| npm, grupo `npm-minor-patch` | `🌙 lights-out`, aprobado y con auto-merge |
+| npm major u otro cambio | `💡 lights-on`, sin aprobar ni auto-merge |
+
+### Cómo decide
+
+- Usa `pull_request_target` (el workflow viene siempre de `main`), solo actúa si el autor es `dependabot[bot]` y no hace checkout ni ejecuta código del PR.
+- `dependabot/fetch-metadata` (fijado por SHA) aporta ecosistema, tipo de actualización y grupo, y valida el PR. Además se exige que **todos** los commits estén verificados y sean de `dependabot[bot]` y que el último sea el head evaluado (`fetch-metadata` solo comprueba el primero).
+- Los archivos cambiados deben limitarse a `.github/workflows/*.yml` (sin `docs-sync.lock.yml`, que se genera) para actions, y a `package.json` y `package-lock.json` para npm. Si no, el PR queda `💡 lights-on`.
+- Los checks obligatorios (`🧪 validate` y `📚 docs`) siguen siendo la barrera final.
+
+### Aprobación y auto-merge
+
+Los bumps de actions tocan `.github/`, que el ruleset `protect-main` y CODEOWNERS asignan a @0GiS0 como revisora. El workflow aprueba con `COPILOT_ASSIGN_TOKEN` y activa `gh pr merge --auto --squash --match-head-commit` con el mismo token: un merge hecho con el `GITHUB_TOKEN` no dispara el despliegue de Pages. Las etiquetas también se cambian con ese token.
+
+Los runs lanzados por Dependabot solo ven los secretos de Dependabot, así que `COPILOT_ASSIGN_TOKEN` debe existir también en *Settings → Secrets and variables → Dependabot*.
+
+### Reprocesar PRs abiertos
+
+*Actions → 🤖 Dependabot lights-out → Run workflow* con el número del PR (`pr_number`) aplica las mismas reglas a un PR ya abierto. Desde la CLI: `gh workflow run dependabot-lights-out.yml -f pr_number=186`. En ejecuciones manuales no hay payload del evento, así que el ecosistema se deduce del nombre de la rama y el grupo y el tipo de actualización del bloque de metadatos de los commits verificados.
+
+Si un PR deja de ser elegible, el workflow desactiva el auto-merge y descarta la aprobación que él mismo dio.

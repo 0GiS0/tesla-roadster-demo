@@ -38,7 +38,7 @@ Como vive en `.github/skills/`, todo cambio al triaje pasa por el workflow `🥷
 - `💬 needs-info`: falta imagen o enlace, texto del meme, alguna confirmación obligatoria, o no se sabe qué falla.
 - `💡 lights-on`: cambia lo que ve el público.
 - `🌙 lights-out`: solo cambia documentación o inventario (pie de foto, texto alternativo, lista de memes); tiene prioridad sobre `💡 lights-on`.
-- Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona.
+- Según el tipo: los issues `🏭 software-factory` nunca son `🌙 lights-out` y siempre llevan `💡 lights-on`, de modo que los revisa siempre una persona. La única excepción son los PRs de Dependabot (actions y grupo `npm-minor-patch`), que [`🤖 Dependabot lights-out`](lights-out.md#prs-de-dependabot-con-las-luces-apagadas) marca `🌙 lights-out`.
 - Complejidad: además, el triaje pone siempre una de `🟢 complexity-low`, `🟡 complexity-medium` (toda escena `🖼️ meme`) o `🔴 complexity-high`.
 - Área: como máximo una de `🎨 ux`, `♿ accessibility`, `🧊 3d`, `🎬 animation`, `🚀 deployment` o `📝 documentation`. No se pone en issues `🖼️ meme` o `🏭 software-factory`, se respeta la que ya haya puesto una persona y se omite si ninguna encaja con claridad. Es lo que permite que actúe [`🌙 Lights-out assign`](lights-out.md).
 

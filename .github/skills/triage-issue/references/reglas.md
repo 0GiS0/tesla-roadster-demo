@@ -43,6 +43,8 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 - ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
   y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
+  Única excepción: los PRs de Dependabot (no son Issues, no pasan por el triaje) que
+  `🤖 Dependabot lights-out` marca 🌙 lights-out; ver `docs/lights-out.md`.
 
 ## Ejemplos
 

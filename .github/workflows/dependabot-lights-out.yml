@@ -1,0 +1,244 @@
+name: 🤖 Dependabot lights-out
+
+# Approves and enables auto-merge on Dependabot pull requests that are safe to
+# ship without a human, and labels the rest 💡 lights-on:
+#   - GitHub Actions bumps (patch, minor and major) -> 🌙 lights-out.
+#   - The npm `npm-minor-patch` group              -> 🌙 lights-out.
+#   - Anything else (npm majors, other changes)     -> 💡 lights-on, untouched.
+# The required checks (🧪 validate and 📚 docs) remain the final barrier.
+#
+# It uses pull_request_target on purpose: the workflow always comes from main,
+# never from the pull request. It never checks out or runs code from the PR;
+# it only reads the PR through the API. Only the PR author is trusted as a
+# filter, and the changed files must be limited to the expected manifests.
+#
+# Approval and auto-merge use COPILOT_ASSIGN_TOKEN (a user token) because:
+#   - the ruleset requires code owner review and CODEOWNERS gives .github/ to
+#     the owner, which Actions bumps touch;
+#   - a merge made with the GITHUB_TOKEN does not trigger the Pages deploy.
+# Runs triggered by Dependabot only see *Dependabot* secrets, so the same secret
+# must also exist under Settings -> Secrets -> Dependabot.
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Dependabot pull request number to (re)process (same rules as the automatic run)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: dependabot-lights-out-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  dependabot:
+    name: 🤖 Evaluate and enable auto-merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Manual runs must use the workflow from main, which is where the secret is trusted.
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.user.login == 'dependabot[bot]')
+    steps:
+      # Gives ecosystem, update type and group. It needs the pull_request
+      # payload, so manual runs derive the same data from the commit messages
+      # in the next step. A failure is handled there (the PR is not eligible).
+      - name: 🔍 Fetch Dependabot metadata
+        id: meta
+        if: github.event_name == 'pull_request_target'
+        continue-on-error: true
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+        with:
+          github-token: ${{ github.token }}
+
+      - name: 🔎 Decide eligibility
+        id: eval
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          EVENT_NAME: ${{ github.event_name }}
+          META_OUTCOME: ${{ steps.meta.outcome }}
+          META_ECOSYSTEM: ${{ steps.meta.outputs.package-ecosystem }}
+          META_GROUP: ${{ steps.meta.outputs.dependency-group }}
+          META_UPDATE_TYPE: ${{ steps.meta.outputs.update-type }}
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid pull request number."
+            exit 1
+          fi
+
+          # Read the current state, not the event payload, which may be stale.
+          gh api "repos/$GH_REPO/pulls/$PR_NUMBER" > "$RUNNER_TEMP/pr.json"
+          gh api --paginate --slurp "repos/$GH_REPO/pulls/$PR_NUMBER/files?per_page=100" \
+            | jq -r 'add // [] | .[].filename' > "$RUNNER_TEMP/files.txt"
+
+          author="$(jq -r '.user.login' "$RUNNER_TEMP/pr.json")"
+          state="$(jq -r '.state' "$RUNNER_TEMP/pr.json")"
+          head_ref="$(jq -r '.head.ref' "$RUNNER_TEMP/pr.json")"
+          same_repo="$(jq -r --arg repo "$GH_REPO" '(.head.repo.full_name == $repo)' "$RUNNER_TEMP/pr.json")"
+
+          # Not a Dependabot PR: do nothing at all (no labels, no approval).
+          if [ "$author" != "dependabot[bot]" ]; then
+            echo "dependabot=false" >> "$GITHUB_OUTPUT"
+            echo "⏭️ PR #$PR_NUMBER is not authored by dependabot[bot]; nothing to do." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "dependabot=true" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" >> "$GITHUB_OUTPUT"
+
+          reasons=()
+
+          [ "$state" = "open" ] || reasons+=("The PR is not open.")
+          [ "$same_repo" = "true" ] || reasons+=("The head branch is not in this repository.")
+          [ "$(jq -r '.base.ref' "$RUNNER_TEMP/pr.json")" = "main" ] || reasons+=("The base branch is not main.")
+
+          # fetch-metadata verifies only the first commit, so every commit is
+          # checked here: all must be verified, by Dependabot, and the last one
+          # must be the head evaluated now.
+          gh api --paginate --slurp "repos/$GH_REPO/pulls/$PR_NUMBER/commits?per_page=100" \
+            | jq 'add // []' > "$RUNNER_TEMP/commits.json"
+          unverified="$(jq '[.[] | select((.author.login != "dependabot[bot]") or (.commit.verification.verified != true))] | length' "$RUNNER_TEMP/commits.json")"
+          [ "$unverified" = "0" ] || reasons+=("Some commits are not verified commits by dependabot[bot].")
+          [ "$(jq -r '.[-1].sha // ""' "$RUNNER_TEMP/commits.json")" = "$(jq -r '.head.sha' "$RUNNER_TEMP/pr.json")" ] \
+            || reasons+=("The commit list does not end at the PR head.")
+
+          ecosystem=""
+          group=""
+          update_type=""
+          if [ "$EVENT_NAME" = "pull_request_target" ]; then
+            if [ "$META_OUTCOME" = "success" ]; then
+              ecosystem="$META_ECOSYSTEM"
+              group="$META_GROUP"
+              update_type="$META_UPDATE_TYPE"
+            else
+              reasons+=("fetch-metadata did not validate the PR.")
+            fi
+          else
+            # Manual run: derive the same data from the branch name (ecosystem)
+            # and from the metadata block of the verified commit messages
+            # (group and update types).
+            if [[ "$head_ref" =~ ^dependabot/([a-z_]+)/ ]]; then
+              ecosystem="${BASH_REMATCH[1]}"
+            fi
+            messages="$(jq -r '.[].commit.message' "$RUNNER_TEMP/commits.json")"
+            group="$(grep -E '^[[:space:]]*dependency-group:' <<<"$messages" | head -n1 | sed -E 's/^[^:]*:[[:space:]]*//' || true)"
+            if grep -qE '^[[:space:]]*update-type:[[:space:]]*version-update:semver-major' <<<"$messages"; then
+              update_type="version-update:semver-major"
+            fi
+          fi
+
+          # Changed files must be limited to the expected manifests.
+          if [ ! -s "$RUNNER_TEMP/files.txt" ]; then
+            reasons+=("The PR has no changed files.")
+          fi
+          case "$ecosystem" in
+            github_actions|github-actions)
+              if grep -qvE '^\.github/workflows/[^/]+\.ya?ml$' "$RUNNER_TEMP/files.txt" \
+                || grep -qxF '.github/workflows/docs-sync.lock.yml' "$RUNNER_TEMP/files.txt"; then
+                reasons+=("It changes files other than .github/workflows/*.yml (docs-sync.lock.yml is generated).")
+              fi
+              ;;
+            npm_and_yarn|npm)
+              if [ "$group" != "npm-minor-patch" ]; then
+                reasons+=("npm updates outside the npm-minor-patch group (for example majors) need human review.")
+              fi
+              if [ "$update_type" = "version-update:semver-major" ]; then
+                reasons+=("The update includes a semver-major bump.")
+              fi
+              if grep -qvxE 'package\.json|package-lock\.json' "$RUNNER_TEMP/files.txt"; then
+                reasons+=("It changes files other than package.json and package-lock.json.")
+              fi
+              ;;
+            *)
+              reasons+=("Unsupported ecosystem: '$ecosystem'.")
+              ;;
+          esac
+
+          if [ "${#reasons[@]}" -eq 0 ]; then
+            echo "eligible=true" >> "$GITHUB_OUTPUT"
+            echo "🌙 PR #$PR_NUMBER ($ecosystem${group:+, group $group}) is eligible for lights-out auto-merge." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "eligible=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "💡 PR #$PR_NUMBER is not eligible for lights-out auto-merge:"
+              printf -- '- %s\n' "${reasons[@]}"
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+
+      # The user token is used for every write: labels, approval and auto-merge.
+      - name: 🔀 Label, approve and enable auto-merge (squash)
+        if: steps.eval.outputs.dependabot == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.COPILOT_ASSIGN_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          HEAD_SHA: ${{ steps.eval.outputs.head_sha }}
+          ELIGIBLE: ${{ steps.eval.outputs.eligible }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Secret COPILOT_ASSIGN_TOKEN is not available. Runs triggered by Dependabot read Dependabot secrets: add it under Settings -> Secrets -> Dependabot too."
+            exit 1
+          fi
+
+          # Plain REST calls: they do not need the extra scopes `gh pr edit` asks for.
+          swap_labels() {
+            local add="$1" remove="$2"
+            gh api -X POST "repos/$GH_REPO/issues/$PR_NUMBER/labels" -f "labels[]=$add" --silent
+            gh api -X DELETE "repos/$GH_REPO/issues/$PR_NUMBER/labels/$(jq -rn --arg l "$remove" '$l|@uri')" --silent 2>/dev/null || true
+          }
+
+          # Dismisses every approval given by the token owner; failures are fatal.
+          dismiss_approvals() {
+            local me ids id
+            me="$(gh api user --jq .login)" || return 1
+            ids="$(gh api --paginate "repos/$GH_REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
+              --jq ".[] | select(.user.login == \"$me\" and .state == \"APPROVED\") | .id")" || return 1
+            for id in $ids; do
+              gh api -X PUT "repos/$GH_REPO/pulls/$PR_NUMBER/reviews/$id/dismissals" \
+                -f message="Dismissed: the PR is not eligible for lights-out (anymore)." --silent || return 1
+            done
+          }
+
+          if [ "$ELIGIBLE" != "true" ]; then
+            swap_labels "💡 lights-on" "🌙 lights-out"
+            # A later push may have made an already-queued PR ineligible.
+            gh pr merge "$PR_NUMBER" --disable-auto || true
+            failed=0
+            queued="$(gh pr view "$PR_NUMBER" --json autoMergeRequest --jq '.autoMergeRequest != null')" || queued="unknown"
+            if [ "$queued" != "false" ]; then
+              echo "::error::Could not confirm that auto-merge is disabled on PR #$PR_NUMBER."
+              failed=1
+            fi
+            # Do not leave a reusable approval from an earlier eligible push.
+            dismiss_approvals || { echo "::error::Could not dismiss the approvals on PR #$PR_NUMBER."; failed=1; }
+            [ "$failed" = "0" ] || exit 1
+            echo "💡 PR #$PR_NUMBER labeled lights-on; auto-merge off, approvals dismissed." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          swap_labels "🌙 lights-out" "💡 lights-on"
+
+          # The approval is bound to the evaluated commit.
+          gh api -X POST "repos/$GH_REPO/pulls/$PR_NUMBER/reviews" \
+            -f commit_id="$HEAD_SHA" -f event=APPROVE \
+            -f body="🤖 Approved by the Dependabot lights-out workflow: eligible update, required checks still gate the merge." --silent
+          # Pin the commit evaluated when auto-merge is enabled; if that fails
+          # (for example a push in between), revoke the approval just given.
+          if ! gh pr merge "$PR_NUMBER" --auto --squash --match-head-commit "$HEAD_SHA"; then
+            dismiss_approvals
+            echo "::error::Could not enable auto-merge on PR #$PR_NUMBER; approval revoked."
+            exit 1
+          fi
+          echo "🌙 PR #$PR_NUMBER approved and auto-merge enabled." >> "$GITHUB_STEP_SUMMARY"
