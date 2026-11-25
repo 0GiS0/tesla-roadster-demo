@@ -19,7 +19,7 @@ Para cada meme elegido se genera una imagen orientativa con la skill `meme-conce
 
 1. En `src/scenario.ts`, añade un `Scenario` puro: `id`, `title`, `duration` y `evaluate(time)`, que dependa solo del tiempo absoluto.
 2. En `src/sceneCatalog.ts`, añade una entrada a `sceneCatalog` con `mode: 'meme'`, `hash` con la forma `#meme/<slug>`, `environment`, cámaras de escritorio y vertical (y `fit` si hace falta), `copy` en español y `source` con el crédito.
-3. Si la escena necesita un entorno nuevo, amplía la unión y el render en `src/Scene.tsx` (hoy existen `ramp`, `pothole`, `parking` y `cables`).
+3. Si la escena necesita un entorno nuevo, amplía la unión y el render en `src/Scene.tsx` (hoy existen `ramp`, `pothole`, `parking`, `cables`, `carrier` y `autoservicio`).
 4. Añade pruebas en `src/scenario.test.ts`: contacto, continuidad, determinismo y límites de reproducción, además de la ruta del hash.
 5. El catálogo del Modo MEME se construye solo a partir de `sceneCatalog`; no hay otra lista que actualizar en la interfaz.
 
