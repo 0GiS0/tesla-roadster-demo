@@ -184,4 +184,33 @@ export function driveThroughBagPose(time:number):{position:[number,number,number
  if(t>=7.2)return {position:[car.position[0]-.35,car.position[1]+1.35,-1.3],rotation:0};
  return {position:[-.35*u,6.9+(DRIVE_THROUGH.hoverHeight+1.35-6.9)*u+.45*Math.sin(Math.PI*u),-2.05+.75*u],rotation:.12*Math.sin(Math.PI*u)};
 }
+export const AIR_TICKET = {
+ duration: 13,
+ hoverHeight: 3.8,
+ patrolX: -5,
+ patrolZ: 3.7,
+ ladderX: 1.8,
+ ladderZ: 2.8,
+ curbZ: 7.5,
+ poleZ: -10,
+} as const;
+export const airTicket:Scenario={id:'multa-en-el-aire',title:'Multa en el aire',duration:AIR_TICKET.duration,evaluate(time){
+ const t=clamp(time,0,AIR_TICKET.duration),escape=smooth((t-9)/2.3);
+ const x=23*escape,y=AIR_TICKET.hoverHeight+9*escape;
+ const dodge=t<9?.08*Math.sin((t-6)*Math.PI*2)*smooth((t-6)/.6)*(1-smooth((t-8.3)/.7)):0;
+ const pitch=-.16*smooth((t-9)/.7)*(1-smooth((t-11)/1));
+ const q=new Quaternion().setFromEuler(new Euler(0,0,pitch+dodge));
+ return {position:[x,y,0],quaternion:q.toArray() as Pose['quaternion'],wheelAngle:0,vapor:t<9?.75:.75+.25*smooth((t-9)/.3),phase:t<3?'En el aire':t<6?'Subiendo la escalera':t<9?'La multa':t<11.3?'Huida':t<13?'La multa cae':'Maniobra completada',speed:t<9||t>=11.3?0:23*6*((t-9)/2.3)*(1-(t-9)/2.3)/2.3};
+}};
+export function airTicketProps(time:number){
+ const t=clamp(time,0,AIR_TICKET.duration),climb=smooth((t-3)/3),reach=smooth((t-6)/1.3);
+ const fall=smooth((t-11)/1.8);
+ return {
+  officerHeight:2.55*climb,
+  reach,
+  paperPosition:[AIR_TICKET.ladderX-.35+.17*Math.sin(fall*16)*fall,Math.max(.07,(1+2.55*climb+.2*reach)*(1-fall)+.07*fall),AIR_TICKET.ladderZ-.8-.48*reach+.48*reach*fall+.3*Math.sin(fall*13)*fall] as [number,number,number],
+  paperRotation:fall*5,
+  policeFlash:Math.floor(t*4)%2===0,
+ };
+}
 export function advance(time:number,delta:number,playing:boolean,duration=DURATION){const next=playing?Math.min(duration,time+Math.max(0,delta)):time;return {time:next,playing:playing&&next<duration};}
