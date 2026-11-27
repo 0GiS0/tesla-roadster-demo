@@ -11,8 +11,8 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 - ✅ agent-ready: meme nuevo con descripción e imagen o enlace; o fallo reproducible.
   Comprobable al terminar.
-- 📐 needs-spec: algo nuevo que no es un meme (sección, diseño, votaciones, cuentas…)
-  o que toca varias partes de la web.
+- 📐 needs-spec: novedad sin concretar (sección, diseño, votaciones, cuentas…)
+  o varias partes sin criterios comprobables.
 - 💬 needs-info: falta la imagen o el enlace, el texto del meme, o qué falla y dónde.
 - 💡 lights-on: cambia lo que ve el público.
 - 🌙 lights-out: solo cambia documentación o inventario (pie de foto, texto alternativo,
@@ -23,8 +23,9 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 - 🟢 complexity-low: 1–2 archivos, sin lógica nueva ni 3D ni recursos que generar
   (cambiar solo el favicon, retocar textos).
 - 🟡 complexity-medium: funcionalidad acotada o recursos que generar (iconos, imágenes,
-  manifest); todo 🖼️ meme.
-- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto.
+  manifest); 🖼️ meme salvo complejidad alta.
+- 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o varios
+  personajes o vehículos animados nuevos con física o colisiones.
 
 ### Área
 
@@ -39,7 +40,7 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 - 🖼️ meme: ✅ agent-ready con descripción y referencia; si no, 💬 needs-info.
 - 🐛 bug: ✅ agent-ready si trae pasos y qué debería pasar; si no, 💬 needs-info.
-- ✨ enhancement: 📐 needs-spec salvo cambio pequeño, en una parte y comprobable.
+- ✨ enhancement: 📐 needs-spec salvo cambio acotado y con criterios comprobables.
 - 🏭 software-factory: nunca 🌙 lights-out; siempre 💡 lights-on. Con criterios concretos
   y comprobables, ✅ agent-ready; 📐 needs-spec solo si no se sabe cómo hacerlo.
   Única excepción: los PRs de Dependabot (no son Issues, no pasan por el triaje) que
@@ -75,3 +76,11 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 ### Añadir un segundo code owner para revisar los cambios de la web (#59)
 - Decisión: ✅ agent-ready · 💡 lights-on
 - Por qué: Define los cambios y criterios de aceptación concretos y comprobables; ser software-factory exige revisión humana, no especificación previa.
+
+### Invitar a descubrir el Modo MEME (#78)
+- Decisión: ✅ agent-ready · 💡 lights-on
+- Por qué: Cambio acotado y comprobable.
+
+### Pelotón ciclista (#168)
+- Decisión: 🔴 complexity-high
+- Por qué: Cinco ciclistas animados caen sin atravesar suelo ni compañeros.
