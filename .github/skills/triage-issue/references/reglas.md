@@ -11,8 +11,8 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 
 - ✅ agent-ready: meme nuevo con descripción e imagen o enlace; o fallo reproducible.
   Comprobable al terminar.
-- 📐 needs-spec: algo nuevo sin concretar (sección, diseño, votaciones, cuentas…)
-  o que toca varias partes sin criterios comprobables.
+- 📐 needs-spec: novedad sin concretar (sección, diseño, votaciones, cuentas…)
+  o varias partes sin criterios comprobables.
 - 💬 needs-info: falta la imagen o el enlace, el texto del meme, o qué falla y dónde.
 - 💡 lights-on: cambia lo que ve el público.
 - 🌙 lights-out: solo cambia documentación o inventario (pie de foto, texto alternativo,
@@ -25,7 +25,7 @@ escena con imagen, pie de foto y texto alternativo; el inventario los lista.
 - 🟡 complexity-medium: funcionalidad acotada o recursos que generar (iconos, imágenes,
   manifest); 🖼️ meme salvo complejidad alta.
 - 🔴 complexity-high: modelo 3D, arquitectura, dependencias, alcance abierto o varios
-  personajes o vehículos nuevos animados con física o colisiones entre ellos.
+  personajes o vehículos animados nuevos con física o colisiones.
 
 ### Área
 
@@ -79,8 +79,8 @@ Accesibilidad → ♿ accessibility; Otra → por contenido. 🎨 ux o ♿ acces
 
 ### Invitar a descubrir el Modo MEME (#78)
 - Decisión: ✅ agent-ready · 💡 lights-on
-- Por qué: La propuesta está acotada y tiene criterios concretos y comprobables.
+- Por qué: Cambio acotado y comprobable.
 
 ### Pelotón ciclista (#168)
 - Decisión: 🔴 complexity-high
-- Por qué: Cinco ciclistas animados caen en cadena con interacciones y contacto propios.
+- Por qué: Cinco ciclistas animados caen sin atravesar suelo ni compañeros.
